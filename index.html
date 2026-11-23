@@ -2574,11 +2574,12 @@ function main(){
     sleep: { label: 'Sleeping', emoji: '😴', color: '#3b82f6', short: 'Sleep' }
   };
 
-  // ================= 20 dances =================
+  // ================= 23 dances =================
   const DANCES = [['groove', 'Groove', '🕺'], ['disco', 'Disco point', '✨'], ['robot', 'Robot', '🤖'], ['floss', 'Floss', '🧵'], ['dab', 'Dab', '😎'],
     ['twist', 'Twist', '🌀'], ['runman', 'Running man', '🏃'], ['sprinkler', 'Sprinkler', '💦'], ['cart', 'Shopping cart', '🛒'], ['roof', 'Raise the roof', '🙌'],
     ['chicken', 'Chicken dance', '🐔'], ['hula', 'Hula', '🌺'], ['spin', 'Spin', '💫'], ['jacks', 'Jumping jacks', '⭐'], ['headbang', 'Headbang', '🤘'],
-    ['wave', 'Arm wave', '🌊'], ['cabbage', 'Cabbage patch', '🥬'], ['cancan', 'Can-can', '🦵'], ['salsa', 'Salsa', '💃'], ['moonwalk', 'Moonwalk', '🌙']];
+    ['wave', 'Arm wave', '🌊'], ['cabbage', 'Cabbage patch', '🥬'], ['cancan', 'Can-can', '🦵'], ['salsa', 'Salsa', '💃'], ['moonwalk', 'Moonwalk', '🌙'],
+    ['hiphop', 'Hip-hop', '🧢'], ['shuffle', 'Shuffle', '👟'], ['toprock', 'Breakdance', '🔥']];
   const DN = {}; DANCES.forEach(d => { DN[d[0]] = { name: d[1], e: d[2] }; });
   const DANCE_IDS = DANCES.map(d => d[0]);
   function emInfo(e) {
@@ -2654,6 +2655,17 @@ function main(){
       case 'salsa':
         legs(-0.35 * s, 0.35 * s); kn = [0.2 + N * 0.4, 0.2 + P * 0.4]; B.rotation.z = Math.sin(b * 2) * 0.06; side(Math.sin(b * 2) * 0.035);
         arm(0, -0.6, -0.8); arm(1, -0.9, 0.3); el = [-1.3, -1.6]; B.rotation.y = s * 0.2; Hd.rotation.y = -s * 0.25; up(as * 0.03); break;
+      case 'hiphop':
+        kn = [0.35 + as * 0.4, 0.35 + as * 0.4]; up(-as * 0.05); legs(-0.12 - as * 0.15, -0.12 - as * 0.15); legz(-0.12, 0.12);
+        B.rotation.x = 0.12 + as * 0.08; B.rotation.y = Math.sin(b / 2) * 0.35;
+        arm(0, -0.5 - P * 0.7, -0.3 - P * 0.45); arm(1, -0.5 - N * 0.7, 0.3 + N * 0.45); el = [-1.25, -1.25];
+        Hd.rotation.x = as * 0.28; Hd.rotation.y = -Math.sin(b / 2) * 0.2; break;
+      case 'shuffle':
+        legz(-P * 0.55, N * 0.55); legs(-P * 0.3, -N * 0.3); kn = [0.1 + P * 0.7, 0.1 + N * 0.7]; up(as * 0.05); side(Math.sin(b / 2) * 0.05);
+        arm(0, -0.6 + s * 0.35, -0.2); arm(1, -0.6 - s * 0.35, 0.2); el = [-1.45, -1.45]; Hd.rotation.x = as * 0.12; break;
+      case 'toprock':
+        legs(-P * 0.7, -N * 0.7); kn = [0.3 + P * 0.8, 0.3 + N * 0.8]; B.rotation.x = 0.22; B.rotation.y = s * 0.4; up(-0.02 + as * 0.04);
+        arm(0, -1.1, -0.2 - c * 0.8); arm(1, -1.1, 0.2 + c * 0.8); el = [-1.0, -1.0]; Hd.rotation.y = -s * 0.25; Hd.rotation.x = 0.1; break;
       case 'moonwalk':
         legs(s * 0.3, -s * 0.3); kn = [N * 0.9 + 0.05, P * 0.9 + 0.05]; if (!sit) B.position.z = -0.22 * (0.5 - 0.5 * Math.cos(b / 4));
         arm(0, -0.2 * s, -0.15); arm(1, 0.2 * s, 0.15); el = [-0.5, -0.5]; Hd.rotation.x = 0.1; B.rotation.x = 0.05; up(as * 0.02); break;
@@ -4666,7 +4678,7 @@ function main(){
   const walkBtn = document.getElementById('walkBtn'), help = document.getElementById('help');
   function setWalk(on) {
     walking = on; walkBtn.classList.toggle('on', on); walkBtn.textContent = on ? 'Exit walk' : 'Walk around';
-    help.textContent = on ? 'W A S D or arrow keys to move · Drag to look · Esc to exit' : habbo ? 'Click a tile to walk, anything to touch it, a desk or chair to sit · 💃 for 20 dances · Click a person to whisper or slap · Drag to move the view · Scroll to zoom · M: mic · 1–4: emotes' : 'Click the floor to walk, a desk or chair to sit · Click a person to whisper or slap · Drag to orbit · Right-drag to pan · Scroll to zoom · M: mic · 1–4: emotes';
+    help.textContent = on ? 'W A S D or arrow keys to move · Drag to look · Esc to exit' : habbo ? 'Click a tile to walk, anything to touch it, a desk or chair to sit · 💃 for 23 dances · Click a person to whisper or slap · Drag to move the view · Scroll to zoom · M: mic · 1–4: emotes' : 'Click the floor to walk, a desk or chair to sit · Click a person to whisper or slap · Drag to orbit · Right-drag to pan · Scroll to zoom · M: mic · 1–4: emotes';
     persp.rotation.order = 'YXZ'; camera = on ? persp : (habbo ? ortho : persp); updateWalls();
     if (on) { tw = null; wk.x = 0.8; wk.z = 9.2; wk.yaw = 0; wk.pitch = -0.05; document.querySelectorAll('#views button').forEach(b => b.classList.remove('on')); cvs.focus(); }
   }
