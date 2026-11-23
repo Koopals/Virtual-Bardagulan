@@ -12,6 +12,13 @@ A pixel-hotel style virtual office that runs in the browser. Real people open th
 - **Lock a room:** click **🔒 Lock room** in the top-left panel and choose a passcode. People who join later need it.
 - **Do things together:** emoji reactions, 20 dances (invite someone to dance with you), slaps with a trout, treating everyone to coffee or pizza, and touching the tree, presents, corgi, plants, lamp, whiteboard, bell and laptops.
 - **Shared music:** the office radio and YouTube / YouTube Music links play for everyone in the room. Songs from your own computer only play for you.
+- **Play any link for the room:** the jukebox plays YouTube, YouTube Music, Vimeo, Dailymotion, Spotify, SoundCloud, Twitch, Google Drive videos, direct video files (`.mp4`, `.webm`) and most other embeddable links. Click **⛶** on the player for the big screen and have a movie night. Late joiners jump to the right spot in direct video files. Some sites, like Netflix, don't allow playing inside other pages. Songs from your own computer only play for you.
+- **Game room:** chess, checkers, reversi, Connect Four and tic-tac-toe on real tables. Play the computer (easy, normal or hard), two people on one screen, or sit down **online** against someone in the office while others watch. There's also a Snake arcade cabinet.
+- **Swimming pool:** click the water to jump in and swim. Lie on a sun lounger by the pool.
+- **Sleeping quarters:** click a bed to lie down and nap.
+- **Basketball court:** walk onto the court and your character plays by itself: dribbling, shooting and scoring. The scoreboard shows the top scorers. Walk off the court to stop.
+- **Bar and dance floor:** order drinks, clink glasses (**🍻 Cheers**) and buy a round for everyone. After 4 beers you stumble off to bed and wake up later with a headache. Step onto the light-up dance floor to start dancing.
+- **Slap fights:** get slapped 3 times in a few seconds and you fall over for a moment.
 - **Rooms:** add `?room=yourteam` to the link to get a separate office. Use the **🔗 Copy invite link** button.
 
 ## Files
@@ -20,7 +27,7 @@ A pixel-hotel style virtual office that runs in the browser. Real people open th
 |---|---|
 | `index.html` | The whole office (one page) |
 | `server.js` | Serves the page and runs the real-time rooms |
-| `hub.js` | Room logic: who's in which room, passcodes, relaying updates and voice call setup |
+| `hub.js` | Room logic: who's in which room, passcodes, game tables, relaying updates and voice call setup |
 | `package.json` | Tells Node.js what to install and how to start |
 | `render.yaml` | One-click setup for Render's free hosting |
 
