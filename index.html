@@ -54,6 +54,11 @@ input:focus,select:focus{outline:2px solid var(--page-accent);outline-offset:-1p
 .lbl{font-size:11px;font-weight:700;color:var(--color-text-muted);margin:0 0 5px}
 .doortip{position:fixed;left:0;top:0;z-index:3000;pointer-events:none;background:rgba(20,24,36,.94);color:#fff;padding:7px 11px;border-radius:9px;font:700 13px/1.35 'Pixelify Sans','Nunito',system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap}
 .doortip span{display:block;font-weight:500;opacity:.82;font-size:11.5px}
+.camctl{top:50%;right:calc(var(--panel-w) + 14px);transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 5px;z-index:55}
+.camctl button{width:36px;height:34px;padding:0;border-radius:8px;font-size:17px;line-height:1}
+.camdial{width:34px;height:34px;border-radius:50%;border:2px solid var(--color-border);display:flex;align-items:center;justify-content:center;position:relative}
+.camdial::before{content:'';position:absolute;top:2px;left:50%;width:0;height:0;margin-left:-4px;border:4px solid transparent;border-bottom:7px solid #e8342e;transform-origin:4px 15px;transform:rotate(var(--r,0deg))}
+.camdeg{font-size:9.5px;font-weight:800;color:var(--color-text-secondary)}
 .roompill{position:fixed;top:12px;left:calc((100% - var(--panel-w)) / 2);transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:5px 14px;border-radius:999px;background:rgba(20,24,36,.78);color:#fff;font:600 13px/1.2 'Pixelify Sans','Nunito',system-ui,sans-serif;pointer-events:none;z-index:40;white-space:nowrap}
 .roompill span{opacity:.75;font-weight:500}
 .roomfade{position:fixed;top:0;left:0;bottom:0;right:var(--panel-w);background:#0b0f18;opacity:0;pointer-events:none;z-index:45}
@@ -439,6 +444,13 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
   </div>
 </section>
 
+<div class="float camctl" id="camCtl" role="toolbar" aria-label="Camera">
+  <button data-cam="l" title="Rotate left (Q)" aria-label="Rotate left">⟲</button>
+  <div class="camdial" title="Camera direction"><span class="camdeg">NE</span></div>
+  <button data-cam="r" title="Rotate right (E)" aria-label="Rotate right">⟳</button>
+  <button data-cam="tilt" title="Change the angle (T)" aria-label="Change the angle">📐</button>
+  <button data-cam="reset" title="Reset the view (R)" aria-label="Reset the view">⌂</button>
+</div>
 <div class="float card" id="card" hidden></div>
 <div class="float card pantry" id="pantry" hidden></div>
 <div class="float card pantry" id="barBox" hidden></div>
@@ -672,27 +684,79 @@ function main(){
   }
 
   // ================= rooms: the world is split into separate rooms joined by doors =================
+
+  // ---- camera angle state (rotate / tilt), remembered in this browser ----
+  const CAM = { theta: ISO_T, phi: ISO_P };
+  try { const s = JSON.parse(localStorage.getItem('virtualOffice.cam') || 'null'); if (s && isFinite(s.t) && isFinite(s.p)) { CAM.theta = s.t; CAM.phi = Math.max(0.35, Math.min(1.3, s.p)); } } catch (e) {}
+  const saveCam = () => { try { localStorage.setItem('virtualOffice.cam', JSON.stringify({ t: CAM.theta, p: CAM.phi })); } catch (e) {} };
+  // ---- every room is as big as the office (30 x 20); each one has its own space ----
+  const SLOT = {}; ['game', 'pool', 'court', 'sleep', 'bar', 'movie', 'gym'].forEach((id, k) => { const cx = 100 + k * 34; SLOT[id] = { cx: cx, x0: cx - 15, x1: cx + 15 }; });
+  const OLDC = { game: [18.75, 0], pool: [26.25, 0], court: [33.5, 0], sleep: [18.25, -11.5], bar: [26.0, -11.5], movie: [33.75, -11.5], gym: [41, 0] };
+  const OFF = {}; Object.keys(SLOT).forEach(id => { OFF[id] = [SLOT[id].cx - OLDC[id][0], OLDC[id][1]]; });
+  const OLDR = { game: [15, 22.5, -10, -1.5], pool: [22.5, 30, -10, -1.5], court: [30, 37, -10, -1.5], sleep: [15, 21.5, 1.5, 10], bar: [21.5, 30.5, 1.5, 10], movie: [30.5, 37, 1.5, 10], gym: [37, 45, -10, 10] };
+  function navOff(cx, cz) {
+    if (cx <= 15.06 || cx >= 45.3) return [0, 0];
+    if (cx >= 44.97) return null;
+    for (const id in OLDR) { const r = OLDR[id]; if (cx > r[0] + 0.05 && cx < r[1] - 0.05 && cz > r[2] + 0.05 && cz < r[3] - 0.05) return OFF[id]; }
+    return null;
+  }
+  const RELO = { marks: [] };
+  function reloMark(id) { const sp = {}; Object.keys(SPOTS).forEach(k => { sp[k] = SPOTS[k].length; }); RELO.marks.push({ id: id, ch: scene.children.length, sp: sp }); }
+  function reloApply() {
+    const marks = RELO.marks, ch = scene.children.slice(), bx = new THREE.Box3(), kill = [], moved = new Set();
+    for (let m = 0; m < marks.length - 1; m++) {
+      const id = marks[m].id, a = marks[m].ch, b = marks[m + 1].ch, off = OFF[id] || null;
+      for (let i = a; i < b; i++) {
+        const o = ch[i]; if (!o) continue;
+        if (id === 'void') { bx.setFromObject(o); if (bx.isEmpty() ? o.position.x > 15.2 : bx.max.x > 15.2) kill.push(o); continue; }
+        if (!off) continue;
+        if (o.isMesh && (o.material === mPart || o.material === mPartCap)) { kill.push(o); continue; }
+        o.position.x += off[0]; o.position.z += off[1];
+      }
+      if (off) Object.keys(SPOTS).forEach(k => {
+        const L = SPOTS[k], s0 = marks[m].sp[k] || 0, s1 = marks[m + 1].sp[k] || 0;
+        const mv = p => { if (!p || moved.has(p)) return; moved.add(p); p[0] += off[0]; p[1] += off[1]; };
+        for (let i = s0; i < s1; i++) { const s = L[i]; mv(s.pos); mv(s.anchor); (s.via || []).forEach(mv); if (s.rect && !moved.has(s.rect)) { moved.add(s.rect); s.rect[0] += off[0]; s.rect[1] += off[0]; s.rect[2] += off[1]; s.rect[3] += off[1]; } }
+      });
+    }
+    kill.forEach(o => scene.remove(o));
+    const sh = (id, p) => { p[0] += OFF[id][0]; p[1] += OFF[id][1]; };
+    POOL.x0 += OFF.pool[0]; POOL.x1 += OFF.pool[0]; POOL.z0 += OFF.pool[1]; POOL.z1 += OFF.pool[1];
+    POOL_ENTRY.forEach(e => { sh('pool', e.out); sh('pool', e.inn); });
+    HOOP.x += OFF.court[0]; HOOP.z += OFF.court[1];
+    DF.x += OFF.bar[0]; DF.z += OFF.bar[1];
+    DUMMY.x += OFF.gym[0]; DUMMY.z += OFF.gym[1];
+    GYM.bars.forEach(B => { B.x0 = 39.0 + OFF.gym[0]; B.z0 += OFF.gym[1]; });
+    // a bigger basketball court for the bigger room
+    const cc = SLOT.court.cx; Object.assign(COURT, { x0: cc - 8, x1: cc + 8, z0: -9.8, z1: 4.6 });
+    if (WING.courtFloor) { WING.courtFloor.scale.set(16 / 6.6, 14.4 / 8.1, 1); WING.courtFloor.position.set(cc, 0.012, -2.6); }
+    if (WING.courtBench) WING.courtBench.position.set(cc + 8.6, 0.225, -2.6);
+    SPOTS.court.forEach((s, k) => { s.pos = [cc + 8.55, -3.85 + k * 1.25]; s.anchor = [cc + 7.9, s.pos[1]]; s.via = []; });
+    [['court', '🏀 BASKETBALL COURT', '#7a3a10', '#ffe0b0'], ['sleep', '😴 SLEEPING QUARTERS', '#1d2547', '#cdd6ff'], ['bar', '🍻 THE BAR', '#2b0b3a', '#ff7ad9'], ['movie', '🎬 MOVIE ROOM', '#3a0d0d', '#ffd23f']]
+      .forEach(r => wallSign(SLOT[r[0]].cx - 6, -9.97, 3.4, r[1], r[2], r[3]));
+  }
+  const SR = id => [SLOT[id].x0 - 0.3, SLOT[id].x1 + 0.3, -10.3, 10.3], SF = id => [SLOT[id].x0, SLOT[id].x1, -10, 10];
   const ZONES = [
     { id: 'office', name: '🏢 Office', short: 'Office', r: [-15.3, 15, -10.3, 10], fl: [-15, 15, -10, 10] },
     { id: 'hall', name: '🚪 Hallway', short: 'Hallway', r: [-15.3, 15, 10, 20.5], fl: [-15, 15, 10, 20] },
-    { id: 'void', name: 'Corridor', short: 'Corridor', r: [15, 37, -1.5, 1.5], fl: [15, 37, -1.5, 1.5] },
-    { id: 'game', name: '🎲 Game room', short: 'Games', r: [15, 22.5, -10.3, -1.5], fl: [15, 22.5, -10, -1.5] },
-    { id: 'pool', name: '🏊 Pool', short: 'Pool', r: [22.5, 30, -10.3, -1.5], fl: [22.5, 30, -10, -1.5] },
-    { id: 'court', name: '🏀 Basketball court', short: 'Court', r: [30, 37, -10.3, -1.5], fl: [30, 37, -10, -1.5] },
-    { id: 'sleep', name: '😴 Sleeping quarters', short: 'Sleep', r: [15, 21.5, 1.5, 10.3], fl: [15, 21.5, 1.5, 10] },
-    { id: 'bar', name: '🍻 Bar', short: 'Bar', r: [21.5, 30.5, 1.5, 10.3], fl: [21.5, 30.5, 1.5, 10] },
-    { id: 'movie', name: '🎬 Movie room', short: 'Movies', r: [30.5, 37, 1.5, 10.3], fl: [30.5, 37, 1.5, 10] },
-    { id: 'gym', name: '💪 Gym', short: 'Gym', r: [37, 45.3, -10.3, 10.3], fl: [37, 45, -10, 10] },
-    { id: 'beach', name: '🏖️ Beach', short: 'Beach', r: [45.3, 220, -120, 120], view: [45, 72, -15.5, 15.5] }
+    { id: 'void', name: 'Corridor', short: 'Corridor', r: [15, 45.2, -10.3, 10.3] },
+    { id: 'game', name: '🎲 Game room', short: 'Games', r: SR('game'), fl: SF('game') },
+    { id: 'pool', name: '🏊 Pool', short: 'Pool', r: SR('pool'), fl: SF('pool') },
+    { id: 'court', name: '🏀 Basketball court', short: 'Court', r: SR('court'), fl: SF('court') },
+    { id: 'sleep', name: '😴 Sleeping quarters', short: 'Sleep', r: SR('sleep'), fl: SF('sleep') },
+    { id: 'bar', name: '🍻 Bar', short: 'Bar', r: SR('bar'), fl: SF('bar') },
+    { id: 'movie', name: '🎬 Movie room', short: 'Movies', r: SR('movie'), fl: SF('movie') },
+    { id: 'gym', name: '💪 Gym', short: 'Gym', r: SR('gym'), fl: SF('gym') },
+    { id: 'beach', name: '🏖️ Beach', short: 'Beach', r: [45.3, 84, -120, 120], view: [45, 72, -15.5, 15.5], walk: [45, 75.6, -15.6, 15.6] }
   ];
   const ZBY = {}; ZONES.forEach((z, i) => { z.bit = 1 << (i + 1); ZBY[z.id] = z; });
   const ZS = { on: true, cur: 'office' };
   function zoneAt(x, z) {
-    if (x >= 45.2) return 'beach'; if (x >= 37) return 'gym'; if (x < 15) return z > 10 ? 'hall' : 'office';
-    if (z > -1.5 && z < 1.5) return 'void';
-    if (z <= -1.5) return x < 22.5 ? 'game' : x < 30 ? 'pool' : 'court';
-    return x < 21.5 ? 'sleep' : x < 30.5 ? 'bar' : 'movie';
+    if (x >= 84) { for (const id in SLOT) { if (x < SLOT[id].x1 + 2) return id; } return 'gym'; }
+    if (x >= 45.2) return 'beach'; if (x < 15) return z > 10 ? 'hall' : 'office';
+    return 'void';
   }
+
   const GRP = z => (z === 'office' || z === 'hall') ? 'main' : z;
   const grpMask = g => g === 'main' ? (ZBY.office.bit | ZBY.hall.bit) : ZBY[g].bit;
   const otherZone = w => ZS.on && w && typeof w.x === 'number' && GRP(zoneAt(w.x, w.z)) !== GRP(ZS.cur);
@@ -723,11 +787,12 @@ function main(){
   ground.rotation.x = -Math.PI / 2; ground.position.y = -0.21; ground.receiveShadow = true; scene.add(ground); cityBits.push(ground);
   const WH = 3.2;
   box(0.2, WH, 20, mWall, -15.1, WH / 2, 0);
-  nearWall.push(box(0.2, WH, 8.9, mWall, 45.1, WH / 2, -5.55)); nearWall.push(box(0.2, WH, 8.9, mWall, 45.1, WH / 2, 5.55));
-  [[-15.2, 15], [15, 22.5], [22.5, 30], [30, 37], [37, 45.2]].forEach(s => { const w = s[1] - s[0], cx = (s[0] + s[1]) / 2;
+
+  [[-15.2, 15]].concat(Object.keys(SLOT).map(id => [SLOT[id].x0 - 0.2, SLOT[id].x1 + 0.2])).forEach(s => { const w = s[1] - s[0], cx = (s[0] + s[1]) / 2;
     box(w, 0.9, 0.2, mWall, cx, 0.45, -10.1); box(w, 0.5, 0.2, mWall, cx, WH - 0.25, -10.1);
     const bg = new THREE.Mesh(new THREE.PlaneGeometry(w, 1.8), mGlass); bg.position.set(cx, 1.8, -10.05); scene.add(bg); });
-  for (let x = -15; x <= 45; x += 3) box(0.25, WH, 0.25, mWall, x, WH / 2, -10.1);
+  for (let x = -15; x <= 15; x += 3) box(0.25, WH, 0.25, mWall, x, WH / 2, -10.1);
+  Object.keys(SLOT).forEach(id => { const s = SLOT[id]; for (let x = s.x0; x <= s.x1 + 0.01; x += 3) box(0.25, WH, 0.25, mWall, x, WH / 2, -10.1); box(0.2, WH, 20.2, mWall, s.x0 - 0.1, WH / 2, 0); box(0.2, WH, 20.2, mWall, s.x1 + 0.1, WH / 2, 0); });
   const mCity = M(0xb9c3cc, { roughness: 0.9, emissiveMap: cityTex, emissive: 0x000000 });
   for (let i = 0; i < 26; i++) {
     const w = 3 + ((i * 37) % 5), h = 6 + ((i * 53) % 22);
@@ -916,6 +981,7 @@ function main(){
   function stool(x, z) {
     cyl(0.2, 0.2, 0.06, mChair, x, 0.72, z); cyl(0.025, 0.025, 0.7, mMetal, x, 0.36, z, null, 8); cyl(0.17, 0.17, 0.02, mMetal, x, 0.01, z);
   }
+  reloMark('void');
   // ---- walls: a hallway down the middle (z -1.5 to 1.5), rooms on both sides ----
   glassWall(15, -3, 15, -10);
   partWall(15, -3, 15, -1.5); partWall(15, 1.5, 15, 10);
@@ -926,6 +992,7 @@ function main(){
   signpost(17.1, -1.1, 'GAME ROOM 🎲', '#2a1f4d', '#ffd23f'); signpost(24.5, -1.1, 'POOL 🏊', '#0d5c8a', '#ffffff'); signpost(32.1, -1.1, 'COURT 🏀', '#7a3a10', '#ffe0b0');
   signpost(17.1, 1.1, 'SLEEPING 😴', '#1d2547', '#cdd6ff'); signpost(23.7, 1.1, 'BAR 🍻', '#2b0b3a', '#ff7ad9'); signpost(34.7, 1.1, 'MOVIES 🎬', '#3a0d0d', '#ffd23f');
 
+  reloMark('game');
   // ---- game room (back left) ----
   box(7.4, 0.02, 8.4, M(0x5b4a8a, { roughness: 1 }), 18.75, 0.011, -5.75).castShadow = false;
   wallSign(18.75, -9.97, 3.0, '🎲 GAME ROOM', '#2a1f4d', '#ffd23f');
@@ -958,6 +1025,7 @@ function main(){
   { const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.44), new THREE.MeshBasicMaterial({ map: arcTex, toneMapped: false })); scr.position.set(18.75, 1.42, -4.29); scene.add(scr); arcade.push(scr); }
   plant(15.5, -9.5, 1);
 
+  reloMark('pool');
   // ---- pool (back middle) ----
   const POOL = { x0: 23.25, x1: 29.25, z0: -7.6, z1: -4.4 }, PZ = -6.0, PX = 26.25;
   const POOL_IN = (x, z) => x > POOL.x0 - 0.18 && x < POOL.x1 + 0.18 && z > POOL.z0 - 0.18 && z < POOL.z1 + 0.18;
@@ -992,6 +1060,7 @@ function main(){
   add(new THREE.Mesh(new THREE.ConeGeometry(0.9, 0.42, 12), M(0xff7a6b, { roughness: 0.8 })), 23.1, 2.1, -2.4);
   const poolLight = new THREE.PointLight(0x6fd3ff, 0, 7, 2); poolLight.position.set(PX, 0.9, PZ); scene.add(poolLight); lamps.push(poolLight);
 
+  reloMark('court');
   // ---- basketball court (back right) ----
   const COURT = { x0: 30.2, x1: 36.8, z0: -9.8, z1: -1.7 };
   const HOOP = { x: 33.5, y: 2.45, z: -8.9 };
@@ -1007,19 +1076,20 @@ function main(){
     x.save(); x.beginPath(); x.rect(8, 8, w - 16, hh - 16); x.clip(); x.beginPath(); x.arc(cx, hy, 4.4 * px, 0, Math.PI); x.stroke(); x.restore();
     x.beginPath(); x.arc(cx, hh - 8, 1.1 * px, Math.PI, 0); x.stroke();
   });
-  { const cf = new THREE.Mesh(new THREE.PlaneGeometry(CW, CD), new THREE.MeshStandardMaterial({ map: courtT, roughness: 0.55 })); cf.rotation.x = -Math.PI / 2; cf.position.set(33.5, 0.012, -5.75); cf.receiveShadow = true; scene.add(cf); }
+  { const cf = new THREE.Mesh(new THREE.PlaneGeometry(CW, CD), new THREE.MeshStandardMaterial({ map: courtT, roughness: 0.55 })); cf.rotation.x = -Math.PI / 2; cf.position.set(33.5, 0.012, -5.75); cf.receiveShadow = true; scene.add(cf); WING.courtFloor = cf; }
   const hoopParts = [cyl(0.08, 0.1, 2.95, mDark, HOOP.x, 1.47, -9.55, null, 10), box(0.1, 0.1, 0.5, mDark, HOOP.x, 2.75, -9.35)];
   const bbT = canvasTex(256, 170, (x, w, hh) => { x.fillStyle = '#ffffff'; x.fillRect(0, 0, w, hh); x.strokeStyle = '#d6262f'; x.lineWidth = 10; x.strokeRect(6, 6, w - 12, hh - 12); x.strokeRect(w / 2 - 44, hh - 78, 88, 62); });
   { const bb = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.0, 0.05), new THREE.MeshStandardMaterial({ map: bbT, roughness: 0.4 })); bb.position.set(HOOP.x, 2.85, -9.15); bb.castShadow = true; scene.add(bb); hoopParts.push(bb); }
   { const rim = add(new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.022, 8, 24), mOrange), HOOP.x, HOOP.y, HOOP.z); rim.rotation.x = Math.PI / 2; hoopParts.push(rim);
     const net = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.15, 0.34, 12, 2, true), new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.8 }));
     net.position.set(HOOP.x, HOOP.y - 0.17, HOOP.z); scene.add(net); hoopParts.push(net); }
-  box(0.45, 0.45, 4.0, mWood2, 36.45, 0.225, -5.75);
+  WING.courtBench = box(0.45, 0.45, 4.0, mWood2, 36.45, 0.225, -5.75);
   [-7.0, -5.75, -4.5].forEach(z => SPOTS.court.push({ area: 'court', pos: [36.4, z], anchor: [35.75, z], via: [], face: -Math.PI / 2, sit: 0.25, by: null }));
   const scoreCv = document.createElement('canvas'); scoreCv.width = 768; scoreCv.height = 128;
   const scoreTex = new THREE.CanvasTexture(scoreCv); scoreTex.encoding = THREE.sRGBEncoding;
   { const sb = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.4), new THREE.MeshBasicMaterial({ map: scoreTex, toneMapped: false })); sb.position.set(35.7, 2.95, -9.97); scene.add(sb); }
 
+  reloMark('sleep');
   // ---- sleeping quarters (front left) ----
   box(6.3, 0.02, 8.3, M(0x2f3c66, { roughness: 1 }), 18.25, 0.011, 5.75).castShadow = false;
   function bed(cx, cz, along, k) {
@@ -1041,6 +1111,7 @@ function main(){
   const sleepLight = new THREE.PointLight(0xffc98a, 0, 7, 2); sleepLight.position.set(18.2, 1.4, 6.0); scene.add(sleepLight); lamps.push(sleepLight);
   plant(15.5, 9.4, 0.8);
 
+  reloMark('bar');
   // ---- bar & dance floor (front middle) ----
   const DF = { x: 27.6, z: 6.3, w: 4.4, d: 5.2 };
   const dfCv = document.createElement('canvas'); dfCv.width = 128; dfCv.height = 160;
@@ -1061,6 +1132,7 @@ function main(){
   cyl(0.01, 0.01, 0.45, mDark, DF.x, 3.0, DF.z, null, 4);
   const partyLights = [0xff3fa4, 0x3fd0ff, 0xffd23f].map(c => { const L = new THREE.PointLight(c, 0.3, 6, 2); L.position.set(DF.x, 1.8, DF.z); scene.add(L); return L; });
 
+  reloMark('movie');
   // ---- movie room (front right) ----
   box(6.3, 0.02, 8.3, M(0x5a1e24, { roughness: 1 }), 33.75, 0.011, 5.75).castShadow = false;
   const movCv = document.createElement('canvas'); movCv.width = 512; movCv.height = 288;
@@ -1076,6 +1148,7 @@ function main(){
   const popcorn = [box(0.5, 0.9, 0.5, mWRed, 31.25, 0.45, 9.45), box(0.46, 0.4, 0.46, M(0xfff1b8, { roughness: 0.6 }), 31.25, 1.1, 9.45), box(0.52, 0.12, 0.52, M(0xffd23f, { roughness: 0.5 }), 31.25, 1.36, 9.45)];
   const movieLight = new THREE.PointLight(0x9fb7ff, 0, 6, 2); movieLight.position.set(32.9, 1.6, 3.2); scene.add(movieLight); lamps.push(movieLight);
 
+  reloMark('gym');
   // ---- fitness gym (east end) ----
   SPOTS.gym = [];
   const GYM = { treads: [], bags: [], bars: [], bikes: [] };
@@ -1146,10 +1219,11 @@ function main(){
     add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.018, 0.01), mDark), 0, 0.75, 0.152, up);
     add(new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.06, 0.28), mWRed), 0, 0.05, 0, up); }
 
+  reloMark('beach');
   // ---- beach (outside, through the gym's east door) ----
   SPOTS.beach = [];
   const BEACH = { x0: 45.25, x1: 75.5, z0: -15.5, z1: 15.5, shore: 66 };
-  const ON_BEACH = (x, z) => x > 45.3 && x < 200 && Math.abs(z) < 60;
+  const ON_BEACH = (x, z) => x > 45.3 && x < 84 && Math.abs(z) < 60;
   const SEA_IN = (x, z) => x > BEACH.shore + 0.2 && ON_BEACH(x, z);
   const WATER_IN = (x, z) => POOL_IN(x, z) || SEA_IN(x, z);
   const sandT = canvasTex(256, 256, (c, w, hh) => { c.fillStyle = '#f2d9a0'; c.fillRect(0, 0, w, hh); for (let k = 0; k < 900; k++) { c.fillStyle = k % 3 ? 'rgba(200,160,90,.18)' : 'rgba(255,245,215,.35)'; c.fillRect((k * 73) % 256, (k * 131) % 256, 2, 2); } });
@@ -1164,8 +1238,8 @@ function main(){
   });
   seaT.wrapS = seaT.wrapT = THREE.RepeatWrapping; seaT.repeat.set(12, 18);
   const mSea = new THREE.MeshStandardMaterial({ map: seaT, color: 0x63c3ee, transparent: true, opacity: 0.9, roughness: 0.15, metalness: 0.1 });
-  const sea = new THREE.Mesh(new THREE.PlaneGeometry(140, 240), mSea); sea.rotation.x = -Math.PI / 2; sea.position.set(BEACH.shore + 70, 0.22, 0); scene.add(sea);
-  { const deep = new THREE.Mesh(new THREE.PlaneGeometry(140, 240), M(0x1f6f9a, { roughness: 1 })); deep.rotation.x = -Math.PI / 2; deep.position.set(BEACH.shore + 70, -0.15, 0); scene.add(deep); }
+  const sea = new THREE.Mesh(new THREE.PlaneGeometry(140, 240), mSea); sea.rotation.x = -Math.PI / 2; sea.position.set(BEACH.shore + 70, 0.22, 0); sea.userData.zones = ['beach']; scene.add(sea);
+  { const deep = new THREE.Mesh(new THREE.PlaneGeometry(140, 240), M(0x1f6f9a, { roughness: 1 })); deep.rotation.x = -Math.PI / 2; deep.position.set(BEACH.shore + 70, -0.15, 0); deep.userData.zones = ['beach']; scene.add(deep); }
   const mFoam = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
   const foam = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 120), mFoam); foam.rotation.x = -Math.PI / 2; foam.position.set(BEACH.shore + 0.2, 0.235, 0); scene.add(foam);
   const waves = [0, 1, 2].map(k => { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 120), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 })); m.rotation.x = -Math.PI / 2; m.position.set(BEACH.shore + 6 + k * 5, 0.24, 0); scene.add(m); return m; });
@@ -1234,6 +1308,7 @@ function main(){
     return { g: g, z0: g.position.z, ph: k * 2.1 };
   });
 
+  reloMark('end'); reloApply();
   // ================= Christmas decorations =================
   let xmasOn = true;
   const decor = new THREE.Group(); scene.add(decor);
@@ -1326,7 +1401,7 @@ function main(){
     const pts = []; for (let i = 0; i <= 8; i++) { const t = i / 8; pts.push(new THREE.Vector3(x1 + (x2 - x1) * t, y - sag * 4 * t * (1 - t), z1 + (z2 - z1) * t)); }
     const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.055, 6, false), mGarland); decor.add(m); if (bulbR) nearWall.push(m);
   }
-  for (let x = -15; x < 45; x += 3) strand(x, -9.92, x + 3, -9.92, 3.0, 0.28, 7, true, 0, 0.05);
+  for (let x = -15; x < 15; x += 3) strand(x, -9.92, x + 3, -9.92, 3.0, 0.28, 7, true, 0, 0.05);
   for (let z = -10; z < 10; z += 2.5) { strand(-14.92, z, -14.92, z + 2.5, 3.0, 0.25, 6, true, 0.05, 0); bulbR = true; strand(14.92, z, 14.92, z + 2.5, 3.0, 0.25, 6, true, -0.05, 0); bulbR = false; }
   for (let x = 5.4; x < 14.9; x += 1.6) strand(x, -2.96, Math.min(15, x + 1.6), -2.96, 2.88, 0.14, 4, false, 0, 0.04);
   for (let z = -3; z > -9.9; z -= 1.75) strand(3.96, z, 3.96, Math.max(-10, z - 1.75), 2.88, 0.14, 4, false, -0.04, 0);
@@ -1419,9 +1494,9 @@ function main(){
 
   // ================= navigation grid (walk anywhere) =================
   const NAVG = (function () {
-    const X0 = -15, Z0 = -16, S = 0.25, NX = 364, NZ = 148, R = 0.3;
+    const X0 = -15, Z0 = -16, S = 0.25, NX = 1340, NZ = 148, R = 0.3;
     const rects = [];
-    const rect = (x0, x1, z0, z1) => rects.push([x0 - R, x1 + R, z0 - R, z1 + R]);
+    const rect = (x0, x1, z0, z1) => { const o = navOff((x0 + x1) / 2, (z0 + z1) / 2); if (!o) return; rects.push([x0 + o[0] - R, x1 + o[0] + R, z0 + o[1] - R, z1 + o[1] + R]); };
     const circ = (x, z, r) => rect(x - r, x + r, z - r, z + r);
     [-10.2, -6.3, -2.4].forEach(cx => [-4.4, 0.6].forEach(cz => rect(cx - 1.45, cx + 1.45, cz - 1.25, cz + 1.25)));
     rect(5.4, 15, -3.05, -2.95); rect(3.95, 4.05, -10, -3);
@@ -1459,7 +1534,7 @@ function main(){
     rect(18.4, 19.1, -4.9, -4.25);
     rect(23.07, 29.43, -7.78, -4.22);
     [23.3, 25.7, 28.1].forEach(a => rect(a, a + 1.6, -9.5, -8.9)); circ(23.1, -2.4, 0.08);
-    circ(33.5, -9.55, 0.12); rect(36.2, 36.75, -7.75, -3.75);
+    circ(33.5, -9.55, 0.12); rect(COURT.x1 + 0.35, COURT.x1 + 0.85, -4.6, -0.6);
     [16.1, 20.6].forEach(cx => rect(cx - 0.6, cx + 0.6, 1.62, 3.72)); [5.4, 7.2, 9.0].forEach(cz => rect(19.3, 21.4, cz - 0.6, cz + 0.6));
     rect(17.0, 17.4, 1.62, 2.05); rect(19.2, 19.6, 1.62, 2.05);
     rect(21.58, 23.05, 3.1, 8.7); circ(28.9, 2.7, 0.45); rect(29.98, 30.42, 3.8, 4.3); rect(29.98, 30.42, 9.2, 9.7);
@@ -1467,15 +1542,13 @@ function main(){
     rect(-15, -14.25, 3.55, 8.65); rect(-14.95, -14.15, 8.7, 9.5); rect(-12.95, -10.25, 5.9, 6.9); rect(-12.75, -10.55, 7.0, 7.4);
     rect(-6.05, -2.95, 7.75, 9.3);
     [[4.6, -9.4, 0.3], [-0.3, -9.3, 0.3], [-14.2, -9.3, 0.3], [-14.3, 2.4, 0.25], [-7.2, 9.1, 0.25], [2.6, -9.3, 0.25], [3.2, 0.2, 0.25], [13.9, 1.5, 0.3], [7.2, 9.3, 0.25], [13.9, 9.3, 0.25]].forEach(p => circ(p[0], p[1], p[2]));
-    const blk = new Uint8Array(NX * NZ);
-    for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) {
-      const x = X0 + (i + 0.5) * S, z = Z0 + (j + 0.5) * S;
-      const inB = x > -14.75 && x < 44.75 && z > -9.75 && z < 9.75, onBeach = x > 45.25 && x < 75.5 && z > -15.5 && z < 15.5, door = x >= 44.5 && x <= 45.5 && z > -1.05 && z < 1.05;
-      const inHall = x > -14.75 && x < 14.75 && z > 10.25 && z < 19.75, hallGap = x > -2.05 && x < -0.75 && z >= 9.6 && z <= 10.4;
-      let b = !(inB || onBeach || door || inHall || hallGap);
-      for (let k = 0; !b && k < rects.length; k++) { const r = rects[k]; if (x > r[0] && x < r[1] && z > r[2] && z < r[3]) b = true; }
-      blk[j * NX + i] = b ? 1 : 0;
-    }
+    const blk = new Uint8Array(NX * NZ).fill(1);
+    const rng = (a, b, A0, n) => [Math.max(0, Math.floor((a - A0) / S - 0.5) + 1), Math.min(n - 1, Math.ceil((b - A0) / S - 0.5) - 1)];
+    const fillR = (x0, x1, z0, z1, v) => { const I = rng(x0, x1, X0, NX), J = rng(z0, z1, Z0, NZ); for (let j = J[0]; j <= J[1]; j++) { const o = j * NX; for (let i = I[0]; i <= I[1]; i++) blk[o + i] = v; } };
+    fillR(-14.75, 14.75, -9.75, 9.75, 0); fillR(-14.75, 14.75, 10.25, 19.75, 0); fillR(-2.05, -0.75, 9.6, 10.4, 0); fillR(45.25, 75.5, -15.5, 15.5, 0);
+    Object.keys(SLOT).forEach(id => fillR(SLOT[id].x0 + 0.25, SLOT[id].x1 - 0.25, -9.75, 9.75, 0));
+    rects.forEach(r => fillR(r[0], r[1], r[2], r[3], 1));
+    const AG = new Float32Array(NX * NZ), AC = new Int32Array(NX * NZ), AX = new Uint8Array(NX * NZ);
     const ci = x => Math.max(0, Math.min(NX - 1, Math.floor((x - X0) / S)));
     const cj = z => Math.max(0, Math.min(NZ - 1, Math.floor((z - Z0) / S)));
     const ctr = (i, j) => [X0 + (i + 0.5) * S, Z0 + (j + 0.5) * S];
@@ -1500,7 +1573,7 @@ function main(){
     }
     function astar(sa, sb) {
       const si = ci(sa[0]), sj = cj(sa[1]), gi = ci(sb[0]), gj = cj(sb[1]);
-      const N = NX * NZ, g = new Float32Array(N).fill(Infinity), came = new Int32Array(N).fill(-1), closed = new Uint8Array(N);
+      const N = NX * NZ, g = AG.fill(Infinity), came = AC.fill(-1), closed = AX.fill(0);
       const heap = [], hf = (i, j) => { const dx = Math.abs(i - gi), dz = Math.abs(j - gj); return Math.max(dx, dz) + 0.414 * Math.min(dx, dz); };
       const push = (f, n) => { heap.push([f, n]); let k = heap.length - 1; while (k > 0) { const p = (k - 1) >> 1; if (heap[p][0] <= heap[k][0]) break; const t = heap[p]; heap[p] = heap[k]; heap[k] = t; k = p; } };
       const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let k = 0; for (;;) { const l = 2 * k + 1, r = l + 1; let m = k; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === k) break; const t = heap[m]; heap[m] = heap[k]; heap[k] = t; k = m; } } return top; };
@@ -4060,7 +4133,7 @@ function main(){
   }
   function applyMove(w, mv) {
     if (!mv || typeof mv !== 'object' || !mv.at || !Array.isArray(mv.at.pos)) return;
-    const numX = v => Math.max(-15, Math.min(76, +v || 0)), num = v => Math.max(-16, Math.min(20, +v || 0)), at = mv.at, pos = [numX(at.pos[0]), num(at.pos[1])];
+    const numX = v => Math.max(-15, Math.min(320, +v || 0)), num = v => Math.max(-16, Math.min(20, +v || 0)), at = mv.at, pos = [numX(at.pos[0]), num(at.pos[1])];
     let spot = null;
     if (at.desk) { const d = desks.find(x => x.id === at.desk); if (d) { spot = d; w.desk = d; } }
     if (!spot) { const all = [].concat(SPOTS.meeting, SPOTS.lounge, SPOTS.kitchen, SPOTS.game, SPOTS.sleep, SPOTS.pool, SPOTS.party, SPOTS.court, SPOTS.movie, SPOTS.gym, SPOTS.beach, SPOTS.hall || []); spot = all.find(s => Math.hypot(s.pos[0] - pos[0], s.pos[1] - pos[1]) < 0.05) || null; }
@@ -4838,7 +4911,7 @@ function main(){
   function viewD(p) { const d = camera.position.distanceTo(p); return camera.isOrthographicCamera ? ctl.r * d / ISO_DIST : d; }
   function flyV(v, key) {
     setWalk(false);
-    if (habbo) v = Object.assign({}, v, { theta: ISO_T, phi: ISO_P, r: key === 'overview' ? fitR() : v.r });
+    if (habbo) v = Object.assign({}, v, { theta: CAM.theta, phi: CAM.phi, r: key === 'overview' ? fitR() : v.r });
     let dth = v.theta - ctl.theta; dth = ((dth + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
     tw = { from: { x: ctl.target.x, y: ctl.target.y, z: ctl.target.z, theta: ctl.theta, phi: ctl.phi, r: ctl.r }, to: Object.assign({}, v, { theta: ctl.theta + dth }), t0: performance.now(), dur: reduce ? 1 : 900 };
     document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.v === key));
@@ -4870,7 +4943,7 @@ function main(){
   const walkBtn = document.getElementById('walkBtn'), help = document.getElementById('help');
   function setWalk(on) {
     walking = on; walkBtn.classList.toggle('on', on); walkBtn.textContent = on ? 'Exit walk' : 'Walk around';
-    help.textContent = on ? 'W A S D or arrow keys to move · Drag to look · Esc to exit' : habbo ? 'Click a tile to walk, anything to touch it, a desk or chair to sit · 💃 for 20 dances · Click a person to whisper or slap · Drag to move the view · Scroll to zoom · M: mic · 1–4: emotes' : 'Click the floor to walk, a desk or chair to sit · Click a person to whisper or slap · Drag to orbit · Right-drag to pan · Scroll to zoom · M: mic · 1–4: emotes';
+    help.textContent = on ? 'W A S D or arrow keys to move · Drag to look · Esc to exit' : habbo ? 'Click a tile to walk, anything to touch it, a desk or chair to sit · 💃 for 20 dances · Click a person to whisper or slap · Drag to move the view · Right-drag or Q / E to rotate · T to change the angle · Scroll to zoom · M: mic · 1–4: emotes' : 'Click the floor to walk, a desk or chair to sit · Click a person to whisper or slap · Drag to orbit · Right-drag to pan · Scroll to zoom · M: mic · 1–4: emotes';
     persp.rotation.order = 'YXZ'; camera = on ? persp : (habbo ? ortho : persp); updateWalls();
     if (on) { tw = null; wk.x = 0.8; wk.z = 9.2; wk.yaw = 0; wk.pitch = -0.05; document.querySelectorAll('#views button').forEach(b => b.classList.remove('on')); cvs.focus(); }
   }
@@ -4894,6 +4967,7 @@ function main(){
     if (gameKey(e)) return;
     const k = e.key.toLowerCase(); keys[k] = true;
     if (k === 'm' && !e.repeat && !walking) toggleMic();
+    if (!e.repeat && !walking && !e.ctrlKey && !e.metaKey) { if (k === 'q') rotateCam(-1); else if (k === 'e') rotateCam(1); else if (k === 't') cycleTilt(); else if (k === 'r') resetCam(); }
     if (k === 'h' && !e.repeat) setHud(!hudHidden);
     if (k === 'p' && !e.repeat) { if (document.getElementById('pantry').hidden) openPantry(); else closePantry(); }
     if (!e.repeat && k.length === 1 && '1234'.indexOf(k) > -1) setEmote(me, ['dance', 'sing', 'guitar', 'sleep'][+k - 1]);
@@ -4927,7 +5001,8 @@ function main(){
   const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hitPt = new THREE.Vector3();
   function floorPoint() {
     const p = ray.ray.intersectPlane(floorPlane, hitPt);
-    if (!p || !((p.x > -14.9 && p.x < 44.9 && p.z > -9.9 && p.z < 9.9) || (p.x > -14.9 && p.x < 14.9 && p.z > 9.9 && p.z < 19.9) || (p.x > 44.4 && p.x < 75.6 && p.z > -15.6 && p.z < 15.6))) return null;
+    if (!p) return null;
+    { const zz = zoneAt(p.x, p.z), Z = ZBY[zz], f = Z && (Z.walk || Z.fl); if (!f || zz === 'void' || p.x < f[0] + 0.1 || p.x > f[1] - 0.1 || p.z < f[2] + 0.1 || p.z > f[3] - 0.1) return null; }
     if (ZS.on && GRP(zoneAt(p.x, p.z)) !== GRP(ZS.cur)) return null;
     return [p.x, p.z];
   }
@@ -4983,13 +5058,14 @@ function main(){
   }
   let drag = null, hovT = 0, hovSeat = false, hovDoor = null;
   cvs.addEventListener('contextmenu', e => e.preventDefault());
-  cvs.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, pan: e.button === 2 || e.shiftKey }; cvs.setPointerCapture(e.pointerId); tw = null; });
+  cvs.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, pan: e.shiftKey, rot: e.button === 2 || e.altKey || e.button === 1 }; cvs.setPointerCapture(e.pointerId); tw = null; });
   cvs.addEventListener('pointermove', e => {
     if (drag) {
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
       if (walking) { wk.yaw -= dx * 0.004; wk.pitch = Math.max(-1.2, Math.min(1.2, wk.pitch - dy * 0.004)); }
+      else if (drag.rot) { ctl.theta -= dx * 0.008; ctl.phi = Math.max(0.35, Math.min(1.3, ctl.phi - dy * 0.005)); CAM.theta = ctl.theta; CAM.phi = ctl.phi; drag.moved = true; }
       else if (drag.pan || habbo) {
-        const k = habbo ? ctl.r * 0.84 / H() : ctl.r * 0.0016, ky = habbo ? k * 2 : k;
+        const k = habbo ? ctl.r * 0.84 / H() : ctl.r * 0.0016, ky = habbo ? k / Math.max(0.3, Math.cos(ctl.phi)) : k;
         const fx = Math.sin(ctl.theta), fz = Math.cos(ctl.theta), rx = Math.cos(ctl.theta), rz = -Math.sin(ctl.theta);
         ctl.target.x += -dx * k * rx - dy * ky * fx; ctl.target.z += -dx * k * rz - dy * ky * fz;
         { const zf = groupRect(ZS.cur); ctl.target.x = Math.max(zf[0] - 3, Math.min(zf[1] + 3, ctl.target.x)); ctl.target.z = Math.max(zf[2] - 3, Math.min(zf[3] + 3, ctl.target.z)); }
@@ -5004,6 +5080,7 @@ function main(){
   });
   cvs.addEventListener('pointerleave', () => { tileCur.visible = false; hideDoorTip(); });
   cvs.addEventListener('pointerup', e => {
+    if (drag && drag.rot) { if (drag.moved) saveCam(); drag = null; return; }
     if (drag && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 5) {
       const w = pickAt(e.clientX, e.clientY);
       if (w === JUKE) { showTab('music'); closeCard(); itemAnim(jukeItem, 'bounce', 0.6, 0.7); tsound('boop'); }
@@ -5642,7 +5719,7 @@ function main(){
     GYM.bags.forEach(B => { const w = B.spot.by && byId[B.spot.by]; const k = w && w._gym === 'punch' ? Math.sin(elapsed * 4.8) * 0.12 : B.g.rotation.x * 0.95; B.g.rotation.x = k; });
     GYM.bars.forEach(B => {
       const w = B.spot.by && byId[B.spot.by];
-      if (w && w._gym === 'bench' && w.v.hands) { w.v.root.updateMatrixWorld(true); w.v.hands[0].getWorldPosition(gymV1); w.v.hands[1].getWorldPosition(gymV2); B.g.position.set(39.0, (gymV1.y + gymV2.y) / 2 - 0.02, (gymV1.z + gymV2.z) / 2); }
+      if (w && w._gym === 'bench' && w.v.hands) { w.v.root.updateMatrixWorld(true); w.v.hands[0].getWorldPosition(gymV1); w.v.hands[1].getWorldPosition(gymV2); B.g.position.set(B.x0 || 39.0, (gymV1.y + gymV2.y) / 2 - 0.02, (gymV1.z + gymV2.z) / 2); }
       else { B.g.position.y += (B.y0 - B.g.position.y) * Math.min(1, dt * 6); B.g.position.z += (B.z0 - B.g.position.z) * Math.min(1, dt * 6); }
     });
     if (me._gymDone && !(me.at && me.at.gym)) me._gymDone = false;
@@ -6047,7 +6124,7 @@ function main(){
   }
 
   // ================= bar, drinking & passing out =================
-  PST.bar = { spots: [[23.3, 4.2], [23.3, 5.4], [23.3, 6.6], [23.3, 7.8]], face: -Math.PI / 2, dur: 1.0, label: 'bar' };
+  PST.bar = { spots: [[23.3, 4.2], [23.3, 5.4], [23.3, 6.6], [23.3, 7.8]].map(p => [p[0] + OFF.bar[0], p[1] + OFF.bar[1]]), face: -Math.PI / 2, dur: 1.0, label: 'bar' };
   const beersOf = w => (w.fx && w.fx.tipsy > Date.now()) ? (w.fx.beers || 1) : 0;
   function closeBar() { const b = document.getElementById('barBox'); if (b) b.hidden = true; }
   function openBar() { closeCard(); closePantry(); $('barBox').hidden = false; renderBar(); }
@@ -6820,21 +6897,80 @@ function main(){
     if (me.at && me.at.area === 'movie' && me.mode === 'sit' && !me.path.length) { if (!me._mvTold) { me._mvTold = true; const n = music.now; toast(n && (n.kind === 'link' || n.kind === 'yt') ? '🍿 Enjoy the show! Click the screen for the big player.' : '🍿 Comfy! Click the screen to start a movie.'); } } else if (me._mvTold && (!me.at || me.at.area !== 'movie')) me._mvTold = false;
   }
 
+
+  // ================= camera angle: rotate and tilt =================
+  const TILTS = [['top', 0.55, '⬇️', 'Top view'], ['iso', Math.PI / 3, '📐', 'Angled'], ['low', 1.18, '👀', 'Low angle']];
+  function camTo(theta, phi, keepFrame) {
+    CAM.theta = theta; CAM.phi = Math.max(0.35, Math.min(1.3, phi)); saveCam();
+    let dth = CAM.theta - ctl.theta; dth = ((dth + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+    const to = keepFrame ? { x: ctl.target.x, y: ctl.target.y, z: ctl.target.z, r: ctl.r } : (typeof zoneView === 'function' ? zoneView(ZS.cur) : { x: ctl.target.x, y: ctl.target.y, z: ctl.target.z, r: ctl.r });
+    tw = { from: { x: ctl.target.x, y: ctl.target.y, z: ctl.target.z, theta: ctl.theta, phi: ctl.phi, r: ctl.r }, to: { x: to.x, y: to.y, z: to.z, theta: ctl.theta + dth, phi: CAM.phi, r: to.r }, t0: performance.now(), dur: reduce ? 1 : 450 };
+    renderCamCtl();
+  }
+  function rotateCam(dir) { const step = Math.PI / 4, snapped = Math.round(ctl.theta / step) * step; camTo(snapped + dir * step, CAM.phi, true); }
+  function tiltIdx() { let best = 0, bd = 9; TILTS.forEach((t, i) => { const d = Math.abs(t[1] - CAM.phi); if (d < bd) { bd = d; best = i; } }); return best; }
+  function cycleTilt() { const i = (tiltIdx() + 1) % TILTS.length; camTo(ctl.theta, TILTS[i][1], true); toast(TILTS[i][2] + ' ' + TILTS[i][3]); }
+  function resetCam() { camTo(ISO_T, ISO_P, false); }
+  const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  function renderCamCtl() {
+    const el = document.getElementById('camCtl'); if (!el) return;
+    const t = TILTS[tiltIdx()], deg = ((ctl.theta * 180 / Math.PI) % 360 + 360) % 360;
+    const tb = el.querySelector('[data-cam="tilt"]'); if (tb) { tb.innerHTML = t[2]; tb.title = 'Change the angle: ' + t[3] + ' (T)'; }
+    const nd = el.querySelector('.camdeg'); if (nd) { nd.textContent = COMPASS[Math.round(deg / 45) % 8]; nd.style.setProperty('--r', (-deg + 45) + 'deg'); }
+  }
+  // walls between the camera and the room get hidden so you can always see inside
+  const CUT = { back: [], left: [], right: [] };
+  function buildCut() {
+    const bx = new THREE.Box3(), skip = new Set(workers.map(w => w.v.root).concat([marker, tileCur, ground]));
+    scene.children.forEach(root => {
+      if (skip.has(root) || root.isLight || root.isPoints) return;
+      root.traverse(o => {
+        if (!o.isMesh || o.isInstancedMesh || o.userData.outline) return;
+        bx.setFromObject(o); if (bx.isEmpty()) return;
+        const zid = zoneAt((bx.min.x + bx.max.x) / 2, (bx.min.z + bx.max.z) / 2), Z = ZBY[zid], f = Z && Z.fl;
+        if (!f || zid === 'beach' || zid === 'void') return;
+        const slot = !!SLOT[zid];
+        const g = bx.max.z < f[2] + 0.25 ? 'back' : bx.max.x < f[0] + 0.25 ? 'left' : slot && bx.min.x > f[1] - 0.25 ? 'right' : null;
+        if (g) { o.userData.cutMask = o.layers.mask; CUT[g].push(o); }
+      });
+    });
+  }
+  let cutKey = '';
+  function cutTick() {
+    const s = Math.sin(ctl.theta), c = Math.cos(ctl.theta), hb = c < -0.2, hl = s < -0.2, hr = s > 0.2, key = (hb ? 'b' : '') + (hl ? 'l' : '') + (hr ? 'r' : '');
+    if (key === cutKey) return; cutKey = key;
+    CUT.back.forEach(o => { o.layers.mask = hb ? 0 : o.userData.cutMask; });
+    CUT.left.forEach(o => { o.layers.mask = hl ? 0 : o.userData.cutMask; });
+    CUT.right.forEach(o => { o.layers.mask = hr ? 0 : o.userData.cutMask; });
+  }
+  function camTick() {
+    if (!tw && (Math.abs(ctl.theta - CAM.theta) > 0.001 || Math.abs(ctl.phi - CAM.phi) > 0.001) && !(drag && drag.rot)) { CAM.theta = ctl.theta; CAM.phi = ctl.phi; }
+    cutTick();
+    const d = ((ctl.theta * 180 / Math.PI) % 360 + 360) % 360;
+    if (Math.abs(d - (camTick.d || -1)) > 2) { camTick.d = d; renderCamCtl(); }
+  }
+  $('camCtl').addEventListener('click', e => {
+    const b = e.target.closest('[data-cam]'); if (!b) return;
+    const a = b.dataset.cam;
+    if (a === 'l') rotateCam(-1); else if (a === 'r') rotateCam(1); else if (a === 'tilt') cycleTilt(); else if (a === 'reset') resetCam();
+  });
+
   // ================= rooms & doors =================
   // the office and the hallway are one open area; every other room is behind a door
   const SD = (x) => ({ d: [x, 20], ax: 'z', p: [x, 19.25] });
+  const RD = id => ({ d: [SLOT[id].x0, 6.5], ax: 'x', p: [SLOT[id].x0 + 0.85, 6.5] });
   const DOORS = [
-    { a: 'hall', b: 'game', A: SD(-12.6), B: { d: [18.3, -1.5], ax: 'z', p: [18.3, -2.25] }, col: 0xb18cff },
-    { a: 'hall', b: 'pool', A: SD(-9.0), B: { d: [25.7, -1.5], ax: 'z', p: [25.7, -2.25] }, col: 0x5fd0ff },
-    { a: 'hall', b: 'court', A: SD(-5.4), B: { d: [33.3, -1.5], ax: 'z', p: [33.3, -2.25] }, col: 0xffa04a },
-    { a: 'hall', b: 'sleep', A: SD(-1.8), B: { d: [18.3, 1.5], ax: 'z', p: [18.3, 2.25] }, col: 0x8fa2ff },
-    { a: 'hall', b: 'bar', A: SD(1.8), B: { d: [25.0, 1.5], ax: 'z', p: [25.0, 2.25] }, col: 0xff6fd0 },
-    { a: 'hall', b: 'movie', A: SD(5.4), B: { d: [35.9, 1.5], ax: 'z', p: [35.9, 2.25] }, col: 0xffd23f },
-    { a: 'hall', b: 'gym', A: SD(9.0), B: { d: [37, 0], ax: 'x', p: [37.75, 0] }, col: 0x7cff6b },
+    { a: 'hall', b: 'game', A: SD(-12.6), B: RD('game'), col: 0xb18cff },
+    { a: 'hall', b: 'pool', A: SD(-9.0), B: RD('pool'), col: 0x5fd0ff },
+    { a: 'hall', b: 'court', A: SD(-5.4), B: RD('court'), col: 0xffa04a },
+    { a: 'hall', b: 'sleep', A: SD(-1.8), B: RD('sleep'), col: 0x8fa2ff },
+    { a: 'hall', b: 'bar', A: SD(1.8), B: RD('bar'), col: 0xff6fd0 },
+    { a: 'hall', b: 'movie', A: SD(5.4), B: RD('movie'), col: 0xffd23f },
+    { a: 'hall', b: 'gym', A: SD(9.0), B: RD('gym'), col: 0x7cff6b },
     { a: 'hall', b: 'beach', A: SD(12.6), B: { d: [46.4, 5], ax: 'x', p: [47.2, 5] }, col: 0x4fd6c8 },
-    { a: 'gym', b: 'beach', A: { d: [45, 0], ax: 'x', p: [44.3, 0] }, B: { d: [45, 0], ax: 'x', p: [45.95, 0] }, col: 0x4fd6c8 }
+    { a: 'gym', b: 'beach', A: { d: [SLOT.gym.x1 - 4, -10], ax: 'z', p: [SLOT.gym.x1 - 4, -9.15] }, B: { d: [45, 0], ax: 'x', p: [45.95, 0] }, col: 0x4fd6c8 }
   ];
-  partWall(15, -1.5, 15, 1.5); partWall(37, -1.5, 37, -0.7); partWall(37, 0.7, 37, 1.5);
+  partWall(15, -1.5, 15, 1.5);
   // ---- the hallway itself, in front of the office ----
   {
     const lowWall = (x1, x2) => { const L = x2 - x1, cx = (x1 + x2) / 2; box(L, 0.55, 0.14, mPart, cx, 0.275, 10); box(L + 0.02, 0.05, 0.2, mPartCap, cx, 0.575, 10); };
@@ -6964,9 +7100,11 @@ function main(){
   // ---- the current room ----
   function groupRect(id) { const g = GRP(id); if (g === 'main') return [-15, 15, -10, 20]; const z = ZBY[id]; return z.view || z.fl; }
   function zoneView(id) {
-    const f = groupRect(id), w = f[1] - f[0], d = f[3] - f[2], a = W() / H();
-    const hw = 0.5 * w + 0.25 * d + 0.6, hh = 0.22 * w + 0.3 * d + 1.2;
-    return { x: (f[0] + f[1]) / 2, y: 0, z: (f[2] + f[3]) / 2, theta: ISO_T, phi: ISO_P, r: Math.max(5.5, hh, hw / a) / 0.42 };
+    const f = groupRect(id), a = W() / H(), th = CAM.theta, ph = CAM.phi, c = Math.cos(th), s = Math.sin(th), cp = Math.cos(ph);
+    let u0 = 1e9, u1 = -1e9, v0 = 1e9, v1 = -1e9;
+    [[f[0], f[2]], [f[1], f[2]], [f[0], f[3]], [f[1], f[3]]].forEach(p => { const u = p[0] * c - p[1] * s, v = (p[0] * s + p[1] * c) * cp; u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v); });
+    const hw = (u1 - u0) / 2 + 1.4, hh = (v1 - v0) / 2 + WH * Math.sin(ph) * 0.5 + 1.6;
+    return { x: (f[0] + f[1]) / 2, y: 0, z: (f[2] + f[3]) / 2, theta: th, phi: ph, r: Math.max(5.5, hh, hw / a) / 0.42 };
   }
   const roomPill = document.createElement('div'); roomPill.className = 'roompill'; roomPill.setAttribute('aria-live', 'polite'); stage.appendChild(roomPill);
   function renderRoomPill() {
@@ -6979,6 +7117,7 @@ function main(){
     const gChanged = !ZS.init || GRP(ZS.cur) !== GRP(id); ZS.cur = id; ZS.init = true;
     const mask = 1 | grpMask(GRP(id));
     persp.layers.mask = mask; ortho.layers.mask = mask; ray.layers.mask = mask; sun.shadow.camera.layers.mask = mask;
+    { const v0 = zoneView(id); sun.target.position.set(v0.x, 0, v0.z); sun.position.set(v0.x - 18, 26, v0.z + 14); sun.target.updateMatrixWorld(); }
     zoneWorkers(true);
     if (gChanged || refocus) {
       const v = zoneView(id);
@@ -7067,14 +7206,17 @@ function main(){
     renderRoomPill();
   }
   $('rooms').addEventListener('click', e => { const b = e.target.closest('[data-z]'); if (b) goZone(b.dataset.z); });
+  buildCut();
+  ctl.theta = CAM.theta; ctl.phi = CAM.phi;
   setZone('office', true);
+  renderCamCtl();
 
   const clk = new THREE.Clock();
   let uiTick = 0;
   function loop(now) {
     requestAnimationFrame(loop);
     const dt = Math.min(clk.getDelta(), 0.05); elapsed += dt;
-    micTick(dt); musicLevel(); xmasTick(dt); roomTick(); pantryTick(dt); touchTick(dt); netTick(dt); voiceTick(dt); wingTick(dt); zoneTick(dt);
+    micTick(dt); musicLevel(); xmasTick(dt); roomTick(); pantryTick(dt); touchTick(dt); netTick(dt); voiceTick(dt); wingTick(dt); zoneTick(dt); camTick();
     dogBody.scale.y = 0.1 * (1 + Math.sin(elapsed * 2.2) * 0.06);
     dogT -= dt; if (dogT <= 0) { dogT = 1.7; if (elapsed > dogAwake) floatFx(dogW, rnd(['z', 'Z', 'zz']), 'z'); }
     if (marker.visible) { if (!me.path.length || me.at !== marker.userData.tgt) marker.visible = false; else { const k = 1 + Math.sin(elapsed * 6) * 0.12; marker.scale.set(k, k, k); } }
