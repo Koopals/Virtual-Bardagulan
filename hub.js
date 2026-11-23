@@ -4,7 +4,7 @@
 // tested without a server.
 
 const STATE_KEYS = ['name', 'role', 'look', 'status', 'custom', 'mic', 'emote', 'held', 'talk', 'fx', 'desk', 'task', 'zone', 'mv'];
-const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score'];
+const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score', 'next'];
 const GAME_TABLES = ['chess', 'checkers', 'reversi', 'connect4', 'ttt'];
 const newTable = () => ({ seats: [null, null], log: [] });
 // message id and the message being replied to (who wrote it, their name and a short quote)
