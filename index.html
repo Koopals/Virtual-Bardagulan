@@ -361,7 +361,7 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
   <h1><span>Virtual office</span><button class="hudtog" id="hudTog" aria-expanded="true" aria-controls="hudBody" title="Hide panel (H)">−</button></h1>
   <div class="hudbody" id="hudBody">
   <p class="sub" id="hudSub">21 people on the floor</p>
-  <p class="netline" id="netLine" hidden><span id="netTxt">Connecting…</span><button id="netInvite">🔗 Copy invite link</button><button id="netLock" hidden>🔒 Lock room</button></p>
+  <p class="netline" id="netLine" hidden><span id="netTxt">Connecting…</span><button id="netInvite">🔗 Copy invite link</button><button id="netLock" hidden>🔒 Lock room</button><button id="netSrv" hidden>🔌 Connect to server</button></p>
   <div class="counts" id="counts"></div>
   <div class="lbl">Jump to</div>
   <div class="views" id="views">
@@ -387,7 +387,7 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
 <div class="setup" id="setup" hidden></div>
 <div class="setup pwbox" id="pwBox" hidden><div class="setup-card pwcard" role="dialog" aria-modal="true" aria-labelledby="pwT">
   <h1 id="pwT">This room is locked</h1><p class="sub" id="pwP"></p>
-  <label class="lbl" for="pwIn">Passcode</label><input id="pwIn" type="password" maxlength="64" autocomplete="off">
+  <label class="lbl" for="pwIn" id="pwL">Passcode</label><input id="pwIn" type="password" maxlength="64" autocomplete="off">
   <p class="suerr" id="pwErr" hidden></p>
   <div class="sufoot"><button id="pwCancel">Cancel</button><button id="pwOk" class="go">Join</button></div>
 </div></div>
@@ -1270,6 +1270,9 @@ function main(){
   function netUrl() {
     let s = '';
     try { s = new URLSearchParams(location.search).get('server') || ''; } catch (e) {}
+    if (s) { try { localStorage.setItem('virtualOffice.server', s); } catch (e) {} }
+    if (!s && String(window.VO_SERVER || '') === 'same') s = 'same';
+    if (!s) { try { s = localStorage.getItem('virtualOffice.server') || ''; } catch (e) {} }
     if (!s) s = String(window.VO_SERVER || '');
     s = s.trim(); if (!s) return null;
     if (s === 'same') { if (!/^https?:$/.test(location.protocol)) return null; return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'; }
@@ -1323,7 +1326,7 @@ function main(){
     workers.push(w); byId[w.id] = w;
     return w;
   }
-  if (ONLINE) PEOPLE.length = 1;
+  PEOPLE.length = 1;   // real people only: no made-up coworkers
   PEOPLE.forEach((p, i) => makeWorker(p, i));
   const me = byId.me;
   function inRoom(w) { return !!w && w.x > 4.05 && w.x < 15 && w.z < -3.02 && w.z > -10; }
@@ -3380,9 +3383,12 @@ function main(){
     } finally { NET.rx = false; }
   }
   function netStatus(st) {
-    if (!ONLINE) return;
     const el = document.getElementById('netLine'), tx = document.getElementById('netTxt'); if (!el || !tx) return;
     el.hidden = false;
+    const sb = document.getElementById('netSrv'), ib = document.getElementById('netInvite');
+    if (sb) { sb.hidden = ONLINE && st !== 'off'; sb.textContent = ONLINE ? '🔌 Change server' : '🔌 Connect to server'; }
+    if (ib) ib.hidden = !ONLINE;
+    if (!ONLINE) { tx.textContent = '⚪ Not connected · you’re the only one here'; el.className = 'netline off'; const lb0 = document.getElementById('netLock'); if (lb0) lb0.hidden = true; return; }
     const n = workers.length;
     const vc = voiceCount();
     tx.textContent = st === 'on' ? '🟢 Online · room “' + NET.room + '”' + (NET.lockOn ? ' 🔒' : '') + ' · ' + n + (n === 1 ? ' person' : ' people') + (vc ? ' · 🎧 voice with ' + vc : '')
@@ -3400,9 +3406,24 @@ function main(){
   function inviteLink() {
     const base = (location.origin && location.origin !== 'null' ? location.origin + location.pathname : String(location.href || '').split('?')[0]);
     const q = new URLSearchParams(); q.set('room', NET.room);
-    try { const sv = new URLSearchParams(location.search).get('server'); if (sv) q.set('server', sv); } catch (e) {}
+    try { let sv = new URLSearchParams(location.search).get('server'); if (!sv && String(window.VO_SERVER || '') !== 'same') sv = localStorage.getItem('virtualOffice.server') || String(window.VO_SERVER || ''); if (sv) q.set('server', sv); } catch (e) {}
     return base + '?' + q.toString();
   }
+
+  document.getElementById('netSrv').addEventListener('click', () => {
+    let cur = ''; try { cur = localStorage.getItem('virtualOffice.server') || ''; } catch (e) {}
+    askPass({ title: 'Connect to your server', text: 'Paste the address Render gave you, like virtual-office-xxxx.onrender.com. The page reloads and connects, and your browser remembers it.',
+      label: 'Server address', ok: 'Connect', min: 4, type: 'text', value: cur })
+      .then(v => {
+        if (v == null) return;
+        v = v.trim().replace(/\s+/g, '');
+        if (!/^(https?:\/\/|wss?:\/\/)?[a-z0-9.-]+\.[a-z]{2,}(:\d+)?(\/.*)?$/i.test(v) && !/^(https?:\/\/)?localhost(:\d+)?/i.test(v)) { toast('That doesn’t look like a web address. Try something like virtual-office-xxxx.onrender.com'); return; }
+        try { localStorage.setItem('virtualOffice.server', v); } catch (e) {}
+        const q = new URLSearchParams(location.search); q.delete('server');
+        const qs = q.toString(); location.href = location.pathname + (qs ? '?' + qs : '');
+      });
+  });
+  if (!ONLINE) netStatus('off');
   document.getElementById('netInvite').addEventListener('click', () => {
     const link = inviteLink();
     try { navigator.clipboard.writeText(link).then(() => toast('🔗 Invite link copied: ' + link), () => toast('Share this link: ' + link)); }
@@ -3425,7 +3446,8 @@ function main(){
     return new Promise(res => {
       const box = $('pwBox'), inp = $('pwIn'), err = $('pwErr'), ok = $('pwOk'), cancel = $('pwCancel');
       $('pwT').textContent = o.title; $('pwP').textContent = o.text; ok.textContent = o.ok || 'OK';
-      err.hidden = !o.err; err.textContent = o.err || ''; inp.value = '';
+      err.hidden = !o.err; err.textContent = o.err || ''; inp.value = o.value || ''; inp.type = o.type || 'password';
+      $('pwL').textContent = o.label || 'Passcode';
       box.hidden = false; NET.asking = true;
       setTimeout(() => { try { inp.focus(); } catch (e) {} }, 30);
       const done = v => { box.hidden = true; NET.asking = false; ok.onclick = null; cancel.onclick = null; inp.onkeydown = null; res(v); };
@@ -3710,6 +3732,7 @@ function main(){
     }
     if (to) { whisper(to, text); return; }
     post('me', text, { voice: !!o.voice });
+    if (!ONLINE) { if (!workers.some(w => w !== me)) return; }
     if (ONLINE) { if (NET.on) { netFlush(); netSend({ t: 'chat', text: text, priv: inRoom(me), voice: !!o.voice }); } else toast('You’re offline right now, so nobody else saw that.'); return; }
     const low = plain(text);
     const rawTx = ' ' + String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9@ ]+/g, ' ') + ' ';
@@ -4291,13 +4314,10 @@ function main(){
   post(null, 'Welcome to the office chat · ' + fmtT(new Date()));
   post(null, '🎄 The office is decorated for Christmas! Play 🔔 Jingle Bells in the Music tab.');
   if (ONLINE) post(null, '🌐 This is the multiplayer office. Everyone you see here is a real person who opened the same link.');
-  else post(null, 'Heads up: everyone here is a made-up demo character. Their chatter is auto-generated for fun.');
+  else post(null, '🔌 This office isn’t connected to a server yet, so you’re the only one here. Click “Connect to server” in the top-left panel and paste your Render address.');
   setHabbo(true, true);
   if (needSetup) openSetup(false);
   else { setTimeout(() => toast('Welcome back, ' + me.name + '! 👋'), 600); if (ONLINE) setTimeout(netConnect, 300); }
-  if (!ONLINE) setTimeout(() => post('sam', 'Break and lunch schedule for today is posted 📋'), 1200);
-  if (!ONLINE) setTimeout(() => post('riley', 'Reminder: please update your idle tickets before end of shift'), 3200);
-  if (!ONLINE) setTimeout(() => post('quinn', 'On a coffee break, back in 10 ☕'), 5200);
   cvs.style.cursor = 'grab';
 
   const clk = new THREE.Clock();

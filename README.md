@@ -60,15 +60,18 @@ People type the passcode once, and their browser remembers it. After 5 wrong tri
 
 - **Size:** voice works best with up to about 20 people in a room. Each person connects directly to everyone else.
 
-### Optional: GitHub Pages as well
+### GitHub Pages copy
 
-On its own, the GitHub Pages copy runs as an **offline demo** with made-up coworkers. To make it join your server, open `index.html`, find this line near the top and put your Render address in it:
+There are no made-up coworkers anywhere. Everyone in the office is a real person.
 
-```js
-window.VO_SERVER = 'https://virtual-office-xxxx.onrender.com';
-```
+- **The Render address** (`https://virtual-office-xxxx.onrender.com`) connects on its own. This is the easiest link to share.
+- **The GitHub Pages address** starts out not connected, with just you in the office. Click **🔌 Connect to server** in the top-left panel and paste your Render address. Your browser remembers it.
+- **To skip that step for everyone,** share a link with the server in it, like `https://<you>.github.io/<repo>/?server=virtual-office-xxxx.onrender.com`. The **🔗 Copy invite link** button builds this for you.
+- **To build the address into the page itself,** edit this line near the top of `index.html`:
 
-Or add it to the link: `https://<you>.github.io/virtual-office/?server=virtual-office-xxxx.onrender.com&room=yourteam`
+  ```js
+  window.VO_SERVER = 'https://virtual-office-xxxx.onrender.com';
+  ```
 
 ## Run it on your own computer
 
