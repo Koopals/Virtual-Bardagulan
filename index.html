@@ -1027,27 +1027,32 @@ function main(){
 
   reloMark('pool');
   // ---- pool (back middle) ----
-  const POOL = { x0: 23.25, x1: 29.25, z0: -7.6, z1: -4.4 }, PZ = -6.0, PX = 26.25;
+  // a big pool: 13 x 7 (it was 6 x 3.2)
+  const POOL = { x0: 19.25, x1: 32.25, z0: -7.5, z1: -0.5 }, PZ = -4.0, PX = 25.75, PW = POOL.x1 - POOL.x0, PD = POOL.z1 - POOL.z0;
   const POOL_IN = (x, z) => x > POOL.x0 - 0.18 && x < POOL.x1 + 0.18 && z > POOL.z0 - 0.18 && z < POOL.z1 + 0.18;
-  const POOL_ENTRY = [{ out: [24.2, -3.7], inn: [24.2, -4.95] }, { out: [28.3, -3.7], inn: [28.3, -4.95] }];
-  box(7.4, 0.02, 8.4, M(0xdfe9ee, { roughness: 0.9 }), 26.25, 0.008, -5.75).castShadow = false;
+  const POOL_ENTRY = [{ out: [PX - 4.5, POOL.z1 + 0.75], inn: [PX - 4.5, POOL.z1 - 0.6] }, { out: [PX, POOL.z1 + 0.75], inn: [PX, POOL.z1 - 0.6] }, { out: [PX + 4.5, POOL.z1 + 0.75], inn: [PX + 4.5, POOL.z1 - 0.6] }];
+  box(PW + 4, 0.02, PD + 3.2, M(0xdfe9ee, { roughness: 0.9 }), PX, 0.008, PZ - 0.6).castShadow = false;
+  // lane lines on the pool floor
+  [-1.75, 0, 1.75].forEach(dz => box(PW - 1.2, 0.006, 0.12, M(0x1f5f8a, { roughness: 0.8 }), PX, 0.024, PZ + dz).castShadow = false);
   wallSign(26.25, -9.97, 2.6, '🏊 POOL', '#0d5c8a', '#ffffff');
   const tileT = canvasTex(128, 128, (x, w, hh) => { x.fillStyle = '#5fb6d8'; x.fillRect(0, 0, w, hh); x.strokeStyle = '#3e93b8'; x.lineWidth = 3; for (let i = 0; i <= 128; i += 32) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 128); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(128, i); x.stroke(); } });
-  tileT.wrapS = tileT.wrapT = THREE.RepeatWrapping; tileT.repeat.set(6, 3);
+  tileT.wrapS = tileT.wrapT = THREE.RepeatWrapping; tileT.repeat.set(13, 7);
   const poolBits = [];
-  poolBits.push(box(6.0, 0.02, 3.2, new THREE.MeshStandardMaterial({ map: tileT, roughness: 0.6 }), PX, 0.012, PZ));
-  poolBits.push(box(6.36, 0.34, 0.18, mCope, PX, 0.17, PZ - 1.69), box(6.36, 0.34, 0.18, mCope, PX, 0.17, PZ + 1.69), box(0.18, 0.34, 3.2, mCope, POOL.x0 - 0.09, 0.17, PZ), box(0.18, 0.34, 3.2, mCope, POOL.x1 + 0.09, 0.17, PZ));
+  poolBits.push(box(PW, 0.02, PD, new THREE.MeshStandardMaterial({ map: tileT, roughness: 0.6 }), PX, 0.012, PZ));
+  poolBits.push(box(PW + 0.36, 0.34, 0.18, mCope, PX, 0.17, POOL.z0 - 0.09), box(PW + 0.36, 0.34, 0.18, mCope, PX, 0.17, POOL.z1 + 0.09), box(0.18, 0.34, PD, mCope, POOL.x0 - 0.09, 0.17, PZ), box(0.18, 0.34, PD, mCope, POOL.x1 + 0.09, 0.17, PZ));
   const waterT = canvasTex(256, 256, (x, w, hh) => {
     x.fillStyle = 'rgba(120,210,255,1)'; x.fillRect(0, 0, w, hh);
     x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 3;
     for (let k = 0; k < 26; k++) { const cx = (k * 97) % 256, cy = (k * 59) % 256, r = 10 + (k * 13) % 22; x.beginPath(); x.ellipse(cx, cy, r * 1.6, r, 0.3, 0, Math.PI * 1.3); x.stroke(); }
   });
-  waterT.wrapS = waterT.wrapT = THREE.RepeatWrapping; waterT.repeat.set(2.5, 1.4);
-  const water = new THREE.Mesh(new THREE.PlaneGeometry(6.0, 3.2), new THREE.MeshStandardMaterial({ map: waterT, color: 0x6fc8f0, transparent: true, opacity: 0.78, roughness: 0.15, metalness: 0.1, depthWrite: false }));
+  waterT.wrapS = waterT.wrapT = THREE.RepeatWrapping; waterT.repeat.set(5.4, 3);
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(PW, PD), new THREE.MeshStandardMaterial({ map: waterT, color: 0x6fc8f0, transparent: true, opacity: 0.78, roughness: 0.15, metalness: 0.1, depthWrite: false }));
   water.rotation.x = -Math.PI / 2; water.position.set(PX, 0.27, PZ); scene.add(water); poolBits.push(water);
-  [-0.25, 0.25].forEach(dx => { cyl(0.025, 0.025, 0.75, mWSilv, 24.2 + dx, 0.5, POOL.z1 - 0.02, null, 8); box(0.025, 0.025, 0.3, mWSilv, 24.2 + dx, 0.86, POOL.z1 + 0.1); });
-  box(0.5, 0.06, 1.1, mWhite, 28.3, 0.42, POOL.z1 - 0.3); box(0.3, 0.4, 0.2, mCope, 28.3, 0.2, POOL.z1 + 0.35);
-  const floatRing = new THREE.Group(); floatRing.position.set(25.6, 0.3, PZ - 0.4); scene.add(floatRing);
+  [PX - 2.2, PX + 2.2].forEach(lx => [-0.25, 0.25].forEach(dx => { cyl(0.025, 0.025, 0.75, mWSilv, lx + dx, 0.5, POOL.z1 - 0.02, null, 8); box(0.025, 0.025, 0.3, mWSilv, lx + dx, 0.86, POOL.z1 + 0.1); }));
+  [PX - 1.0, PX + 1.0].forEach(bx0 => { box(0.5, 0.06, 1.2, mWhite, bx0, 0.42, POOL.z1 - 0.35); box(0.3, 0.4, 0.16, mCope, bx0, 0.2, POOL.z1 + 0.15); });
+  // lane ropes across the pool
+  [-1.75, 1.75].forEach(dz => { for (let k = 0; k < 26; k++) { const fl = cyl(0.07, 0.07, 0.12, k % 2 ? mWhite : M(0xd6262f, { roughness: 0.5 }), POOL.x0 + 0.25 + k * (PW - 0.5) / 25, 0.3, PZ + dz, null, 8); fl.rotation.z = Math.PI / 2; poolBits.push(fl); } });
+  const floatRing = new THREE.Group(); floatRing.position.set(PX - 3.6, 0.3, PZ - 2.6); scene.add(floatRing);
   { const tr = add(new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.11, 10, 24), M(0xff5a7a, { roughness: 0.4 })), 0, 0, 0, floatRing); tr.rotation.x = Math.PI / 2;
     for (let k = 0; k < 4; k++) { const st = add(new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.113, 6, 5, Math.PI / 6), mWhite), 0, 0, 0, floatRing); st.rotation.x = Math.PI / 2; st.rotation.z = k * Math.PI / 2; } }
   function lounger(a, z, mat) {
@@ -1056,8 +1061,9 @@ function main(){
     SPOTS.pool.push({ area: 'pool', pos: [a - 0.05, z], anchor: [a - 0.5, z], via: [], face: -Math.PI / 2, sit: 0.42, lie: true, by: null, rect: [a, a + 1.6, z - 0.3, z + 0.3] });
   }
   lounger(23.3, -9.2, blankets[0]); lounger(25.7, -9.2, blankets[4]); lounger(28.1, -9.2, blankets[2]);
-  cyl(0.035, 0.035, 2.0, mDark, 23.1, 1.0, -2.4, null, 8);
-  add(new THREE.Mesh(new THREE.ConeGeometry(0.9, 0.42, 12), M(0xff7a6b, { roughness: 0.8 })), 23.1, 2.1, -2.4);
+  cyl(0.035, 0.035, 2.0, mDark, 25.3, 1.0, -9.2, null, 8);
+  add(new THREE.Mesh(new THREE.ConeGeometry(0.9, 0.42, 12), M(0xff7a6b, { roughness: 0.8 })), 25.3, 2.1, -9.2);
+  [PX - 4, PX + 4].forEach(lx => { const pl = new THREE.PointLight(0x6fd3ff, 0, 7, 2); pl.position.set(lx, 0.9, PZ); scene.add(pl); lamps.push(pl); });
   const poolLight = new THREE.PointLight(0x6fd3ff, 0, 7, 2); poolLight.position.set(PX, 0.9, PZ); scene.add(poolLight); lamps.push(poolLight);
 
   reloMark('court');
@@ -1413,8 +1419,8 @@ function main(){
       fp(g, 1.2, 0.1, 1.2, mT, 0, 2.2, 0); for (let k = 0; k < 6; k++) fp(g, 0.05, 0.05, 0.6, MC(0xffffff), -0.62, 0.3 + k * 0.33, 0);
       const ch = fp(g, 3.6, 0.12, 0.8, mSl, 2.25, 1.15, 0); ch.rotation.z = -0.55; [-1, 1].forEach(s => { const r = fp(g, 3.6, 0.2, 0.06, mSl, 2.25, 1.25, s * 0.4); r.rotation.z = -0.55; });
       nb(p0 - 8.65, p0 - 7.35, -6.65, -5.35);
-      FURN_ITEMS.push(['water slide', [g], (w, it) => { if (w !== me) return; floatFx(me, '🛝 Wheee!'); tsound('boing'); swimClick({ x: POOL.x0 + 0.7, z: -6 }); }]); }
-    { const d = new THREE.Group(); d.position.set(p0 + 1.5, 0.3, -6.3); scene.add(d); const y = MC(0xffd23f, { roughness: 0.4 });
+      FURN.slide = g; FURN_ITEMS.push(['water slide', [g], (w, it) => { if (w === me) goSlide(); }, { slide: true }]); }
+    { const d = new THREE.Group(); d.position.set(POOL.x1 - 3.2, 0.3, POOL.z0 + 1.6); scene.add(d); const y = MC(0xffd23f, { roughness: 0.4 });
       add(new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 10), y), 0, 0, 0, d).scale.set(1.2, 0.7, 1); add(new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), y), 0.25, 0.22, 0, d); add(new THREE.Mesh(FBX(0.12, 0.05, 0.08), MC(0xff8a3a)), 0.4, 0.2, 0, d); FURN.duck = d;
       FURN_ITEMS.push(['rubber duck', [d], (w, it) => { tsound('squeak'); floatAt(it, '🦆 Quack!'); }]); }
     [[p0 - 9, 3.6], [p0 - 6.4, 3.6], [p0 - 3.8, 3.6], [p0 + 1.2, 3.6], [p0 + 3.8, 3.6], [p0 + 6.4, 3.6]].forEach((p, k) => { lounger(p[0], p[1], blankets[k % blankets.length]); nb(p[0], p[0] + 1.6, p[1] - 0.3, p[1] + 0.3); });
@@ -1618,6 +1624,52 @@ function main(){
   for (let z = -10; z < 10; z += 2.5) { strand(-14.92, z, -14.92, z + 2.5, 3.0, 0.25, 6, true, 0.05, 0); bulbR = true; strand(14.92, z, 14.92, z + 2.5, 3.0, 0.25, 6, true, -0.05, 0); bulbR = false; }
   for (let x = 5.4; x < 14.9; x += 1.6) strand(x, -2.96, Math.min(15, x + 1.6), -2.96, 2.88, 0.14, 4, false, 0, 0.04);
   for (let z = -3; z > -9.9; z -= 1.75) strand(3.96, z, 3.96, Math.max(-10, z - 1.75), 2.88, 0.14, 4, false, -0.04, 0);
+
+  // ---- Christmas in every room ----
+  const XMAS_BLOCK = [], ROOM_STARS = [], ROOM_BANNERS = [];
+  function xTree(x, z, s) {
+    const g = new THREE.Group(); g.position.set(x, 0, z); g.scale.setScalar(s); decor.add(g);
+    cyl(0.42, 0.48, 0.28, mTreeBase, 0, 0.14, 0, g, 20); cyl(0.1, 0.12, 0.35, mTrunk, 0, 0.42, 0, g, 10);
+    TIERS.forEach((T, i) => { const c = add(new THREE.Mesh(new THREE.ConeGeometry(T[0], T[1], 12, 1), i % 2 ? mTree2 : mTree), 0, T[2], 0, g); c.rotation.y = i * 0.4; });
+    let o2 = 0;
+    TIERS.forEach((T, i) => { const n = 8 - i * 1.5 | 0, yb = T[2] - T[1] / 2 + 0.1; for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2 + i * 0.7, r = rAt(yb) + 0.03; add(new THREE.Mesh(ornG, ornMats[o2++ % 4]), Math.cos(a) * r, yb - 0.04, Math.sin(a) * r, g); } });
+    for (let u = 0; u <= 1.0001; u += 1 / 72) { const y = 0.55 + u * 2.05, a = u * Math.PI * 2 * 5.5, r = rAt(y) + 0.02; if (r > 0.02) bulb(x + Math.cos(a) * r * s, y * s, z + Math.sin(a) * r * s); }
+    const st = new THREE.Mesh(starGeo, mXStar); st.position.set(x, 2.9 * s, z); st.scale.setScalar(s); decor.add(st); ROOM_STARS.push(st);
+    [[0.4, 0.95, 0.32, 0xd6262f, 0xf2c14e], [1.6, 1.0, 0.26, 0x2a7d45, 0xd6262f], [2.9, 0.95, 0.36, 0xf2c14e, 0xd6262f], [4.4, 1.0, 0.28, 0x2f6fd6, 0xffffff]].forEach(p => {
+      const pg = new THREE.Group(); pg.position.set(x + Math.cos(p[0]) * p[1] * s, 0, z + Math.sin(p[0]) * p[1] * s); pg.rotation.y = p[0] * 1.7; decor.add(pg);
+      const sz = p[2], mb = M(p[3], { roughness: 0.6 }), mr = M(p[4], { roughness: 0.4 });
+      box(sz, sz * 0.8, sz, mb, 0, sz * 0.4, 0, pg); box(sz * 1.02, sz * 0.82, sz * 0.14, mr, 0, sz * 0.4, 0, pg); box(sz * 0.14, sz * 0.82, sz * 1.02, mr, 0, sz * 0.4, 0, pg);
+    });
+    XMAS_BLOCK.push([x - 1.25 * s, x + 1.25 * s, z - 1.25 * s, z + 1.25 * s]);
+    return g;
+  }
+  const ROOM_TREES = { game: [88.5, 2.2], pool: [122, 8.6], court: [156.5, 1.2], sleep: [191.5, -5.5], bar: [226, 7.6], movie: [282.6, 1.6], gym: [296.5, 7.4] };
+  Object.keys(SLOT).forEach(id => {
+    const S = SLOT[id], cx = S.cx;
+    if (ROOM_TREES[id]) xTree(ROOM_TREES[id][0], ROOM_TREES[id][1], 0.85);
+    for (let xx = S.x0; xx < S.x1 - 0.01; xx += 3) strand(xx, -9.92, xx + 3, -9.92, 3.0, 0.28, 7, true, 0, 0.05);
+    for (let zz = -10; zz < 10; zz += 2.5) { strand(S.x0 + 0.08, zz, S.x0 + 0.08, zz + 2.5, 3.0, 0.25, 6, true, 0.05, 0); bulbR = true; strand(S.x1 - 0.08, zz, S.x1 - 0.08, zz + 2.5, 3.0, 0.25, 6, true, -0.05, 0); bulbR = false; }
+    wreath(cx - 3, 2.15, -9.93, 0); wreath(cx + 6, 2.15, -9.93, 0);
+    ROOM_BANNERS.push(cx - 10);
+  });
+  // hallway
+  xTree(13.5, 13.6, 0.7);
+  for (let zz = 10; zz < 20; zz += 2.5) strand(-14.92, zz, -14.92, zz + 2.5, 3.0, 0.25, 6, true, 0.05, 0);
+  strand(-2.2, 10.12, -0.6, 10.12, 2.45, 0.1, 5, true, 0, 0.02);
+  wreath(-14.93, 2.15, 15.6, Math.PI / 2);
+  // beach: lights wrapped around the palms, a santa hat on the lifeguard tower and a sandman
+  PALMS.forEach(P => { for (let u = 0.05; u <= 0.95; u += 0.045) { const a = u * Math.PI * 2 * 4; bulb(P[0] + Math.cos(a) * 0.2 + ((P[0] * 7 % 3) - 1) * 0.08 * u * 5.4, 0.3 + u * (P[2] - 0.4), P[1] + Math.sin(a) * 0.2); } });
+  for (let k = 0; k < 9; k++) bulb(47.9 + k * 0.4, 2.3 - Math.sin(k / 8 * Math.PI) * 0.15, -9.82);
+  { const hg = new THREE.Group(); hg.position.set(64, 2.12, -6.35); hg.rotation.z = -0.25; decor.add(hg);
+    add(new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.6, 12), mScarf), 0, 0.3, 0, hg); const hb = add(new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.07, 8, 18), mSnowM), 0, 0, 0, hg); hb.rotation.x = Math.PI / 2; sp1(mSnowM, 0, 0.62, 0, 0.08, 0.08, 0.08, hg); }
+  { const mSandM = M(0xe9c98a, { roughness: 1 }), sg = new THREE.Group(); sg.position.set(52.5, 0, 6.5); sg.rotation.y = -0.6; decor.add(sg);
+    sp1(mSandM, 0, 0.3, 0, 0.32, 0.3, 0.32, sg); sp1(mSandM, 0, 0.76, 0, 0.23, 0.22, 0.23, sg); sp1(mSandM, 0, 1.12, 0, 0.165, 0.16, 0.165, sg);
+    [-1, 1].forEach(s2 => sp1(mCoal, s2 * 0.055, 1.16, 0.145, 0.022, 0.022, 0.015, sg));
+    const ns = add(new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.16, 8), mCarrot), 0, 1.11, 0.22, sg); ns.rotation.x = Math.PI / 2;
+    [0.86, 0.76, 0.66].forEach(y => sp1(M(0xffffff), 0, y, 0.215, 0.025, 0.025, 0.015, sg));
+    const sh = new THREE.Group(); sh.position.set(0, 1.26, 0); sh.rotation.z = 0.2; sg.add(sh); add(new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.32, 12), mScarf), 0, 0.16, 0, sh); const sb = add(new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.04, 6, 16), mSnowM), 0, 0, 0, sh); sb.rotation.x = Math.PI / 2;
+    [-1, 1].forEach(s2 => { const a = cyl(0.012, 0.012, 0.42, mTrunk, s2 * 0.36, 0.86, 0, sg, 6); a.rotation.z = s2 * 1.05; });
+    XMAS_BLOCK.push([52.1, 52.9, 6.1, 6.9]); }
   const bulbG = new THREE.SphereGeometry(0.042, 8, 6), dummy = new THREE.Object3D();
   [bulbPts, bulbPtsR].forEach((set, si) => set.forEach((list, k) => {
     if (!list.length) return;
@@ -1639,6 +1691,7 @@ function main(){
   });
   const banner = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.66), new THREE.MeshStandardMaterial({ map: bannerTex, roughness: 0.8 }));
   banner.position.set(-6.3, 2.4, -9.86); decor.add(banner);
+  ROOM_BANNERS.forEach(bx0 => { const bn = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 0.54), banner.material); bn.position.set(bx0, 2.5, -9.86); decor.add(bn); });
 
   // stockings on the bookshelf
   const STOCKINGS = [];
@@ -1664,7 +1717,7 @@ function main(){
   // snow outside
   const SN = 2800, snowPos = new Float32Array(SN * 3), snowSp = new Float32Array(SN);
   for (let i = 0; i < SN; i++) {
-    let x, z; do { x = Math.random() * 104 - 46; z = Math.random() * 86 - 46; } while ((x > -15.6 && x < 45.6 && Math.abs(z) < 10.6) || (x > -15.6 && x < 15.6 && z > 9 && z < 20.6) || x > 44);
+    let x, z; if (i % 3 === 0) { x = 82 + Math.random() * 242; z = -11 - Math.random() * 28; } else do { x = Math.random() * 104 - 46; z = Math.random() * 86 - 46; } while ((x > -15.6 && x < 45.6 && Math.abs(z) < 10.6) || (x > -15.6 && x < 15.6 && z > 9 && z < 20.6) || x > 44);
     snowPos[i * 3] = x; snowPos[i * 3 + 1] = Math.random() * 28; snowPos[i * 3 + 2] = z; snowSp[i] = 0.6 + Math.random() * 0.9;
   }
   const snowGeo = new THREE.BufferGeometry(); snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
@@ -1687,7 +1740,7 @@ function main(){
     const nb = night ? 1.8 : 0.9;
     const burst = elapsed < xBurst;
     bulbMats.forEach((m, k) => { m.emissiveIntensity = burst ? nb * (1.2 + 1.4 * Math.max(0, Math.sin(elapsed * 18 + k * 2.1))) : nb * (0.3 + 0.7 * Math.max(0, Math.sin(elapsed * 2.4 + k * 1.26))); });
-    mXStar.emissiveIntensity = (night ? 1.7 : 0.85) + Math.sin(elapsed * 3) * 0.25 + (burst ? 1.5 : 0); star.rotation.y = burst ? star.rotation.y + 0.35 : elapsed * 0.8;
+    mXStar.emissiveIntensity = (night ? 1.7 : 0.85) + Math.sin(elapsed * 3) * 0.25 + (burst ? 1.5 : 0); star.rotation.y = burst ? star.rotation.y + 0.35 : elapsed * 0.8; ROOM_STARS.forEach((s2, k) => { s2.rotation.y = elapsed * 0.8 + k; });
     treeLight.intensity = night ? 1.3 + Math.sin(elapsed * 9) * 0.08 : 0.3;
     const P = snowPos;
     for (let i = 0; i < SN; i++) { const j = i * 3; P[j + 1] -= snowSp[i] * dt; P[j] += Math.sin(elapsed * 0.8 + i) * 0.004; if (P[j + 1] < 0) P[j + 1] += 28; }
@@ -1731,7 +1784,7 @@ function main(){
     // rooms are separate: the only way between them is through a door
     rect(14.9, 15.1, -1.5, 1.5); rect(36.9, 37.1, -1.5, 1.5); rect(44.9, 45.1, -1.1, 1.1);
     // hallway furniture
-    FURN_BLOCK.forEach(r => rect(r[0], r[1], r[2], r[3]));
+    FURN_BLOCK.forEach(r => rect(r[0], r[1], r[2], r[3])); XMAS_BLOCK.forEach(r => rect(r[0], r[1], r[2], r[3]));
     HALL_SOFAS.forEach(s => { const r = sofaRect(s); rect(r[0], r[1], r[2], r[3]); }); HALL_CHAIRS.forEach(c => rect(c.x - 0.45, c.x + 0.45, c.z - 0.42, c.z + 0.42)); HALL_BLOCK.forEach(r => rect(r[0], r[1], r[2], r[3]));
     circ(46.4, 4.3, 0.1); circ(46.4, 5.7, 0.1);
     [[17.6, 19.0], [25.0, 26.4], [32.6, 34.0]].forEach(s => rect(s[0], s[1], -1.6, -1.4));
@@ -1746,8 +1799,8 @@ function main(){
     rect(63.55, 64.45, -6.45, -5.55); circ(60.5, 5.5, 0.5); rect(63.0, 64.6, 9.4, 10.0); circ(51.5, -4, 0.45);
     [[16.5, -8.3], [18.75, -8.3], [21.0, -8.3], [16.5, -4.9], [21.0, -4.9]].forEach(p => rect(p[0] - 0.55, p[0] + 0.55, p[1] - 0.55, p[1] + 0.55));
     rect(18.4, 19.1, -4.9, -4.25);
-    rect(23.07, 29.43, -7.78, -4.22);
-    [23.3, 25.7, 28.1].forEach(a => rect(a, a + 1.6, -9.5, -8.9)); circ(23.1, -2.4, 0.08);
+    rect(19.07, 32.43, -7.68, -0.32);
+    [23.3, 25.7, 28.1].forEach(a => rect(a, a + 1.6, -9.5, -8.9)); circ(25.3, -9.2, 0.08);
     circ(33.5, -9.55, 0.12); rect(COURT.x1 + 0.35, COURT.x1 + 0.85, -4.6, -0.6);
     [16.1, 20.6].forEach(cx => rect(cx - 0.6, cx + 0.6, 1.62, 3.72)); [5.4, 7.2, 9.0].forEach(cz => rect(19.3, 21.4, cz - 0.6, cz + 0.6));
     rect(17.0, 17.4, 1.62, 2.05); rect(19.2, 19.6, 1.62, 2.05);
@@ -4443,6 +4496,7 @@ function main(){
         if (tg.laptop || tg.it) fireTouch(w, tg);
       }
       else if (m.k === 'music') applyNetMusic(m, w);
+      else if (m.k === 'slide') startSlide(w);
       else if (m.k === 'shoot') { if (m.next) matchShot(w, !!m.made, +m.pts === 3 ? 3 : 2, String(m.next)); else startShot(w, !!m.made, +m.pts === 3 ? 3 : 2); }
       else if (m.k === 'bbpass') { const to = byPid(String(m.to || '')); if (to) matchPass(w, to); }
       else if (m.k === 'bbsteal') { if (!MATCH.fl) { MATCH.holder = pidOf(w); MATCH.lastEv = elapsed; } }
@@ -5254,6 +5308,7 @@ function main(){
   const marker = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.32, 36), new THREE.MeshBasicMaterial({ color: 0xff7a6b, transparent: true, opacity: 0.9, depthWrite: false }));
   marker.rotation.x = -Math.PI / 2; marker.position.y = 0.03; marker.visible = false; scene.add(marker);
   function sendMeTo(s) {
+    if (me.slide) stopSlide(me);
     if (ZS.on && !s._door) {
       me.travelDoor = null;
       const tz = zoneAt(s.pos[0], s.pos[1]), cz = zoneAt(me.x, me.z);
@@ -5325,6 +5380,7 @@ function main(){
   });
   cvs.addEventListener('pointerleave', () => { tileCur.visible = false; hideDoorTip(); });
   cvs.addEventListener('pointerup', e => {
+    if (me.slide) { drag = null; return; }
     if (drag && drag.rot) { if (drag.moved) saveCam(); drag = null; return; }
     if (drag && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 5) {
       const w = pickAt(e.clientX, e.clientY);
@@ -5332,7 +5388,7 @@ function main(){
       else if (w && w.pantry) { openPantry(); if (w.pantry === 'coffee') fetchItem('coffee'); }
       else if (w) openCard(w.id);
       else if (me.downUntil > Date.now()) toast('💫 You’re still seeing stars… give it a few seconds.');
-      else { closeCard(); if (!walking) { const fp = floorPoint(), ih = itemFromHit(); if (ih && ih.it && ih.it.door) { useDoor(ih.it.door); } else if (ih && ih.it && ih.it.game) { goGame(ih.it.game); } else if (ih && ih.it === barItem) { openBar(); } else if (ih && ih.it === dummyItem) { openAtk(); } else if (fp && POOL_IN(fp[0], fp[1]) && !(ih && ih.it === ringItem)) { swimClick({ x: fp[0], z: fp[1] }); } else if (ih && (ih.it || ih.laptop)) startTouch(me, ih); else { const seat = seatFromHit(); if (seat) sitAt(seat); else if (ih && ih.gen) startTouch(me, ih); else { const p = floorPoint(); if (p) walkMeTo(p[0], p[1]); } } } }
+      else { closeCard(); if (!walking) { const fp = floorPoint(), ih = itemFromHit(); if (ih && ih.it && ih.it.slide) { goSlide(); } else if (ih && ih.it && ih.it.door) { useDoor(ih.it.door); } else if (ih && ih.it && ih.it.game) { goGame(ih.it.game); } else if (ih && ih.it === barItem) { openBar(); } else if (ih && ih.it === dummyItem) { openAtk(); } else if (fp && POOL_IN(fp[0], fp[1]) && !(ih && ih.it)) { swimClick({ x: fp[0], z: fp[1] }); } else if (ih && (ih.it || ih.laptop)) startTouch(me, ih); else { const seat = seatFromHit(); if (seat) sitAt(seat); else if (ih && ih.gen) startTouch(me, ih); else { const p = floorPoint(); if (p) walkMeTo(p[0], p[1]); } } } }
     }
     drag = null;
   });
@@ -5469,7 +5525,7 @@ function main(){
     bendLimbs(w, t);
     applyHeld(w, dt); applyReach(w);
     applyReact(w, dt);
-    bbPose(w); applySwim(w, dt); applyLie(w); gymPose(w, dt); applyAct(w); applyChair(w, dt);
+    bbPose(w); applySwim(w, dt); applyLie(w); gymPose(w, dt); applyAct(w); applyChair(w, dt); applySlide(w);
     if (!w.act && w._acted !== false) { if (w._acted) { V.body.rotation.y = 0; if (!w._lie) V.body.rotation.x = 0; V.arms[0].rotation.z = 0; V.arms[1].rotation.z = 0; } w._acted = false; } else if (w.act) w._acted = true;
     if (V.cape) V.cape.rotation.x = w.mode === 'walk' ? 0.38 + Math.sin(elapsed * 9 + w.i) * 0.08 : w.mode === 'sit' ? 0.15 : 0.06 + Math.sin(elapsed * 1.5 + w.i) * 0.03;
   }
@@ -5517,7 +5573,7 @@ function main(){
     workers.forEach(w => {
       if (otherZone(w)) { w.el.style.display = 'none'; return; }
       bubbleHTML(w);
-      v3.set(w.x, w.v.body.position.y + (w.v.bubY || BUB_Y), w.z);
+      v3.set(w._vx != null ? w._vx : w.x, w.v.body.position.y + (w.v.bubY || BUB_Y) + (w._vy || 0), w._vz != null ? w._vz : w.z);
       const d = viewD(v3);
       v3.project(camera);
       if (v3.z > 1 || Math.abs(v3.x) > 1.15 || Math.abs(v3.y) > 1.15 || d < 0.8) { w.el.style.display = 'none'; return; }
@@ -6020,6 +6076,129 @@ function main(){
     if (key !== _ebKey) { _ebKey = key; renderEmoteBar(); }
   }
 
+
+  // ================= water slide: climb, sit, slide, splash =================
+  function goSlide() {
+    if (!FURN.slide || setupOpen || me.slide) return;
+    if (me.downUntil > Date.now()) { toast('💫 You’re still seeing stars…'); return; }
+    const G = FURN.slide.position, p = NAVG.snap(G.x - 1.4, G.z);
+    if (me.held) dropItem(me, true);
+    sendMeTo({ area: 'pool', pos: p, anchor: p.slice(), via: [], face: Math.PI / 2, sit: 0, by: null });
+    me.pendSlide = { t: elapsed, p: p };
+    toast('🛝 Heading up the water slide!');
+  }
+  function startSlide(w) {
+    if (!FURN.slide || w.slide) return;
+    const G = FURN.slide.position;
+    if (w.emote) { w.emote = null; if (w === me) renderEmoteBar(); }
+    if (w === me) { if (me.held) dropItem(me, true); me.fetch = null; me.touch = null; me.bb = null; marker.visible = false; if (NET.on && !NET.rx) netSend({ t: 'ev', k: 'slide' }); }
+    w.path = []; w.mode = 'stand'; w.yaw = w.tyaw = Math.PI / 2;
+    w.slide = { t0: elapsed, G: [G.x, G.z], snd: 0 };
+  }
+  function stopSlide(w) {
+    if (!w.slide) return; w.slide = null;
+    const V = w.v; V.root.position.y = 0; V.body.rotation.set(0, 0, 0); w._vx = null; w._vz = null; w._vy = 0;
+  }
+  function finishSlide(w) {
+    const S = w.slide; stopSlide(w);
+    const px = S.G[0] + 4.4, pz = S.G[1];
+    w.x = px; w.z = pz;
+    if (w === me) {
+      const s = { area: 'pool', swim: true, pos: [px, pz], anchor: [px, pz], via: [], face: Math.PI / 2, sit: 0, by: null };
+      reserve(me, s); me.path = []; me.pending = null; me.at = s; settle(me);
+      splash(); toast('💦 SPLASH!');
+    }
+    floatFx(w, '💦');
+  }
+  // slide geometry (local to the slide): ladder at x -0.8, platform top 2.25, chute surface from (0.83, 2.09) to (3.77, 0.28)
+  function applySlide(w) {
+    const S = w.slide; if (!S) return;
+    const V = w.v, t = elapsed - S.t0, A = V.arms, E = V.elbows, Lg = V.legs, K = V.knees;
+    const T0 = 0.25, T1 = 1.35, T2 = 1.7, T3 = 2.05, T4 = 2.95;
+    let lx, ly, pose;
+    if (t < T0) { lx = -1.4 + 0.6 * (t / T0); ly = 0; pose = 'walk'; }
+    else if (t < T1) { lx = -0.8; ly = 2.25 * ((t - T0) / (T1 - T0)); pose = 'climb'; }
+    else if (t < T2) { lx = -0.8 + 1.4 * ((t - T1) / (T2 - T1)); ly = 2.25; pose = 'walk'; }
+    else if (t < T3) { lx = 0.62; ly = 2.15; pose = 'sit'; }
+    else if (t < T4) { const k = (t - T3) / (T4 - T3), e = k * k; lx = 0.83 + 2.94 * e; ly = 2.09 - 1.81 * e; pose = 'slide'; if (S.snd < 1) { S.snd = 1; if (!otherZone(w)) fxSound('whoosh'); floatFx(w, '🛝 Wheee!'); } }
+    else { finishSlide(w); return; }
+    if (t >= T1 && S.snd < 0.5) { S.snd = 0.5; tsound('boing'); }
+    const x = S.G[0] + lx, z = S.G[1];
+    V.root.position.set(x, ly, z); V.root.rotation.y = Math.PI / 2;
+    w._vx = x; w._vz = z; w._vy = ly;
+    if (V.wchair) V.wchair.visible = false;
+    V.body.rotation.set(0, 0, 0);
+    if (pose === 'climb') {
+      const s = Math.sin(t * 10);
+      V.body.position.y = 0;
+      A[0].rotation.set(-2.5 + s * 0.4, 0, 0); A[1].rotation.set(-2.5 - s * 0.4, 0, 0); E[0].rotation.x = -0.4; E[1].rotation.x = -0.4;
+      Lg[0].rotation.set(-0.7 + s * 0.5, 0, 0); Lg[1].rotation.set(-0.7 - s * 0.5, 0, 0); K[0].rotation.x = 1.0; K[1].rotation.x = 1.0;
+    } else if (pose === 'walk') {
+      const s = Math.sin(t * 9) * 0.6;
+      Lg[0].rotation.set(s, 0, 0); Lg[1].rotation.set(-s, 0, 0); A[0].rotation.set(-s * 0.8, 0, 0); A[1].rotation.set(s * 0.8, 0, 0);
+      E[0].rotation.x = -0.3; E[1].rotation.x = -0.3; K[0].rotation.x = 0.1; K[1].rotation.x = 0.1; V.body.position.y = Math.abs(Math.sin(t * 9)) * 0.05;
+    } else {
+      V.body.position.y = SADJ;
+      const sl = pose === 'slide';
+      Lg[0].rotation.set(sl ? -1.2 : -1.45, 0, 0); Lg[1].rotation.set(sl ? -1.2 : -1.45, 0, 0); K[0].rotation.x = sl ? 0.2 : 1.2; K[1].rotation.x = sl ? 0.2 : 1.2;
+      if (sl) { V.body.rotation.x = 0.15; A[0].rotation.set(0, 0, -2.7); A[1].rotation.set(0, 0, 2.7); E[0].rotation.x = 0; E[1].rotation.x = 0; V.smile.scale.set(1.4, 2.4, 1); }
+      else { A[0].rotation.set(-0.3, 0, -0.3); A[1].rotation.set(-0.3, 0, 0.3); E[0].rotation.x = -0.4; E[1].rotation.x = -0.4; }
+    }
+  }
+  function slideTick() {
+    const P = me.pendSlide;
+    if (P && !me.path.length && !me.travel && !me.travelDoor) {
+      me.pendSlide = null;
+      if (Math.hypot(me.x - P.p[0], me.z - P.p[1]) < 0.7 && !WATER_IN(me.x, me.z)) startSlide(me);
+    } else if (P && elapsed - P.t > 60) me.pendSlide = null;
+  }
+
+  // ================= being hit by a throw: burst into toy-block pieces, then snap back =================
+  const SCAT = [];
+  function scatter(w) {
+    if (!w || !w.v || w._scat || w.isDummy) return;
+    const root = w.v.root; root.updateMatrixWorld(true);
+    const g = new THREE.Group(); g.raycast = () => {}; scene.add(g);
+    const parts = [];
+    root.traverse(o => {
+      if (!o.isMesh || o.userData.outline) return;
+      for (let p = o; p && p !== root; p = p.parent) if (!p.visible) return;
+      const c = new THREE.Mesh(o.geometry, o.material); o.matrixWorld.decompose(c.position, c.quaternion, c.scale);
+      c.castShadow = true; c.layers.mask = o.layers.mask; c.raycast = () => {};
+      const dx = c.position.x - w.x, dz = c.position.z - w.z;
+      const v = new THREE.Vector3(dx * 7 + (Math.random() - 0.5) * 4, 2.5 + Math.random() * 4, dz * 7 + (Math.random() - 0.5) * 4);
+      const av = new THREE.Vector3((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16);
+      g.add(c); parts.push({ m: c, v: v, av: av, hp: c.position.clone(), hq: c.quaternion.clone() });
+    });
+    for (let k = 0; k < 8; k++) { const pf = new THREE.Mesh(new THREE.SphereGeometry(0.18 + Math.random() * 0.12, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false })); pf.position.set(w.x + (Math.random() - 0.5) * 0.6, 0.4 + Math.random() * 1.2, w.z + (Math.random() - 0.5) * 0.6); pf.layers.mask = root.children[0] ? root.children[0].layers.mask : 1; pf.raycast = () => {}; g.add(pf); parts.push({ m: pf, puff: true, v: new THREE.Vector3((Math.random() - 0.5) * 3, 1 + Math.random(), (Math.random() - 0.5) * 3) }); }
+    root.visible = false;
+    w._scat = { g: g, parts: parts, t0: elapsed, x: w.x, z: w.z };
+    SCAT.push(w);
+    floatFx(w, rnd(['💥 KAPOW!', '💥 BONK!', '💥 SPLAT!']));
+  }
+  function scatTick(dt) {
+    for (let i = SCAT.length - 1; i >= 0; i--) {
+      const w = SCAT[i], S = w._scat, t = elapsed - S.t0;
+      if (!S) { SCAT.splice(i, 1); continue; }
+      if (w.v && w.v.root) w.v.root.visible = false;
+      if (t < 1.9) {
+        S.parts.forEach(P => {
+          if (P.puff) { P.m.position.addScaledVector(P.v, dt); P.m.scale.multiplyScalar(1 + dt * 1.5); P.m.material.opacity = Math.max(0, 0.85 - t * 0.9); return; }
+          P.v.y -= 14 * dt; P.m.position.addScaledVector(P.v, dt);
+          if (P.m.position.y < 0.04) { P.m.position.y = 0.04; P.v.y = Math.abs(P.v.y) * 0.35; P.v.x *= 0.55; P.v.z *= 0.55; P.av.multiplyScalar(0.55); }
+          P.m.rotation.x += P.av.x * dt; P.m.rotation.y += P.av.y * dt; P.m.rotation.z += P.av.z * dt;
+        });
+      } else if (t < 2.6) {
+        if (!S.from) { S.from = S.parts.map(P => P.puff ? null : { p: P.m.position.clone(), q: P.m.quaternion.clone() }); S.parts.forEach(P => { if (P.puff) P.m.visible = false; }); }
+        const k = (t - 1.9) / 0.7, e = k * k * (3 - 2 * k);
+        S.parts.forEach((P, j) => { if (P.puff) return; const hp = P.hp.clone(); hp.x += w.x - S.x; hp.z += w.z - S.z; P.m.position.lerpVectors(S.from[j].p, hp, e); P.m.quaternion.slerpQuaternions(S.from[j].q, P.hq, e); });
+      } else {
+        scene.remove(S.g); S.parts.forEach(P => { if (P.puff) { P.m.geometry.dispose(); P.m.material.dispose(); } });
+        w._scat = null; if (w.v && w.v.root) w.v.root.visible = true; SCAT.splice(i, 1); floatFx(w, '✨ good as new!');
+      }
+    }
+  }
+
   // ================= board drawing =================
   const PIECE = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
   function drawGameBoard(g, s, x, W2, H2, ui) {
@@ -6445,7 +6624,7 @@ function main(){
 
   // ================= falling down =================
   function knockDown(secs) {
-    if (setupOpen || WATER_IN(me.x, me.z)) return;
+    if (setupOpen || WATER_IN(me.x, me.z) || me.slide) return;
     if (me.emote) setEmote(me, null);
     if (me.held) dropItem(me, true);
     me.fetch = null; me.touch = null; me.bb = null; me.pendingGame = null;
@@ -6987,6 +7166,7 @@ function main(){
   function hitTarget(tgt, from, kind) {
     if (!tgt) return;
     if (tgt.isDummy) { dummyHit(kind); return; }
+    if (THROWS[kind]) scatter(tgt);
     const big = !!BIG_HIT[kind];
     tgt.hit = big ? 2.0 : 1.4;
     if (kind === 'slap') slapSound(); else fxSound(kind === 'kick' || kind === 'punch' ? 'thud' : kind === 'laptop' ? 'bonk' : kind === 'car' ? 'crash' : kind === 'shield' || kind === 'wheelchair' ? 'clang' : 'thud');
@@ -7039,7 +7219,7 @@ function main(){
       const d = Math.hypot(p.tgt.x - me.x, p.tgt.z - me.z);
       if (d < 1.9) doMelee(me, p.tgt, p.kind); else toast('They moved away before you got there!');
     } else if (me.pendAtk && elapsed - me.pendAtk.t > 10) me.pendAtk = null;
-    flyTick(dt); dummyTick(dt);
+    flyTick(dt); dummyTick(dt); scatTick(dt);
   }
   function fxSound(kind) {
     if (!audio.speaker) return; const c = actx(); if (!c) return;
@@ -7370,7 +7550,7 @@ function main(){
     return g;
   }
   DOORS.forEach(D => { D.gA = doorSideMesh(D, D.A, D.a, D.b); D.gB = doorSideMesh(D, D.B, D.b, D.a); });
-  FURN_ITEMS.forEach(f => regItem(f[0], f[1], f[2]));
+  FURN_ITEMS.forEach(f => { const it = regItem(f[0], f[1], f[2]); if (f[3]) Object.assign(it, f[3]); });
   FLOORMATS.forEach(m => SCENERY.add(m));
   function nextDoor(from, to) {
     const gf = GRP(from), gt = GRP(to); if (gf === gt) return null;
@@ -7440,6 +7620,7 @@ function main(){
   const fadeEl = document.createElement('div'); fadeEl.className = 'roomfade'; stage.appendChild(fadeEl);
   function fade() { fadeEl.classList.remove('go'); void fadeEl.offsetWidth; fadeEl.classList.add('go'); }
   function teleportMe(p, zid, faceFrom) {
+    stopSlide(me);
     const q = NAVG.snap(p[0], p[1]);
     if (me.at && me.at.scr && me.at.type === 'desk') me.at.scr.material = offMat;
     me.path = []; me.pending = null; me.x = q[0]; me.z = q[1];
@@ -7526,7 +7707,7 @@ function main(){
   function loop(now) {
     requestAnimationFrame(loop);
     const dt = Math.min(clk.getDelta(), 0.05); elapsed += dt;
-    micTick(dt); musicLevel(); xmasTick(dt); roomTick(); pantryTick(dt); touchTick(dt); netTick(dt); voiceTick(dt); wingTick(dt); zoneTick(dt); camTick(); furnTick(dt);
+    micTick(dt); musicLevel(); xmasTick(dt); roomTick(); pantryTick(dt); touchTick(dt); netTick(dt); voiceTick(dt); wingTick(dt); zoneTick(dt); camTick(); furnTick(dt); slideTick();
     dogBody.scale.y = 0.1 * (1 + Math.sin(elapsed * 2.2) * 0.06);
     dogT -= dt; if (dogT <= 0) { dogT = 1.7; if (elapsed > dogAwake) floatFx(dogW, rnd(['z', 'Z', 'zz']), 'z'); }
     if (marker.visible) { if (!me.path.length || me.at !== marker.userData.tgt) marker.visible = false; else { const k = 1 + Math.sin(elapsed * 6) * 0.12; marker.scale.set(k, k, k); } }
