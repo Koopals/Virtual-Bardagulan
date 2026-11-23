@@ -7,6 +7,13 @@ const STATE_KEYS = ['name', 'role', 'look', 'status', 'custom', 'mic', 'emote', 
 const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score'];
 const GAME_TABLES = ['chess', 'checkers', 'reversi', 'connect4', 'ttt'];
 const newTable = () => ({ seats: [null, null], log: [] });
+// message id and the message being replied to (who wrote it, their name and a short quote)
+function chatExtra(m) {
+  const x = {};
+  if (m.mid) x.mid = str(m.mid, 24);
+  if (m.re && typeof m.re === 'object') x.re = { mid: str(m.re.mid, 24), u: str(m.re.u, 24), n: str(m.re.n, 20), t: str(m.re.t, 90) };
+  return x;
+}
 
 const str = (v, n) => String(v == null ? '' : v).slice(0, n);
 const roomName = v => str(v, 24).toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'lobby';
@@ -131,10 +138,10 @@ function createHub(opts) {
         if (!text) return;
         if (m.to) {   // whisper: only the person it's for gets it
           const tgt = room.clients.get(String(m.to));
-          if (tgt) send(tgt, { t: 'chat', from: c.id, text: text, to: true });
+          if (tgt) send(tgt, Object.assign({ t: 'chat', from: c.id, text: text, to: true }, chatExtra(m)));
           return;
         }
-        const out = { t: 'chat', from: c.id, text: text, voice: !!m.voice, priv: !!m.priv };
+        const out = Object.assign({ t: 'chat', from: c.id, text: text, voice: !!m.voice, priv: !!m.priv }, chatExtra(m));
         if (m.priv) {   // said inside the meeting room: only people inside get the words
           broadcast(room, out, c.id, p => p.state.zone === 'room');
           broadcast(room, { t: 'muf', from: c.id }, c.id, p => p.state.zone !== 'room');

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+else if (a === 'lk') { setLookField(me.look, b.dataset.f, b.dataset.v); rebuildLook(me); renderSetup(); }<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -118,6 +118,29 @@ input:focus,select:focus{outline:2px solid var(--page-accent);outline-offset:-1p
 .msg.mine{flex-direction:row-reverse}
 .msg.mine .mh{text-align:right}
 .msg.mine .mt{background:var(--page-accent);border-color:var(--page-accent);color:#fff;border-radius:12px 4px 12px 12px}
+.msg .mb{position:relative}
+.msg .rp{border:0;background:transparent;padding:0 4px;margin-left:4px;font-size:12px;line-height:1;color:var(--color-text-muted);opacity:0;cursor:pointer;transition:opacity .12s}
+.msg:hover .rp,.msg .rp:focus-visible{opacity:1}
+@media (hover:none){.msg .rp{opacity:.7}}
+.msg .rq{display:block;font-size:11.5px;line-height:1.35;color:var(--color-text-secondary);border-left:3px solid var(--page-accent);background:color-mix(in srgb,var(--page-accent) 8%,transparent);padding:3px 8px;margin:0 0 3px;border-radius:4px;cursor:pointer;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg .rq b{color:var(--color-text);margin-right:4px}
+.msg.mine .rq{margin-left:auto}
+.msg .mn{font-weight:800;color:var(--page-accent);background:color-mix(in srgb,var(--page-accent) 12%,transparent);border-radius:4px;padding:0 2px}
+.msg.mine .mn{color:#fff;background:rgba(255,255,255,.22)}
+.msg .mn.me{color:#8a4b00;background:#ffe27a}
+.msg.ment .mt{box-shadow:0 0 0 2px #f5b400;background:color-mix(in srgb,#ffd23f 22%,var(--color-surface))}
+.msg.flash .mt{animation:msgFlash 1.2s ease-out}
+@keyframes msgFlash{0%,40%{box-shadow:0 0 0 3px #f5b400}100%{box-shadow:none}}
+.rbar{display:flex;align-items:center;gap:8px;padding:6px 12px;border-top:1px solid var(--color-border-light);background:var(--color-surface);font-size:12px}
+.rbar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--color-text-secondary)}
+.rbar b{color:var(--color-text)}
+.rbar button{border:0;background:transparent;font-size:16px;line-height:1;padding:2px 6px;color:var(--color-text-muted)}
+.mpick{position:fixed;z-index:3000;min-width:190px;max-width:260px;padding:4px;background:var(--color-bg-secondary);border:1px solid var(--color-border);border-radius:8px;box-shadow:var(--shadow-md)}
+.mpick button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:5px 8px;border-radius:6px;text-align:left;font-size:13px}
+.mpick button.on{background:var(--color-surface-active)}
+.mpick button small{margin-left:auto;color:var(--color-text-muted);font-size:11px}
+.badge.at{background:#e8342e}
+.hbc.ment{border-color:#f5b400;box-shadow:0 0 0 2px #ffd23f,0 3px 0 rgba(0,0,0,.28)}
 .msg.sys{justify-content:center;font-size:11px;color:var(--color-text-muted);margin:4px 0 10px;text-align:center}
 .compose{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--color-border-light)}
 .compose input{flex:1}
@@ -435,9 +458,10 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
   <div class="pane" id="pTeam"></div>
   <div class="pane" id="pChat" hidden>
     <div class="msgs" id="msgs"></div>
+    <div class="rbar" id="rBar" hidden></div>
     <div class="compose" id="compose">
       <select id="chatTo" aria-label="Send to"></select>
-      <input id="chatIn" maxlength="200" placeholder="Message the office… (try @Avery)" autocomplete="off">
+      <input id="chatIn" maxlength="200" placeholder="Message the office… (type @ to mention someone)" autocomplete="off">
       <button id="chatSend">Send</button>
     </div>
   </div>
@@ -839,9 +863,9 @@ function main(){
   partWall(27, 0, 31.6, 0); partWall(33.2, 0, 37, 0);
 
   // ---- game room ----
-  box(11, 0.02, 6.1, M(0x5b4a8a, { roughness: 1 }), 21, 0.011, -6.45).castShadow = false;
-  wallSign(21, -9.97, 3.4, '🎲 GAME ROOM', '#2a1f4d', '#ffd23f');
-  pendant(20.6, -6.2, 5, 0.3);
+  box(11, 0.02, 6.1, M(0x5b4a8a, { roughness: 1 }), 21, 0.011, 0.25).castShadow = false;
+  wallSign(21, -9.97, 3.4, '🏊 POOL', '#0d5c8a', '#ffffff');
+  pendant(20.6, 0.25, 5, 0.3);
   function gameTable(g, x, z) {
     const top = box(1.1, 0.06, 1.1, mWood2, x, 0.74, z), leg = cyl(0.07, 0.1, 0.72, mMetal, x, 0.36, z, null, 10), base = cyl(0.34, 0.34, 0.03, mMetal, x, 0.015, z);
     const vert = g === 'connect4', cw = vert ? 256 : 256, chh = vert ? 220 : 256;
@@ -861,26 +885,27 @@ function main(){
     spots.forEach(s => SPOTS.game.push(s));
     WING.tables[g] = { meshes: [top, leg, base, board], cv: cv, ctx: cv.getContext('2d'), tex: tex, spots: spots };
   }
-  gameTable('chess', 17.0, -7.6); gameTable('checkers', 20.6, -7.6); gameTable('reversi', 24.2, -7.6);
-  gameTable('connect4', 17.0, -4.9); gameTable('ttt', 24.2, -4.9);
+  gameTable('chess', 17.0, -1.35); gameTable('checkers', 20.6, -1.35); gameTable('reversi', 24.2, -1.35);
+  gameTable('connect4', 17.0, 1.85); gameTable('ttt', 24.2, 1.85);
   // arcade cabinet
   const arcCv = document.createElement('canvas'); arcCv.width = 160; arcCv.height = 128;
   const arcTex = new THREE.CanvasTexture(arcCv); arcTex.encoding = THREE.sRGBEncoding;
-  const arcade = [box(0.7, 1.75, 0.6, M(0x3a2a7a, { roughness: 0.6 }), 26.25, 0.875, -9.35), box(0.72, 0.18, 0.62, M(0xff3fa4, { roughness: 0.4 }), 26.25, 1.84, -9.35),
-    box(0.62, 0.08, 0.3, mDark, 26.25, 1.0, -9.0)];
-  { const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.44), new THREE.MeshBasicMaterial({ map: arcTex, toneMapped: false })); scr.position.set(26.25, 1.42, -9.04); scene.add(scr); arcade.push(scr); }
-  plant(15.6, -9.5, 1);
-  signpost(20.6, -2.55, 'GAME ROOM 🎲', '#2a1f4d', '#ffd23f');
+  const arcade = [box(0.7, 1.75, 0.6, M(0x3a2a7a, { roughness: 0.6 }), 26.25, 0.875, 3.05), box(0.72, 0.18, 0.62, M(0xff3fa4, { roughness: 0.4 }), 26.25, 1.84, 3.05),
+    box(0.62, 0.08, 0.3, mDark, 26.25, 1.0, 2.7)];
+  { const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.44), new THREE.MeshBasicMaterial({ map: arcTex, toneMapped: false })); scr.position.set(26.25, 1.42, 2.74); scr.rotation.y = Math.PI; scene.add(scr); arcade.push(scr); }
+  plant(15.6, -9.5, 1); plant(26.4, -9.4, 1.1);
+  signpost(20.6, -2.55, 'POOL 🏊', '#0d5c8a', '#ffffff');
 
   // ---- pool ----
-  const POOL = { x0: 17.6, x1: 24.8, z0: -1.6, z1: 1.6 };
+  const POOL = { x0: 17.6, x1: 24.8, z0: -8.0, z1: -4.8 }, PZ = -6.4;
   const POOL_IN = (x, z) => x > POOL.x0 - 0.18 && x < POOL.x1 + 0.18 && z > POOL.z0 - 0.18 && z < POOL.z1 + 0.18;
-  const POOL_ENTRY = [{ out: [16.9, 0], inn: [18.15, 0] }, { out: [21.2, -2.4], inn: [21.2, -1.15] }, { out: [25.6, 0], inn: [24.25, 0] }];
+  const POOL_ENTRY = [{ out: [16.9, PZ], inn: [18.15, PZ] }, { out: [21.2, -4.1], inn: [21.2, -5.35] }, { out: [25.75, -6.6], inn: [24.25, -6.6] }];
   const tileT = canvasTex(128, 128, (x, w, hh) => { x.fillStyle = '#5fb6d8'; x.fillRect(0, 0, w, hh); x.strokeStyle = '#3e93b8'; x.lineWidth = 3; for (let i = 0; i <= 128; i += 32) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 128); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(128, i); x.stroke(); } });
   tileT.wrapS = tileT.wrapT = THREE.RepeatWrapping; tileT.repeat.set(7, 3);
   const poolBits = [];
-  poolBits.push(box(7.2, 0.02, 3.2, new THREE.MeshStandardMaterial({ map: tileT, roughness: 0.6 }), 21.2, 0.012, 0));
-  poolBits.push(box(7.56, 0.34, 0.18, mCope, 21.2, 0.17, -1.69), box(7.56, 0.34, 0.18, mCope, 21.2, 0.17, 1.69), box(0.18, 0.34, 3.2, mCope, 17.51, 0.17, 0), box(0.18, 0.34, 3.2, mCope, 24.89, 0.17, 0));
+  poolBits.push(box(7.2, 0.02, 3.2, new THREE.MeshStandardMaterial({ map: tileT, roughness: 0.6 }), 21.2, 0.012, PZ));
+  poolBits.push(box(7.56, 0.34, 0.18, mCope, 21.2, 0.17, PZ - 1.69), box(7.56, 0.34, 0.18, mCope, 21.2, 0.17, PZ + 1.69), box(0.18, 0.34, 3.2, mCope, 17.51, 0.17, PZ), box(0.18, 0.34, 3.2, mCope, 24.89, 0.17, PZ));
+  box(11.6, 0.02, 6.6, M(0xdfe9ee, { roughness: 0.9 }), 21, 0.008, -6.5).castShadow = false;
   const waterT = canvasTex(256, 256, (x, w, hh) => {
     x.fillStyle = 'rgba(120,210,255,1)'; x.fillRect(0, 0, w, hh);
     x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 3;
@@ -888,10 +913,10 @@ function main(){
   });
   waterT.wrapS = waterT.wrapT = THREE.RepeatWrapping; waterT.repeat.set(3, 1.4);
   const water = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 3.2), new THREE.MeshStandardMaterial({ map: waterT, color: 0x6fc8f0, transparent: true, opacity: 0.78, roughness: 0.15, metalness: 0.1, depthWrite: false }));
-  water.rotation.x = -Math.PI / 2; water.position.set(21.2, 0.27, 0); scene.add(water); poolBits.push(water);
-  [-0.25, 0.25].forEach(dz => { cyl(0.025, 0.025, 0.75, mWSilv, 17.62, 0.5, dz, null, 8); box(0.3, 0.025, 0.025, mWSilv, 17.5, 0.86, dz); });
-  box(1.1, 0.06, 0.5, mWhite, 24.55, 0.42, 1.0); box(0.2, 0.4, 0.3, mCope, 25.2, 0.2, 1.0);
-  const floatRing = new THREE.Group(); floatRing.position.set(22.6, 0.3, 0.4); scene.add(floatRing);
+  water.rotation.x = -Math.PI / 2; water.position.set(21.2, 0.27, PZ); scene.add(water); poolBits.push(water);
+  [-0.25, 0.25].forEach(dz => { cyl(0.025, 0.025, 0.75, mWSilv, 17.62, 0.5, PZ + dz, null, 8); box(0.3, 0.025, 0.025, mWSilv, 17.5, 0.86, PZ + dz); });
+  box(1.1, 0.06, 0.5, mWhite, 24.55, 0.42, PZ + 0.8); box(0.2, 0.4, 0.3, mCope, 25.2, 0.2, PZ + 0.8);
+  const floatRing = new THREE.Group(); floatRing.position.set(22.6, 0.3, PZ + 0.4); scene.add(floatRing);
   { const tr = add(new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.11, 10, 24), M(0xff5a7a, { roughness: 0.4 })), 0, 0, 0, floatRing); tr.rotation.x = Math.PI / 2;
     for (let k = 0; k < 4; k++) { const st = add(new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.113, 6, 5, Math.PI / 6), mWhite), 0, 0, 0, floatRing); st.rotation.x = Math.PI / 2; st.rotation.z = k * Math.PI / 2; } }
   function lounger(a, z, mat) {
@@ -899,11 +924,11 @@ function main(){
     const br = box(0.5, 0.07, 0.58, mat, a + 1.37, 0.47, z); br.rotation.z = 0.55;
     SPOTS.pool.push({ area: 'pool', pos: [a - 0.05, z], anchor: [a - 0.5, z], via: [], face: -Math.PI / 2, sit: 0.42, lie: true, by: null, rect: [a, a + 1.6, z - 0.3, z + 0.3] });
   }
-  lounger(16.4, 2.6, blankets[0]); lounger(22.3, 2.6, blankets[4]); lounger(25.0, 2.6, blankets[2]);
-  cyl(0.035, 0.035, 2.0, mDark, 19.2, 1.0, 2.75, null, 8);
-  { const um = add(new THREE.Mesh(new THREE.ConeGeometry(1.0, 0.45, 12), M(0xff7a6b, { roughness: 0.8 })), 19.2, 2.1, 2.75); }
-  const poolLight = new THREE.PointLight(0x6fd3ff, 0, 7, 2); poolLight.position.set(21.2, 0.9, 0); scene.add(poolLight); lamps.push(poolLight);
-  signpost(16.0, -2.45, 'POOL 🏊', '#0d5c8a', '#ffffff');
+  lounger(16.6, -9.2, blankets[0]); lounger(19.6, -9.2, blankets[4]); lounger(22.6, -9.2, blankets[2]);
+  cyl(0.035, 0.035, 2.0, mDark, 21.9, 1.0, -9.2, null, 8);
+  { const um = add(new THREE.Mesh(new THREE.ConeGeometry(1.0, 0.45, 12), M(0xff7a6b, { roughness: 0.8 })), 21.9, 2.1, -9.2); }
+  const poolLight = new THREE.PointLight(0x6fd3ff, 0, 7, 2); poolLight.position.set(21.2, 0.9, PZ); scene.add(poolLight); lamps.push(poolLight);
+  signpost(16.0, -2.45, 'GAME ROOM 🎲', '#2a1f4d', '#ffd23f');
 
   // ---- sleeping quarters ----
   box(11.4, 0.02, 6.0, M(0x2f3c66, { roughness: 1 }), 21.1, 0.011, 6.8).castShadow = false;
@@ -1172,10 +1197,10 @@ function main(){
     rect(15, 19.9, -3.08, -2.92); rect(21.3, 27, -3.08, -2.92); rect(15, 20.0, 3.42, 3.58); rect(21.4, 27, 3.42, 3.58);
     rect(26.92, 27.08, -10, -3); rect(26.92, 27.08, 3.5, 6.2); rect(26.92, 27.08, 7.6, 10);
     rect(27, 31.6, -0.08, 0.08); rect(33.2, 37, -0.08, 0.08);
-    [[17.0, -7.6], [20.6, -7.6], [24.2, -7.6], [17.0, -4.9], [24.2, -4.9]].forEach(p => rect(p[0] - 0.55, p[0] + 0.55, p[1] - 0.55, p[1] + 0.55));
-    rect(25.9, 26.6, -9.75, -8.95);
-    rect(17.42, 24.98, -1.78, 1.78);
-    [16.4, 22.3, 25.0].forEach(a => rect(a, a + 1.6, 2.3, 2.9)); circ(19.2, 2.75, 0.08);
+    [[17.0, -1.35], [20.6, -1.35], [24.2, -1.35], [17.0, 1.85], [24.2, 1.85]].forEach(p => rect(p[0] - 0.55, p[0] + 0.55, p[1] - 0.55, p[1] + 0.55));
+    rect(25.9, 26.65, 2.6, 3.42);
+    rect(17.42, 24.98, -8.18, -4.62); rect(25.0, 25.4, -5.8, -5.4);
+    [16.6, 19.6, 22.6].forEach(a => rect(a, a + 1.6, -9.5, -8.9)); circ(21.9, -9.2, 0.08);
     [16.3, 18.5, 22.7, 24.9].forEach(cx => rect(cx - 0.6, cx + 0.6, 3.6, 5.72)); [7.3, 9.1].forEach(cz => rect(24.8, 26.95, cz - 0.6, cz + 0.6));
     rect(17.2, 17.6, 3.62, 4.05); rect(23.6, 24.0, 3.62, 4.05);
     circ(32.1, -9.55, 0.12); rect(36.2, 36.75, -7.0, -3.0);
@@ -1279,12 +1304,34 @@ function main(){
   function shade(c, k) { const f = v => Math.max(0, Math.min(255, Math.round(v * k))); return (f(c >> 16 & 255) << 16) | (f(c >> 8 & 255) << 8) | f(c & 255); }
   function avColor(c) { const L = ((c >> 16 & 255) * 299 + (c >> 8 & 255) * 587 + (c & 255) * 114) / 1000; return hex(L > 205 ? 0x94a3b8 : L < 55 ? 0x64748b : c); }
   const SKINS = [0xffe2cc, 0xf5cdaa, 0xe6b38d, 0xc78c60, 0x9b6542, 0x6b4328];
-  const HAIRC = [0x1d1a1a, 0x3b2418, 0x6b4226, 0xa8703f, 0xe0b46a, 0xb8462f, 0x9aa0a8, 0x7a5cc9];
-  const TOPC = [0xff7a6b, 0x8f6fe0, 0x4f9a5a, 0x3d63b8, 0x2b2d33, 0xd9a440, 0x3aa7a0, 0xe36f9a, 0xeeeeee, 0x8a5a3c];
-  const PANTSC = [0x2d3340, 0x3b4f7a, 0x5b5f66, 0x6b5440, 0x1c1c22];
-  const ACC = [0x8c9096, 0x2b2d33, 0xff7a6b, 0x3d63b8, 0xd9a440, 0x4f9a5a];
-  const HAIRS = [['short', 'Short'], ['messy', 'Messy'], ['curly', 'Curly'], ['bun', 'Bun'], ['long', 'Long'], ['ponytail', 'Ponytail'], ['buzz', 'Buzz']];
-  const TOPS = [['hoodie', 'Hoodie'], ['sweater', 'Sweater'], ['tee', 'T-shirt']];
+  const HAIRC = [0x1d1a1a, 0x3b2418, 0x6b4226, 0xa8703f, 0xe0b46a, 0xb8462f, 0x9aa0a8, 0x7a5cc9, 0xf2e6c8, 0xe36f9a, 0x3a8fd6, 0x2f8a6a];
+  const TOPC = [0xff7a6b, 0x8f6fe0, 0x4f9a5a, 0x3d63b8, 0x2b2d33, 0xd9a440, 0x3aa7a0, 0xe36f9a, 0xeeeeee, 0x8a5a3c, 0xffb6c8, 0xc9a6ff, 0xffe27a, 0xb8e3ff, 0xa3243f, 0x9ed9a0];
+  const PANTSC = [0x2d3340, 0x3b4f7a, 0x5b5f66, 0x6b5440, 0x1c1c22, 0xe36f9a, 0x8f6fe0, 0xeeeeee, 0x3aa7a0, 0xd6262f, 0xffb6c8, 0xd9a440];
+  const ACC = [0x8c9096, 0x2b2d33, 0xff7a6b, 0x3d63b8, 0xd9a440, 0x4f9a5a, 0xe36f9a, 0xffffff, 0x8f6fe0, 0xffd23f, 0x8a5a3c, 0xd6262f];
+  const HAIRS = [['short', 'Short'], ['messy', 'Messy'], ['curly', 'Curly'], ['bun', 'Bun'], ['long', 'Long'], ['ponytail', 'Ponytail'], ['buzz', 'Buzz'],
+    ['pigtails', 'Pigtails'], ['braid', 'Braid'], ['bob', 'Bob'], ['wavy', 'Wavy long'], ['afro', 'Afro'], ['spiky', 'Spiky'], ['mohawk', 'Mohawk']];
+  const TOPS = [['hoodie', 'Hoodie'], ['sweater', 'Sweater'], ['tee', 'T-shirt'], ['blouse', 'Blouse'], ['dress', 'Dress'], ['tank', 'Tank top'], ['cardigan', 'Cardigan'],
+    ['blazer', 'Blazer'], ['polo', 'Polo'], ['jacket', 'Jacket'], ['overalls', 'Overalls'], ['jersey', 'Jersey']];
+  const BOTTOMS = [['pants', 'Pants'], ['shorts', 'Shorts'], ['skirt', 'Skirt'], ['long', 'Long skirt']];
+  const HATS = [['none', 'None'], ['beanie', '🧶 Beanie'], ['beret', '🎨 Beret'], ['bow', '🎀 Bow'], ['headband', 'Headband'], ['flowers', '🌸 Flower crown'], ['tiara', '👸 Tiara'],
+    ['crown', '👑 Crown'], ['catears', '🐱 Cat ears'], ['bunny', '🐰 Bunny ears'], ['cowboy', '🤠 Cowboy hat'], ['tophat', '🎩 Top hat'], ['hardhat', '⛑️ Hard hat'],
+    ['hijab', '🧕 Hijab'], ['party', '🥳 Party hat'], ['unicorn', '🦄 Unicorn horn']];
+  const SUIT = {
+    captain: { name: '⭐ Star Captain', t: 0x2a3f8f, t2: 0xd6262f, arm: 0x2a3f8f, leg: 0x2a3f8f, shoe: 0xb81f2a, glove: 0xb81f2a, mask: 'cowl', mc: 0x2a3f8f, star: 0xffffff, stripes: true, shield: true },
+    armor: { name: '🦾 Red Armor', t: 0xb3121d, t2: 0xe0b030, arm: 0xb3121d, leg: 0xb3121d, shoe: 0xe0b030, glove: 0xb3121d, mask: 'helm', mc: 0xb3121d, face: 0xe0b030, eye: 'glow', reactor: true, pads: 0xe0b030 },
+    thunder: { name: '⚡ Thunder God', t: 0x2b2d38, t2: 0xaab2bf, arm: 0x2b2d38, leg: 0x23252e, shoe: 0x2b2d38, glove: 0x2b2d38, cape: 0xc01f2a, discs: true, hammer: true },
+    smash: { name: '💚 Green Smash', skin: 0x5fae3e, t: 0x5a2f82, t2: 0x3f1f5e, sleeve: 'none', leg: 0x5a2f82, shorts: true, shoe: 0x5fae3e, torn: true },
+    spider: { name: '🕸️ Web Slinger', t: 0xd21f2b, t2: 0x1f3d9e, arm: 0xd21f2b, leg: 0x1f3d9e, shoe: 0xd21f2b, glove: 0xd21f2b, mask: 'helm', mc: 0xd21f2b, eye: 'big', web: true },
+    spy: { name: '🕷️ Shadow Spy', t: 0x18181e, t2: 0xc81e2a, arm: 0x18181e, leg: 0x18181e, shoe: 0x18181e, glove: 0x18181e, belt: true },
+    panther: { name: '🐾 Night Panther', t: 0x15151c, t2: 0xb8bcc8, arm: 0x15151c, leg: 0x15151c, shoe: 0x15151c, glove: 0x15151c, mask: 'helm', mc: 0x15151c, eye: 'silver', ears: true, necklace: true },
+    mystic: { name: '🌀 Mystic Doctor', t: 0x24407a, t2: 0xe3b23c, arm: 0x24407a, leg: 0x1c1e2a, shoe: 0x3a2a1c, glove: 0x8a5a3c, cape: 0xb81f2a, collar: true, amulet: true },
+    crimson: { name: '🔮 Crimson Mage', t: 0x9c1a2c, t2: 0x5a0e1a, arm: 0x9c1a2c, leg: 0x2a1418, shoe: 0x2a1418, glove: 0x9c1a2c, skirt: 0x9c1a2c, tiara: 0xd6262f },
+    archer: { name: '🏹 Hawk Archer', t: 0x4a2a6a, t2: 0x1c1c22, sleeve: 'none', leg: 0x1c1c22, shoe: 0x1c1c22, glove: 0x4a2a6a, quiver: true },
+    cosmic: { name: '✨ Cosmic Captain', t: 0x1f3d9e, t2: 0xd6262f, arm: 0xd6262f, leg: 0x1f3d9e, shoe: 0xd6262f, glove: 0xd6262f, star: 0xffd23f, sash: 0xffd23f }
+  };
+  const SUITS = [['none', 'No costume']].concat(Object.keys(SUIT).map(k => [k, SUIT[k].name]));
+  const HAT_COVER = { beanie: 1, beret: 1, cowboy: 1, tophat: 1, hardhat: 1, hijab: 1 };
+  const TALL_HAT = { tophat: 1, bunny: 1, party: 1, unicorn: 1, cowboy: 1 };
   const EXTRAS = [['santa', '🎅 Santa hat'], ['glasses', '👓 Glasses'], ['cap', '🧢 Cap'], ['headphones', '🎧 Headphones'], ['beard', '🧔 Beard']];
   const CURLS = (function () { const out = []; for (let k = 0; k < 40; k++) { const y = 1 - (k + 0.5) / 40 * 1.7, r = Math.sqrt(Math.max(0, 1 - y * y)), a = k * 2.39996; const p = [Math.cos(a) * r, y, Math.sin(a) * r]; if (p[1] < -0.55) continue; if (p[2] > 0.25 && p[1] < 0.45) continue; out.push(p); } return out; })();
   function part(geo, mat, x, y, z, par, sx, sy, sz) {
@@ -1298,46 +1345,126 @@ function main(){
   function makePerson(L) {
     const root = new THREE.Group(); scene.add(root);
     const body = new THREE.Group(); root.add(body);
-    const mS = M(L.skin, { roughness: 0.72 }), mH = M(L.hairColor, { roughness: 0.6 }), mT = M(L.topColor, { roughness: 0.92 }), mT2 = M(shade(L.topColor, 0.78), { roughness: 0.92 });
-    const mP = M(L.pants, { roughness: 0.85 }), mA = M(L.accent, { roughness: 0.45 }), mN = M(shade(L.skin, 0.88), { roughness: 0.75 });
-    const tee = L.top === 'tee';
+    const S = SUIT[L.suit] || null, bottom = L.bottom || 'pants', hat = S && S.mask ? 'none' : (L.hat || 'none');
+    const xm = [], mc = c => { const m = M(c, { roughness: 0.8 }); xm.push(m); return m; };
+    const skinC = S && S.skin ? S.skin : L.skin;
+    const mS = M(skinC, { roughness: 0.72 }), mH = M(L.hairColor, { roughness: 0.6 }), mT = M(S ? S.t : L.topColor, { roughness: 0.92 }), mT2 = M(S ? S.t2 : shade(L.topColor, 0.78), { roughness: 0.92 });
+    const mP = M(S ? S.leg : L.pants, { roughness: 0.85 }), mA = M(L.accent, { roughness: 0.45 }), mN = M(shade(skinC, 0.88), { roughness: 0.75 });
+    const top = S ? 'suit' : (L.top || 'hoodie');
+    const sleeve = S ? (S.sleeve || 'long') : ({ tee: 'short', blouse: 'puff', dress: 'short', polo: 'short', overalls: 'short', tank: 'none', jersey: 'none' }[top] || 'long');
+    const mArm = S && S.arm ? mc(S.arm) : mT, mHand = S && S.glove ? mc(S.glove) : mS, mFoot = S && S.shoe ? mc(S.shoe) : mShoe;
+    const skirtLen = S ? (S.skirt ? 0.58 : 0) : top === 'dress' ? (bottom === 'long' ? 0.58 : 0.32) : bottom === 'skirt' ? 0.28 : bottom === 'long' ? 0.58 : 0;
+    const mSkirt = S && S.skirt ? mc(S.skirt) : top === 'dress' ? mT : mP;
+    const shorts = S ? !!S.shorts : bottom === 'shorts';
+    const mLegU = S ? mP : skirtLen ? mS : mP, mLegL = S ? (S.shorts ? mS : mP) : (skirtLen || shorts) ? mS : mP;
     const bx = (w, hh, d, mat, x, y, z, par) => part(BX(w, hh, d), mat, x, y, z, par);
     // legs
     const legs = [], knees = [];
     [-1, 1].forEach(s => {
       const hip = new THREE.Group(); hip.position.set(s * 0.082, HIP, 0); body.add(hip);
-      bx(0.13, 0.36, 0.15, mP, 0, -0.17, 0, hip);
+      bx(0.13, 0.36, 0.15, mLegU, 0, -0.17, 0, hip);
+      if (shorts) bx(0.14, 0.12, 0.16, mP, 0, -0.06, 0, hip);
       const knee = new THREE.Group(); knee.position.y = -0.34; hip.add(knee);
-      bx(0.12, 0.3, 0.14, mP, 0, -0.14, 0, knee);
-      bx(0.14, 0.07, 0.22, mShoe, 0, -0.305, 0.035, knee);
-      bx(0.146, 0.022, 0.226, mString, 0, -0.33, 0.035, knee);
+      bx(0.12, 0.3, 0.14, mLegL, 0, -0.14, 0, knee);
+      bx(0.14, 0.07, 0.22, mFoot, 0, -0.305, 0.035, knee);
+      if (!S) bx(0.146, 0.022, 0.226, mString, 0, -0.33, 0.035, knee);
+      if (S && S.pads) bx(0.135, 0.1, 0.155, mc(S.pads), 0, -0.02, 0, knee);
       legs.push(hip); knees.push(knee);
     });
-    bx(0.3, 0.12, 0.17, mP, 0, HIP + 0.03, 0, body);
+    bx(0.3, 0.12, 0.17, skirtLen ? mSkirt : mP, 0, HIP + 0.03, 0, body);
+    if (skirtLen) {
+      const sg = new THREE.Group(); sg.position.set(0, HIP + 0.08 - skirtLen / 2, 0); sg.scale.z = 0.72; body.add(sg);
+      const sk = part(new THREE.CylinderGeometry(0.235, 0.27 + skirtLen * 0.22, skirtLen, 4, 1), mSkirt, 0, 0, 0, sg); sk.rotation.y = Math.PI / 4;
+      if (!S && bottom !== 'long' && top !== 'dress') bx(0.31, 0.03, 0.18, mT2, 0, HIP + 0.075, 0, body);
+    }
     // torso
-    bx(0.34, 0.46, 0.2, mT, 0, 0.93, 0, body);
-    if (L.top === 'hoodie') {
+    const torso = bx(0.34, 0.46, 0.2, top === 'overalls' ? mT : mT, 0, 0.93, 0, body);
+    const front = (w2, h2, mat, y, xx) => part(BX(w2, h2, 0.012), mat, xx || 0, y, 0.104, body);
+    if (top === 'hoodie') {
       bx(0.3, 0.12, 0.09, mT2, 0, 1.15, -0.12, body);
       bx(0.22, 0.09, 0.02, mT2, 0, 0.8, 0.105, body);
       [-1, 1].forEach(s => bx(0.014, 0.12, 0.01, mString, s * 0.045, 1.08, 0.106, body));
-    } else if (L.top === 'sweater') {
+    } else if (top === 'sweater') {
       bx(0.2, 0.045, 0.14, mT2, 0, 1.17, 0, body);
       bx(0.345, 0.045, 0.205, mT2, 0, 0.72, 0, body);
-    } else {
+    } else if (top === 'tee') {
       bx(0.12, 0.022, 0.01, mT2, 0, 1.14, 0.102, body);
+    } else if (top === 'blouse') {
+      [-1, 1].forEach(s => { const c = bx(0.09, 0.05, 0.02, mString, s * 0.05, 1.13, 0.105, body); c.rotation.z = s * 0.5; });
+      [1.05, 0.95, 0.85].forEach(y => front(0.022, 0.022, mT2, y));
+      bx(0.345, 0.035, 0.205, mT2, 0, 0.73, 0, body);
+    } else if (top === 'dress') {
+      bx(0.345, 0.04, 0.205, mT2, 0, 0.75, 0, body);
+      front(0.11, 0.03, mT2, 1.14);
+      { const bw = bx(0.06, 0.05, 0.03, mT2, 0, 0.76, 0.11, body); bw.rotation.z = 0.785; }
+    } else if (top === 'tank' || top === 'jersey') {
+      [-1, 1].forEach(s => bx(0.06, 0.03, 0.2, mT, s * 0.11, 1.17, 0, body));
+      if (top === 'jersey') { bx(0.2, 0.03, 0.205, mT2, 0, 1.135, 0, body); front(0.1, 0.13, mString, 0.95); front(0.06, 0.09, mT2, 0.95); }
+      else front(0.12, 0.03, mS, 1.14);
+    } else if (top === 'cardigan') {
+      front(0.12, 0.46, mString, 0.93);
+      [-1, 1].forEach(s => front(0.025, 0.46, mT2, 0.93, s * 0.07));
+      [1.02, 0.92, 0.82].forEach(y => front(0.02, 0.02, mT2, y, 0.07));
+    } else if (top === 'blazer') {
+      front(0.11, 0.26, mString, 1.03);
+      front(0.035, 0.2, mA, 1.0);
+      [-1, 1].forEach(s => { const lp = front(0.06, 0.22, mT2, 1.04, s * 0.075); lp.rotation.z = s * 0.25; });
+      front(0.025, 0.025, mT2, 0.84, 0.03);
+    } else if (top === 'polo') {
+      [-1, 1].forEach(s => { const c = bx(0.08, 0.04, 0.05, mT2, s * 0.05, 1.15, 0.09, body); c.rotation.z = s * 0.45; });
+      [1.1, 1.05].forEach(y => front(0.018, 0.018, mString, y));
+    } else if (top === 'jacket') {
+      bx(0.26, 0.07, 0.2, mT2, 0, 1.16, -0.01, body);
+      front(0.016, 0.44, mGlassF, 0.93);
+      [-1, 1].forEach(s => front(0.07, 0.05, mT2, 0.84, s * 0.1));
+    } else if (top === 'overalls') {
+      front(0.22, 0.24, mP, 0.84);
+      [-1, 1].forEach(s => { front(0.04, 0.24, mP, 1.04, s * 0.085); front(0.025, 0.025, mA, 0.95, s * 0.085); });
+      bx(0.345, 0.12, 0.205, mP, 0, 0.75, 0, body);
     }
-    bx(0.1, 0.18, 0.1, mS, 0, 1.25, 0, body);
+    // costume details on the body
+    let cape = null;
+    if (S) {
+      if (S.star) { const st = mc(S.star); for (let k = 0; k < 5; k++) { const r = front(0.03, 0.07, st, 0, 0); r.position.set(Math.sin(k * 1.2566) * 0.03, 1.0 + Math.cos(k * 1.2566) * 0.03, 0.106); r.rotation.z = -k * 1.2566; } front(0.035, 0.035, st, 1.0); }
+      if (S.stripes) { [0.82, 0.76].forEach((y, k) => bx(0.345, 0.03, 0.205, k ? mString : mT2, 0, y, 0, body)); }
+      if (S.reactor) { const rc = part(new THREE.CylinderGeometry(0.045, 0.045, 0.02, 12), new THREE.MeshBasicMaterial({ color: 0x9ff4ff }), 0, 1.0, 0.105, body); rc.rotation.x = Math.PI / 2; xm.push(rc.material); bx(0.2, 0.04, 0.205, mT2, 0, 0.75, 0, body); }
+      if (S.discs) [[-0.07, 1.04], [0.07, 1.04], [-0.07, 0.94], [0.07, 0.94]].forEach(p => { const d = part(new THREE.CylinderGeometry(0.032, 0.032, 0.015, 10), mT2, p[0], p[1], 0.105, body); d.rotation.x = Math.PI / 2; });
+      if (S.web) { [-0.06, 0.06].forEach(xx => front(0.008, 0.44, mGlassF, 0.93, xx)); [1.06, 0.93, 0.8].forEach(y => front(0.33, 0.008, mGlassF, y)); front(0.05, 0.08, mGlassF, 1.0); [-1, 1].forEach(s => { const lg = front(0.07, 0.01, mGlassF, 1.01, s * 0.04); lg.rotation.z = s * 0.5; }); }
+      if (S.belt) { bx(0.35, 0.045, 0.21, mGlassF, 0, 0.74, 0, body); const bk = front(0.05, 0.05, mT2, 0.74); bk.rotation.z = 0.785; bk.position.z = 0.11; }
+      if (S.necklace) [-1, 1].forEach(s => { const n = front(0.02, 0.16, mT2, 1.07, s * 0.045); n.rotation.z = s * 0.45; });
+      if (S.amulet) { const am = part(new THREE.CylinderGeometry(0.035, 0.035, 0.02, 10), new THREE.MeshBasicMaterial({ color: 0x7dff9a }), 0, 1.06, 0.11, body); am.rotation.x = Math.PI / 2; xm.push(am.material); bx(0.36, 0.05, 0.21, mT2, 0, 0.76, 0, body); }
+      if (S.sash) { const sa = front(0.05, 0.5, mc(S.sash), 0.93); sa.rotation.z = 0.6; }
+      if (S.torn) [[-0.1, 0.72], [0.04, 0.71], [0.12, 0.73]].forEach(p => { const t = front(0.05, 0.05, mS, p[1], p[0]); t.rotation.z = 0.785; });
+      if (S.collar) [-1, 1].forEach(s => { const c = bx(0.14, 0.2, 0.03, mc(S.cape), s * 0.12, 1.25, -0.04, body); c.rotation.y = s * 0.5; });
+      if (S.cape) {
+        cape = new THREE.Group(); cape.position.set(0, 1.16, -0.115); body.add(cape);
+        bx(0.4, 0.76, 0.025, mc(S.cape), 0, -0.38, 0, cape);
+        bx(0.38, 0.06, 0.03, mT2, 0, -0.01, 0.01, cape);
+      }
+      if (S.shield) {
+        const sg = new THREE.Group(); sg.position.set(0, 0.95, -0.125); sg.rotation.x = Math.PI / 2; body.add(sg);
+        [[0.2, mT2], [0.155, mString], [0.11, mT2], [0.07, mT]].forEach((r, k) => part(new THREE.CylinderGeometry(r[0], r[0], 0.02, 20), r[1], 0, -k * 0.006, 0, sg));
+        const st = mString; for (let k = 0; k < 5; k++) { const b2 = part(BX(0.02, 0.012, 0.055), st, Math.sin(k * 1.2566) * 0.022, -0.028, Math.cos(k * 1.2566) * 0.022, sg); b2.rotation.y = k * 1.2566; }
+      }
+      if (S.hammer) { const hg = new THREE.Group(); hg.position.set(0.21, 0.72, 0.03); hg.rotation.z = 0.15; body.add(hg); bx(0.03, 0.24, 0.03, mc(0x6b4a2a), 0, -0.1, 0, hg); bx(0.15, 0.09, 0.1, mc(0x9aa2ae), 0, -0.25, 0, hg); }
+      if (S.quiver) { const qg = new THREE.Group(); qg.position.set(-0.06, 0.98, -0.14); qg.rotation.z = -0.35; body.add(qg); bx(0.1, 0.36, 0.09, mc(0x6b4a2a), 0, 0, 0, qg); [-0.03, 0, 0.03].forEach(xx => bx(0.02, 0.08, 0.02, mT, xx, 0.21, 0, qg)); }
+    }
+    bx(0.1, 0.18, 0.1, (S && S.mask === 'helm') ? mc(S.mc) : mS, 0, 1.25, 0, body);
     // arms
     const arms = [], elbows = [], hands = [];
     [-1, 1].forEach(s => {
       const sh = new THREE.Group(); sh.position.set(s * 0.225, 1.12, 0); body.add(sh);
       const up = new THREE.Group(); up.rotation.z = s * 0.05; sh.add(up);
-      if (tee) { bx(0.11, 0.12, 0.13, mT, 0, -0.04, 0, up); bx(0.085, 0.16, 0.1, mS, 0, -0.17, 0, up); }
-      else bx(0.1, 0.28, 0.12, mT, 0, -0.12, 0, up);
+      if (sleeve === 'none') bx(0.085, 0.28, 0.1, mS, 0, -0.12, 0, up);
+      else if (sleeve === 'short') { bx(0.11, 0.12, 0.13, mArm, 0, -0.04, 0, up); bx(0.085, 0.16, 0.1, mS, 0, -0.17, 0, up); }
+      else if (sleeve === 'puff') { bx(0.14, 0.13, 0.15, mArm, 0, -0.04, 0, up); bx(0.145, 0.025, 0.155, mT2, 0, -0.11, 0, up); bx(0.085, 0.16, 0.1, mS, 0, -0.17, 0, up); }
+      else bx(0.1, 0.28, 0.12, mArm, 0, -0.12, 0, up);
+      if (S && S.pads) bx(0.13, 0.08, 0.15, mc(S.pads), 0, 0.0, 0, up);
       const el = new THREE.Group(); el.position.y = -0.26; up.add(el);
-      bx(0.09, 0.2, 0.11, tee ? mS : mT, 0, -0.09, 0, el);
-      if (!tee) bx(0.096, 0.03, 0.116, mT2, 0, -0.185, 0, el);
-      bx(0.085, 0.08, 0.095, mS, 0, -0.235, 0.005, el);
+      bx(0.09, 0.2, 0.11, sleeve === 'long' ? mArm : mS, 0, -0.09, 0, el);
+      if (sleeve === 'long' && !S) bx(0.096, 0.03, 0.116, mT2, 0, -0.185, 0, el);
+      if (S && S.glove && sleeve !== 'long') bx(0.095, 0.1, 0.115, mHand, 0, -0.15, 0, el);
+      bx(0.085, 0.08, 0.095, mHand, 0, -0.235, 0.005, el);
       const hand = new THREE.Group(); hand.position.y = -0.25; el.add(hand);
       arms.push(sh); elbows.push(el); hands.push(hand);
     });
@@ -1348,7 +1475,7 @@ function main(){
     bx(0.38, 0.38, 0.36, mS, 0, 0.02, 0, head);
     [-1, 1].forEach(s => bx(0.035, 0.08, 0.07, mS, s * 0.2, -0.01, 0, head));
     bx(0.05, 0.045, 0.035, mN, 0, -0.02, 0.195, head);
-    const eyes = [];
+    let eyes = [];
     [-1, 1].forEach(s => {
       const eg = new THREE.Group(); eg.position.set(s * 0.085, 0.045, 0.181); head.add(eg);
       part(BX(0.045, 0.065, 0.012), mEye, 0, 0, 0, eg).castShadow = false;
@@ -1358,37 +1485,80 @@ function main(){
       part(BX(0.055, 0.028, 0.004), mBlush, s * 0.135, -0.045, 0.181, head).castShadow = false;
     });
     const smile = part(BX(0.085, 0.02, 0.012), mMouth, 0, -0.088, 0.181, head); smile.castShadow = false;
+    const helm = S && S.mask === 'helm';
+    if (helm) {
+      const mM = mc(S.mc);
+      bx(0.405, 0.405, 0.385, mM, 0, 0.02, 0, head);
+      [-1, 1].forEach(s => bx(0.04, 0.09, 0.08, mM, s * 0.21, -0.01, 0, head));
+      eyes = [];
+      if (S.face) { bx(0.3, 0.3, 0.02, mc(S.face), 0, -0.01, 0.196, head); bx(0.12, 0.012, 0.012, mGlassF, 0, -0.1, 0.207, head); }
+      [-1, 1].forEach(s => {
+        const eg = new THREE.Group(); eg.position.set(s * 0.085, 0.045, 0.205); head.add(eg);
+        if (S.eye === 'big') { const em = part(BX(0.1, 0.075, 0.012), mString, 0, 0, 0, eg); em.rotation.z = s * -0.35; part(BX(0.11, 0.085, 0.006), mGlassF, 0, 0, -0.004, eg).rotation.z = s * -0.35; }
+        else if (S.eye === 'glow') { const gm = new THREE.MeshBasicMaterial({ color: 0xbff8ff }); xm.push(gm); part(BX(0.08, 0.025, 0.012), gm, 0, 0, 0.012, eg).castShadow = false; }
+        else { const sm = mc(0xd8dce6); const e2 = part(BX(0.08, 0.035, 0.012), sm, 0, 0, 0, eg); e2.rotation.z = s * -0.25; }
+        eyes.push(eg);
+      });
+      if (S.ears) [-1, 1].forEach(s => { const ea = part(pyrG, mM, s * 0.12, 0.27, 0, head); ea.scale.set(0.28, 0.32, 0.22); ea.rotation.y = Math.PI / 4; });
+    }
+    const cowl = S && S.mask === 'cowl';
     // hair
-    const capOn = L.cap || L.santa;
-    if (L.hair === 'buzz') {
+    const capOn = L.cap || L.santa || !!HAT_COVER[hat] || cowl;
+    const hairOff = helm || hat === 'hijab';
+    const hs = L.hair || 'short';
+    if (hairOff) { /* covered */ }
+    else if (hs === 'buzz' || hs === 'mohawk') {
       bx(0.39, 0.035, 0.37, mH, 0, 0.222, 0, head);
       bx(0.39, 0.22, 0.03, mH, 0, 0.1, -0.175, head);
+      if (hs === 'mohawk' && !capOn) [0.12, 0.04, -0.04, -0.12].forEach((z, k) => bx(0.07, 0.15 - k * 0.015, 0.09, mH, 0, 0.3, z, head));
+    } else if (hs === 'afro') {
+      if (!capOn) bx(0.56, 0.34, 0.5, mH, 0, 0.22, -0.07, head);
+      bx(0.5, 0.36, 0.2, mH, 0, 0.1, -0.15, head);
+      [-1, 1].forEach(s => bx(0.08, 0.24, 0.3, mH, s * 0.24, 0.12, -0.03, head));
     } else {
       if (!capOn) bx(0.4, 0.09, 0.38, mH, 0, 0.245, 0, head);
       bx(0.4, 0.3, 0.07, mH, 0, 0.09, -0.16, head);
       [-1, 1].forEach(s => bx(0.03, 0.17, 0.3, mH, s * 0.2, 0.12, -0.02, head));
     }
-    if (L.hair === 'short' && !capOn) bx(0.3, 0.07, 0.06, mH, -0.045, 0.19, 0.17, head);
-    if (L.hair === 'messy' && !capOn) [[-0.12, 0.31, 0.06], [0, 0.32, 0.1], [0.12, 0.3, 0.04], [-0.06, 0.31, -0.08], [0.08, 0.31, -0.1], [0.1, 0.19, 0.17], [-0.1, 0.2, 0.17]].forEach(p => bx(0.11, 0.09, 0.11, mH, p[0], p[1], p[2], head));
-    if (L.hair === 'curly') [[-0.15, 0.27, 0.1], [0, 0.29, 0.12], [0.15, 0.27, 0.1], [-0.15, 0.29, -0.06], [0, 0.31, -0.05], [0.15, 0.29, -0.06], [-0.2, 0.15, -0.14], [0.2, 0.15, -0.14], [0, 0.14, -0.2], [-0.21, 0.2, 0.05], [0.21, 0.2, 0.05], [-0.1, 0.21, 0.18], [0.1, 0.21, 0.18]]
-      .forEach(p => { if (capOn && p[1] > 0.24) return; bx(0.12, 0.12, 0.12, mH, p[0], p[1], p[2], head); });
-    if (L.hair === 'bun' && !capOn) bx(0.16, 0.14, 0.16, mH, 0, 0.36, -0.07, head);
-    if (L.hair === 'long') {
-      bx(0.42, 0.5, 0.09, mH, 0, -0.06, -0.17, head);
-      [-1, 1].forEach(s => bx(0.06, 0.42, 0.14, mH, s * 0.215, -0.03, 0.06, head));
-      if (!capOn) bx(0.26, 0.07, 0.06, mH, 0.06, 0.19, 0.17, head);
+    if (!hairOff) {
+      if (hs === 'short' && !capOn) bx(0.3, 0.07, 0.06, mH, -0.045, 0.19, 0.17, head);
+      if (hs === 'messy' && !capOn) [[-0.12, 0.31, 0.06], [0, 0.32, 0.1], [0.12, 0.3, 0.04], [-0.06, 0.31, -0.08], [0.08, 0.31, -0.1], [0.1, 0.19, 0.17], [-0.1, 0.2, 0.17]].forEach(p => bx(0.11, 0.09, 0.11, mH, p[0], p[1], p[2], head));
+      if (hs === 'curly') [[-0.15, 0.27, 0.1], [0, 0.29, 0.12], [0.15, 0.27, 0.1], [-0.15, 0.29, -0.06], [0, 0.31, -0.05], [0.15, 0.29, -0.06], [-0.2, 0.15, -0.14], [0.2, 0.15, -0.14], [0, 0.14, -0.2], [-0.21, 0.2, 0.05], [0.21, 0.2, 0.05], [-0.1, 0.21, 0.18], [0.1, 0.21, 0.18]]
+        .forEach(p => { if (capOn && p[1] > 0.24) return; bx(0.12, 0.12, 0.12, mH, p[0], p[1], p[2], head); });
+      if (hs === 'bun' && !capOn) bx(0.16, 0.14, 0.16, mH, 0, 0.36, -0.07, head);
+      if (hs === 'long' || hs === 'wavy') {
+        bx(0.42, 0.5, 0.09, mH, 0, -0.06, -0.17, head);
+        [-1, 1].forEach(s => bx(0.06, 0.42, 0.14, mH, s * 0.215, -0.03, 0.06, head));
+        if (!capOn) bx(0.26, 0.07, 0.06, mH, 0.06, 0.19, 0.17, head);
+        if (hs === 'wavy') [-1, 1].forEach(s => { [-0.12, -0.28].forEach((y, k) => bx(0.08, 0.1, 0.16, mH, s * (0.235 + k * 0.015), y, 0.05 - k * 0.03, head)); bx(0.12, 0.12, 0.1, mH, s * 0.14, -0.34, -0.17, head); });
+      }
+      if (hs === 'ponytail') {
+        bx(0.07, 0.07, 0.05, mA, 0, 0.12, -0.215, head);
+        const tl = bx(0.11, 0.3, 0.11, mH, 0, -0.06, -0.26, head); tl.rotation.x = 0.3;
+      }
+      if (hs === 'pigtails') {
+        if (!capOn) bx(0.36, 0.06, 0.06, mH, 0, 0.19, 0.17, head);
+        [-1, 1].forEach(s => { bx(0.06, 0.06, 0.06, mA, s * 0.235, 0.12, -0.06, head); const pt = bx(0.11, 0.3, 0.11, mH, s * 0.27, -0.06, -0.07, head); pt.rotation.z = s * 0.2; });
+      }
+      if (hs === 'braid') {
+        if (!capOn) bx(0.26, 0.07, 0.06, mH, -0.06, 0.19, 0.17, head);
+        for (let k = 0; k < 5; k++) { const b2 = bx(0.1 - k * 0.008, 0.09, 0.09, mH, (k % 2 ? 0.012 : -0.012), -0.05 - k * 0.085, -0.22 - k * 0.012, head); b2.rotation.z = k % 2 ? 0.3 : -0.3; }
+        bx(0.05, 0.04, 0.05, mA, 0, -0.5, -0.27, head);
+      }
+      if (hs === 'bob') {
+        bx(0.42, 0.34, 0.09, mH, 0, 0.03, -0.17, head);
+        [-1, 1].forEach(s => bx(0.06, 0.3, 0.17, mH, s * 0.215, 0.0, 0.06, head));
+        if (!capOn) bx(0.39, 0.08, 0.06, mH, 0, 0.19, 0.17, head);
+      }
+      if (hs === 'spiky' && !capOn) [[-0.12, 0.03], [0, 0.06], [0.12, 0.02], [-0.07, -0.1], [0.08, -0.1]].forEach(p => { const sp = part(pyrG, mH, p[0], 0.37, p[1], head); sp.scale.set(0.34, 0.5, 0.34); sp.rotation.y = Math.PI / 4; });
     }
-    if (L.hair === 'ponytail') {
-      bx(0.07, 0.07, 0.05, mA, 0, 0.12, -0.215, head);
-      const tl = bx(0.11, 0.3, 0.11, mH, 0, -0.06, -0.26, head); tl.rotation.x = 0.3;
-    }
-    if (L.beard) {
+    if (L.beard && !helm) {
       bx(0.38, 0.09, 0.05, mH, 0, -0.14, 0.17, head);
       bx(0.22, 0.06, 0.05, mH, 0, -0.2, 0.16, head);
       [-1, 1].forEach(s => bx(0.04, 0.16, 0.2, mH, s * 0.19, -0.07, 0.07, head));
       part(BX(0.13, 0.025, 0.014), mH, 0, -0.06, 0.186, head).castShadow = false;
     }
-    if (L.glasses) {
+    if (L.glasses && !helm) {
       [-1, 1].forEach(s => {
         const cx = s * 0.085;
         part(BX(0.1, 0.014, 0.01), mGlassF, cx, 0.085, 0.19, head); part(BX(0.1, 0.014, 0.01), mGlassF, cx, 0.005, 0.19, head);
@@ -1397,26 +1567,57 @@ function main(){
       });
       part(BX(0.04, 0.012, 0.01), mGlassF, 0, 0.06, 0.19, head);
     }
-    if (L.cap && !L.santa) {
+    if (cowl) {
+      const mM = mc(S.mc);
+      bx(0.41, 0.14, 0.39, mM, 0, 0.17, 0, head);
+      bx(0.41, 0.32, 0.06, mM, 0, 0.05, -0.17, head);
+      [-1, 1].forEach(s => { bx(0.035, 0.32, 0.37, mM, s * 0.205, 0.05, 0, head); const wg = bx(0.012, 0.05, 0.1, mString, s * 0.225, 0.13, 0.02, head); wg.rotation.x = -0.4; });
+      bx(0.04, 0.04, 0.012, mString, 0, 0.17, 0.196, head);
+    }
+    if (S && S.tiara) { bx(0.4, 0.03, 0.02, mc(S.tiara), 0, 0.2, 0.18, head); const tp = part(pyrG, mc(S.tiara), 0, 0.27, 0.18, head); tp.scale.set(0.3, 0.45, 0.06); tp.rotation.y = Math.PI / 4; }
+    if (L.cap && !L.santa && !helm && !cowl && hat === 'none') {
       bx(0.41, 0.12, 0.39, mA, 0, 0.27, 0, head);
       bx(0.34, 0.025, 0.16, mA, 0, 0.22, 0.25, head);
       bx(0.04, 0.03, 0.04, mA, 0, 0.345, 0, head);
     }
-    if (L.santa) {
+    if (L.santa && !helm && !cowl && hat === 'none') {
       bx(0.42, 0.08, 0.4, mHatW, 0, 0.25, 0, head);
       const hg = new THREE.Group(); hg.position.set(0, 0.29, -0.01); hg.rotation.set(-0.25, 0, -0.1); head.add(hg);
       const cn = part(pyrG, mHatR, 0, 0.18, 0, hg); cn.rotation.y = Math.PI / 4;
       bx(0.08, 0.08, 0.08, mHatW, 0, 0.36, 0, hg);
     }
-    if (L.headphones) {
-      const top = capOn ? 0.35 : (L.hair === 'buzz' ? 0.255 : 0.3);
-      bx(0.44, 0.03, 0.06, mA, 0, top, 0, head);
-      [-1, 1].forEach(s => { bx(0.03, top - 0.06, 0.05, mA, s * 0.225, (top + 0.06) / 2, 0, head); bx(0.065, 0.14, 0.12, mA, s * 0.225, 0.02, 0, head); });
+    // headwear
+    const hTop = (hs === 'afro' && !capOn) ? 0.4 : 0.29;
+    const mA2 = mc(shade(L.accent, 0.75)), gold = mc(0xf2c230), pink = mc(0xffb0c8);
+    if (hat === 'beanie') { bx(0.42, 0.16, 0.4, mA, 0, 0.27, 0, head); bx(0.43, 0.05, 0.41, mA2, 0, 0.2, 0, head); bx(0.09, 0.09, 0.09, mA2, 0, 0.38, 0, head); }
+    else if (hat === 'beret') { const br = bx(0.44, 0.07, 0.42, mA, 0.02, 0.29, 0, head); br.rotation.z = 0.12; bx(0.03, 0.04, 0.03, mA2, 0.02, 0.34, 0, head); }
+    else if (hat === 'bow') { const bg = new THREE.Group(); bg.position.set(0.11, hTop + 0.02, 0.06); bg.rotation.z = -0.3; head.add(bg); [-1, 1].forEach(s => { const wg = bx(0.11, 0.09, 0.04, mA, s * 0.065, 0, 0, bg); wg.rotation.z = s * 0.35; }); bx(0.04, 0.05, 0.05, mA2, 0, 0, 0, bg); }
+    else if (hat === 'headband') { bx(0.42, 0.035, 0.07, mA, 0, hTop, 0.06, head); [-1, 1].forEach(s => bx(0.03, 0.14, 0.07, mA, s * 0.215, hTop - 0.07, 0.06, head)); }
+    else if (hat === 'flowers') { const fc = [0xff7aa8, 0xffd23f, 0xffffff, 0xc9a6ff, 0xff9a5a]; for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2; bx(0.07, 0.06, 0.07, mc(fc[k % 5]), Math.sin(a) * 0.2, hTop - 0.01, Math.cos(a) * 0.19, head); } for (let k = 0; k < 9; k++) { const a = (k + 0.5) / 9 * Math.PI * 2; bx(0.05, 0.03, 0.05, mc(0x4f9a5a), Math.sin(a) * 0.2, hTop - 0.03, Math.cos(a) * 0.19, head); } }
+    else if (hat === 'tiara') { bx(0.36, 0.03, 0.02, gold, 0, hTop - 0.02, 0.16, head); [-0.09, 0, 0.09].forEach((xx, k) => { const tp = part(pyrG, gold, xx, hTop + (k === 1 ? 0.05 : 0.025), 0.16, head); tp.scale.set(0.16, k === 1 ? 0.3 : 0.18, 0.06); tp.rotation.y = Math.PI / 4; }); bx(0.03, 0.03, 0.02, mc(0xe36f9a), 0, hTop + 0.01, 0.17, head); }
+    else if (hat === 'crown') { [[0, 0.19, 0.4, 0.03], [0, -0.19, 0.4, 0.03], [0.19, 0, 0.03, 0.4], [-0.19, 0, 0.03, 0.4]].forEach(p => bx(p[2], 0.09, p[3], gold, p[0], hTop + 0.02, p[1], head)); [[-0.13, 0.19], [0, 0.19], [0.13, 0.19], [-0.13, -0.19], [0.13, -0.19], [0.19, 0], [-0.19, 0]].forEach(p => { const pt = part(pyrG, gold, p[0], hTop + 0.1, p[1], head); pt.scale.set(0.15, 0.22, 0.15); pt.rotation.y = Math.PI / 4; }); [-0.1, 0.1].forEach(xx => bx(0.035, 0.035, 0.02, mc(0xd6262f), xx, hTop + 0.02, 0.2, head)); bx(0.04, 0.04, 0.02, mc(0x3d63b8), 0, hTop + 0.02, 0.2, head); }
+    else if (hat === 'catears' || hat === 'bunny') {
+      [-1, 1].forEach(s => {
+        if (hat === 'catears') { const ea = part(pyrG, mA, s * 0.12, hTop + 0.06, 0, head); ea.scale.set(0.32, 0.4, 0.2); ea.rotation.y = Math.PI / 4; const ei = part(pyrG, pink, s * 0.12, hTop + 0.05, 0.02, head); ei.scale.set(0.18, 0.26, 0.12); ei.rotation.y = Math.PI / 4; }
+        else { const eg = new THREE.Group(); eg.position.set(s * 0.09, hTop, 0); eg.rotation.z = s * -0.15; head.add(eg); bx(0.08, 0.3, 0.05, mA, 0, 0.15, 0, eg); bx(0.04, 0.22, 0.01, pink, 0, 0.15, 0.03, eg); }
+      });
+      bx(0.4, 0.03, 0.05, mA, 0, hTop - 0.01, 0, head);
+    }
+    else if (hat === 'cowboy') { bx(0.72, 0.03, 0.62, mA, 0, 0.27, 0, head); [-1, 1].forEach(s => { const r = bx(0.08, 0.03, 0.62, mA, s * 0.38, 0.3, 0, head); r.rotation.z = s * 0.6; }); bx(0.4, 0.17, 0.36, mA, 0, 0.36, 0, head); bx(0.41, 0.04, 0.37, mA2, 0, 0.3, 0, head); }
+    else if (hat === 'tophat') { const mBk = mc(0x1c1c22); bx(0.54, 0.03, 0.5, mBk, 0, 0.27, 0, head); bx(0.36, 0.34, 0.34, mBk, 0, 0.45, 0, head); bx(0.37, 0.06, 0.35, mA, 0, 0.31, 0, head); }
+    else if (hat === 'hardhat') { const mY = mc(0xffc21a); bx(0.43, 0.15, 0.41, mY, 0, 0.28, 0, head); bx(0.48, 0.025, 0.46, mY, 0, 0.21, 0.02, head); bx(0.06, 0.04, 0.42, mY, 0, 0.37, 0, head); }
+    else if (hat === 'hijab') { bx(0.43, 0.13, 0.41, mA, 0, 0.235, 0, head); bx(0.43, 0.5, 0.08, mA, 0, -0.02, -0.19, head); [-1, 1].forEach(s => bx(0.04, 0.44, 0.38, mA, s * 0.215, 0.0, 0.0, head)); bx(0.42, 0.1, 0.4, mA, 0, -0.22, -0.01, head); bx(0.38, 0.12, 0.25, mA, 0, 1.22, 0, body); bx(0.4, 0.03, 0.03, mA2, 0, 0.17, 0.196, head); }
+    else if (hat === 'party') { const pg = new THREE.Group(); pg.position.set(0.04, hTop - 0.02, 0); pg.rotation.z = -0.15; head.add(pg); const cn = part(pyrG, mA, 0, 0.17, 0, pg); cn.rotation.y = Math.PI / 4; cn.scale.set(0.7, 1, 0.7); bx(0.07, 0.07, 0.07, mc(0xffd23f), 0, 0.36, 0, pg); [0.08, 0.17].forEach((y, k) => bx(0.3 - y, 0.025, 0.3 - y, mc(k ? 0xffffff : 0xffd23f), 0, y, 0, pg)); }
+    else if (hat === 'unicorn') { const ug = new THREE.Group(); ug.position.set(0, hTop - 0.01, 0.1); ug.rotation.x = 0.25; head.add(ug); const hn = part(new THREE.ConeGeometry(0.05, 0.26, 8), gold, 0, 0.13, 0, ug); hn.castShadow = true; bx(0.4, 0.03, 0.05, mA, 0, 0, -0.08, ug); }
+    if (L.headphones && !helm) {
+      const top2 = capOn ? 0.35 : (hs === 'buzz' || hs === 'mohawk' ? 0.255 : 0.3);
+      bx(0.44, 0.03, 0.06, mA, 0, top2, 0, head);
+      [-1, 1].forEach(s => { bx(0.03, top2 - 0.06, 0.05, mA, s * 0.225, (top2 + 0.06) / 2, 0, head); bx(0.065, 0.14, 0.12, mA, s * 0.225, 0.02, 0, head); });
     }
     const outlines = [], mlist = [];
     root.traverse(o => { if (o.isMesh) mlist.push(o); });
     mlist.forEach(m => {
-      if (m.material === mShine || m.material === mBlush) return;
+      if (m.material === mShine || m.material === mBlush || m.material.isMeshBasicMaterial) return;
       const g = m.geometry; if (!g.boundingBox) g.computeBoundingBox(); const bb = g.boundingBox; if (!bb) return;
       const ex = (bb.max.x - bb.min.x) / 2 * Math.abs(m.scale.x), ey = (bb.max.y - bb.min.y) / 2 * Math.abs(m.scale.y), ez = (bb.max.z - bb.min.z) / 2 * Math.abs(m.scale.z);
       const mx = Math.max(ex, ey, ez), mn = Math.min(ex, ey, ez);
@@ -1426,7 +1627,8 @@ function main(){
       ol.userData.outline = true; ol.castShadow = false; ol.visible = habbo; ol.raycast = () => {};
       m.add(ol); outlines.push(ol);
     });
-    return { outlines: outlines, root: root, body: body, legs: legs, knees: knees, arms: arms, elbows: elbows, hands: hands, head: head, cup: cup, eyes: eyes, smile: smile, bubY: L.santa ? 2.3 : BUB_Y, mats: [mS, mH, mT, mT2, mP, mA, mN] };
+    const tall = L.santa || TALL_HAT[hat] || (hs === 'afro' && !capOn);
+    return { outlines: outlines, root: root, body: body, legs: legs, knees: knees, arms: arms, elbows: elbows, hands: hands, head: head, cup: cup, eyes: eyes, smile: smile, cape: cape, bubY: hat === 'tophat' || hat === 'bunny' ? 2.45 : tall ? 2.3 : BUB_Y, mats: [mS, mH, mT, mT2, mP, mA, mN].concat(xm) };
   }
   function rebuildLook(w) {
     const old = w.v, set = new Set();
@@ -1523,7 +1725,7 @@ function main(){
   const workers = [], byId = {}, workerPick = [];
   function makeWorker(p, i) {
     const w = Object.assign({}, p);
-    w.i = i; w.look = Object.assign({}, p.look);
+    w.i = i; w.look = Object.assign({ bottom: 'pants', hat: 'none', suit: 'none' }, p.look);
     if (w.look.santa == null) w.look.santa = xmasOn && !(w.look.cap || w.look.headphones); w.color = avColor(w.look.topColor);
     w.custom = p.custom || { emoji: '😀', text: '', place: 'desk' };
     w.v = makePerson(w.look);
@@ -1737,17 +1939,18 @@ function main(){
   window.addEventListener('pagehide', () => { if (mic.stream) mic.stream.getTracks().forEach(t => t.stop()); });
 
   // whisper
-  function whisper(to, text) {
+  function whisper(to, text, re) {
     const w = byId[to]; if (!w || to === 'me') return;
-    post('me', text, { to: to });
-    if (w.remote) { if (NET.on) netSend({ t: 'chat', text: text, to: w.netId }); else toast('You’re offline right now.'); return; }
+    const mid = newMid();
+    post('me', text, { to: to, re: re || null, mid: mid });
+    if (w.remote) { if (NET.on) netSend({ t: 'chat', text: text, to: w.netId, mid: mid, re: reOut(re) }); else toast('You’re offline right now.'); return; }
     setTimeout(() => {
       const st = stInfo(w).key; let r;
       if (st === 'meeting') r = rnd(['psst, in a meeting, reply after 🤐', 'can’t talk, meeting! 🙈']);
       else if (st === 'lunch') r = rnd(['mouth full of noodles, one sec 🍜', 'on lunch, tell me after!']);
       else if (text.indexOf('?') > -1) r = rnd(['between us? yes 🤫', 'good question, I’ll send details quietly', 'not sure, let me check without telling anyone']);
       else r = rnd(['haha, noted 🤭', 'my lips are sealed 🤐', 'ok ok, got it 😉', 'oh really? 👀']);
-      post(to, r, { to: 'me' });
+      post(to, r, { to: 'me', re: { mid: mid, who: 'me', n: me.name, t: text } });
     }, 1500 + Math.random() * 1500);
   }
   const WHISPERS = ['psst… there’s cake in the kitchen 🎂', 'between us, the demo build is a bit shaky 🙈', 'did you see that dance by the jukebox? 😂', 'could you cover my 3 PM? 🙏', 'want a coffee? I’m buying ☕', 'nice job in the sync earlier 👏'];
@@ -1819,12 +2022,55 @@ function main(){
     }, 900);
   }
 
+  // ---- replies & mentions: message ids, @mention parsing (used by post) ----
+  const plainM = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const MSGS = new Map();
+  let replyTo = null, msgSeq = 0;
+  const newMid = () => 'm' + Date.now().toString(36) + (++msgSeq).toString(36) + Math.random().toString(36).slice(2, 5);
+  const snip = (t, n) => { t = String(t || '').replace(/\s+/g, ' ').trim(); n = n || 70; return t.length > n ? t.slice(0, n - 1) + '…' : t; };
+  const MN_ALL = ['everyone', 'all', 'here'];
+  function mentionNames() {
+    const out = [];
+    workers.forEach(w => { const nm = w === me ? me.name : w.name; if (nm) out.push({ w: w, key: plainM(nm) }); if (nm && nm.indexOf(' ') > -1) out.push({ w: w, key: plainM(nm).replace(/\s+/g, '') }); });
+    MN_ALL.forEach(k => out.push({ w: null, key: k }));
+    workers.forEach(w => { const nm = w === me ? me.name : w.name; const f = plainM(nm || '').split(' ')[0]; if (f && f !== plainM(nm) && !workers.some(x => x !== w && plainM((x === me ? me.name : x.name) || '').split(' ')[0] === f)) out.push({ w: w, key: f }); });
+    return out.sort((a, b) => b.key.length - a.key.length);
+  }
+  // find @mentions in text: [{s, e, w (null = everyone)}]
+  function findMentions(text) {
+    const res = [], low = plainM(text), names = mentionNames();
+    for (let i = low.indexOf('@'); i > -1; i = low.indexOf('@', i + 1)) {
+      if (i > 0 && /[a-z0-9]/.test(low[i - 1])) continue;
+      const rest = low.slice(i + 1);
+      const hit = names.find(n => rest.indexOf(n.key) === 0 && !/[a-z0-9]/.test(rest[n.key.length] || ''));
+      if (hit) { res.push({ s: i, e: i + 1 + hit.key.length, w: hit.w }); i += hit.key.length; }
+    }
+    return res;
+  }
+  const mentionsMe = text => findMentions(text).some(m => m.w === me || (!m.w));
+  function fmtMsg(text) {
+    const ms = findMentions(text); let out = '', p = 0;
+    ms.forEach(m => { out += esc(text.slice(p, m.s)) + '<span class="mn' + (m.w === me || !m.w ? ' me' : '') + '">' + esc(text.slice(m.s, m.e)) + '</span>'; p = m.e; });
+    return out + esc(text.slice(p));
+  }
+  function reHtml(re) {
+    if (!re) return '';
+    return '<span class="rq" data-jump="' + esc(re.mid || '') + '" title="Show the original message"><b>↩ ' + esc(re.who === 'me' ? 'You' : re.n || 'Someone') + '</b>' + esc(snip(re.t, 80)) + '</span>';
+  }
+  // reply data travelling over the network uses the author's network id
+  function reOut(re) { if (!re) return undefined; const w = byId[re.who]; return { mid: re.mid, u: re.who === 'me' ? NET.id || '' : (w && w.netId) || '', n: re.n, t: snip(re.t, 90) }; }
+  function reIn(r) {
+    if (!r || typeof r !== 'object') return null;
+    const u = String(r.u || ''), w = u && u === NET.id ? me : peerW(u);
+    return { mid: String(r.mid || '').slice(0, 24), who: w ? w.id : '', n: w ? (w === me ? me.name : w.name) : String(r.n || 'Someone').slice(0, 20), t: String(r.t || '').slice(0, 90) };
+  }
   function post(who, text, o) {
     o = o || {};
     if (who && who !== 'me') { const pw = byId[who]; if (!pw || (pw.remote && !o.net)) return; }
     const t0 = new Date();
     const near = msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 60;
     const d = document.createElement('div');
+    let mid = null, pinged = '';
     if (!who) { d.className = 'msg sys'; d.textContent = text; }
     else {
       const w = byId[who], wh = !!o.to;
@@ -1834,18 +2080,24 @@ function main(){
         return;
       }
       const voice = !wh && (who === 'me' || w.remote ? !!o.voice : !!w.mic);
-      d.className = 'msg' + (who === 'me' ? ' mine' : '') + (wh ? ' whisper' : '') + (priv ? ' room' : '');
+      mid = String(o.mid || newMid()).slice(0, 24);
+      if (who !== 'me' && !o.late) pinged = o.re && o.re.who === 'me' ? 'reply' : mentionsMe(text) ? 'ment' : '';
+      d.className = 'msg' + (who === 'me' ? ' mine' : '') + (wh ? ' whisper' : '') + (priv ? ' room' : '') + (pinged || (who !== 'me' && mentionsMe(text)) ? ' ment' : '');
+      d.dataset.mid = mid;
       const label = '<b>' + esc(who === 'me' ? 'You' : w.name) + '</b>' + (wh ? '<span class="wh">🤫 whisper ' + (who === 'me' ? 'to ' + esc(byId[o.to].name) : 'to you') + '</span>' : '') + (priv ? '<span class="rm">🔒 Harbour room</span>' : '') + (o.late ? '<span class="rm late">earlier</span>' : '');
-      d.innerHTML = '<span class="av sm" style="--c:' + w.color + '">' + esc(w.name[0]) + '</span><div class="mb"><div class="mh">' + label + fmtT(t0) + '</div><div class="mt">' + (voice ? '<span class="vc" title="Said out loud">🎙️</span>' : '') + esc(text) + '</div></div>';
+      d.innerHTML = '<span class="av sm" style="--c:' + w.color + '">' + esc(w.name[0]) + '</span><div class="mb"><div class="mh">' + label + fmtT(t0) + '<button class="rp" data-reply="' + mid + '" title="Reply" aria-label="Reply">↩</button></div>' + reHtml(o.re) + '<div class="mt">' + (voice ? '<span class="vc" title="Said out loud">🎙️</span>' : '') + fmtMsg(text) + '</div></div>';
+      MSGS.set(mid, { who: who, name: who === 'me' ? me.name : w.name, text: text, el: d, wh: wh, to: o.to || null });
+      if (MSGS.size > 300) MSGS.delete(MSGS.keys().next().value);
       w.speech = { text: text, until: Date.now() + 5500, whisper: wh, to: o.to || null };
-      if (!o.late) hbChat(w, text, wh, o.to || null, priv ? 'room' : '');
+      if (!o.late) hbChat(w, (o.re ? '↩ ' : '') + text, wh, o.to || null, (priv ? 'room' : '') + (pinged || (who !== 'me' && mentionsMe(text)) ? ' ment' : ''));
       if (voice && who !== 'me') w.talkUntil = Date.now() + Math.min(6000, 900 + text.length * 55);
       if (who !== 'me') {
         if (o.late) { /* caught up later */ } else if (wh) say(w, text, true); else if (voice) say(w, text, false); else blip();
         if (tab !== 'chat') {
           unread++; const u = $('unread'); u.textContent = String(unread); u.hidden = false;
-          if (wh && o.to === 'me') toast('🤫 ' + w.name + ' whispered: “' + (text.length > 60 ? text.slice(0, 58) + '…' : text) + '”');
+          if (wh && o.to === 'me' && !pinged) toast('🤫 ' + w.name + ' whispered: “' + (text.length > 60 ? text.slice(0, 58) + '…' : text) + '”');
         }
+        if (pinged) pingMe(w, text, pinged);
       }
     }
     msgsEl.appendChild(d);
@@ -2661,9 +2913,11 @@ function main(){
       '<div class="lbl">Skin tone</div>' + sw('skin', SKINS) +
       '<div class="lbl">Hair</div>' + op('hair', HAIRS) + sw('hairColor', HAIRC) +
       '<div class="lbl">Outfit</div>' + op('top', TOPS) + sw('topColor', TOPC) +
-      '<div class="lbl">Pants</div>' + sw('pants', PANTSC) +
+      '<div class="lbl">Bottoms</div>' + op('bottom', BOTTOMS) + sw('pants', PANTSC) +
+      '<div class="lbl">Headwear</div>' + op('hat', HATS) +
+      '<div class="lbl">🦸 Hero costumes</div>' + op('suit', SUITS) + (SUIT[L.suit] ? '<p class="wnote">Costume on. It covers your outfit. Pick “No costume” to go back.</p>' : '') +
       '<div class="lbl">Extras</div><div class="lopts">' + EXTRAS.map(o => '<button data-su="lkt" data-f="' + o[0] + '" class="' + (L[o[0]] ? 'on' : '') + '" aria-pressed="' + !!L[o[0]] + '">' + o[1] + '</button>').join('') + '</div>' +
-      ((L.cap || L.headphones || L.hair === 'ponytail') ? '<div class="lbl">Cap, headphones and hair tie color</div>' + sw('accent', ACC) : '') +
+      ((L.cap || L.headphones || ['ponytail', 'pigtails', 'braid'].indexOf(L.hair) > -1 || (L.hat && L.hat !== 'none')) ? '<div class="lbl">Headwear, headphones and hair tie color</div>' + sw('accent', ACC) : '') +
       '<div class="sufoot"><button data-su="rand">🎲 Surprise me</button>' + (setupReturn ? '<button data-su="cancel">Cancel</button>' : '') + '<button data-su="go" class="go" id="suGo"' + (nm ? '' : ' disabled') + '>' + (setupReturn ? 'Save' : 'Enter the office') + '</button></div>' +
       '<p class="suerr" id="suErr" hidden>Type your name to continue.</p>';
   }
@@ -2723,9 +2977,9 @@ function main(){
     const b = e.target.closest('[data-su]'); if (!b) return;
     const a = b.dataset.su;
     if (a === 'lk') { const f = b.dataset.f, v = b.dataset.v; me.look[f] = (f === 'hair' || f === 'top') ? v : +v; rebuildLook(me); renderSetup(); }
-    else if (a === 'lkt') { const f = b.dataset.f; me.look[f] = !me.look[f]; rebuildLook(me); renderSetup(); }
+    else if (a === 'lkt') { toggleLookExtra(me.look, b.dataset.f); rebuildLook(me); renderSetup(); }
     else if (a === 'rand') {
-      Object.assign(me.look, { skin: rnd(SKINS), hair: rnd(HAIRS)[0], hairColor: rnd(HAIRC), top: rnd(TOPS)[0], topColor: rnd(TOPC), pants: rnd(PANTSC), accent: rnd(ACC), glasses: Math.random() < 0.35, cap: Math.random() < 0.2, headphones: Math.random() < 0.2, beard: Math.random() < 0.25, santa: xmasOn && Math.random() < 0.6 });
+      Object.assign(me.look, { skin: rnd(SKINS), hair: rnd(HAIRS)[0], hairColor: rnd(HAIRC), top: rnd(TOPS)[0], topColor: rnd(TOPC), pants: rnd(PANTSC), accent: rnd(ACC), glasses: Math.random() < 0.35, cap: Math.random() < 0.2, headphones: Math.random() < 0.2, beard: Math.random() < 0.25, santa: xmasOn && Math.random() < 0.6 }, randomExtras());
       rebuildLook(me); renderSetup(); react(me, rnd(['wave', 'party', 'flex', 'thumbs']), true);
     }
     else if (a === 'go') finishSetup();
@@ -2753,7 +3007,7 @@ function main(){
     el.className = 'hbc' + (wh ? ' wh' : '') + (w === me ? ' mine' : '') + (kind ? ' ' + kind : '');
     el.style.setProperty('--sk', hex(w.look.skin)); el.style.setProperty('--hc', hex(w.look.hairColor));
     const pre = wh ? (w === me && to && byId[to] ? ' → ' + byId[to].name : ' whispers') : '';
-    el.innerHTML = '<span class="hh"></span>' + (kind === 'room' ? '<span class="lk">🔒</span>' : '') + '<span class="tx"><b>' + esc((w === me ? me.name : w.name) + pre) + ':</b> ' + esc(text) + '</span>';
+    el.innerHTML = '<span class="hh"></span>' + (kind && kind.indexOf('room') > -1 ? '<span class="lk">🔒</span>' : '') + '<span class="tx"><b>' + esc((w === me ? me.name : w.name) + pre) + ':</b> ' + esc(text) + '</span>';
     bubLayer.appendChild(el);
     const p = screenPos(w), w0 = W(), h0 = H(), bw = el.offsetWidth || 180;
     const x = Math.max(8, Math.min(w0 - bw - 8, (p ? p.x : w0 / 2) - bw / 2));
@@ -3395,7 +3649,19 @@ function main(){
     const pick = (v, list, d) => list.indexOf(v) > -1 ? v : d, ids = a => a.map(x => x[0]);
     return { skin: pick(+L.skin, SKINS, SKINS[2]), hair: pick(L.hair, ids(HAIRS), 'short'), hairColor: pick(+L.hairColor, HAIRC, HAIRC[0]), top: pick(L.top, ids(TOPS), 'hoodie'),
       topColor: pick(+L.topColor, TOPC, TOPC[0]), pants: pick(+L.pants, PANTSC, PANTSC[0]), accent: pick(+L.accent, ACC, ACC[0]),
-      glasses: !!L.glasses, cap: !!L.cap, headphones: !!L.headphones, beard: !!L.beard, santa: !!L.santa };
+      glasses: !!L.glasses, cap: !!L.cap, headphones: !!L.headphones, beard: !!L.beard, santa: !!L.santa,
+      bottom: pick(L.bottom, ids(BOTTOMS), 'pants'), hat: pick(L.hat, ids(HATS), 'none'), suit: pick(L.suit, ids(SUITS), 'none') };
+  }
+  function setLookField(L, f, v) {
+    if (['hair', 'top', 'bottom', 'hat', 'suit'].indexOf(f) > -1) L[f] = v; else L[f] = +v;
+    if (f === 'hat' && v !== 'none') { L.cap = false; L.santa = false; }
+    if (f === 'top' && v === 'dress' && L.bottom === 'pants') L.bottom = 'skirt';
+  }
+  function toggleLookExtra(L, f) { L[f] = !L[f]; if ((f === 'cap' || f === 'santa') && L[f]) L.hat = 'none'; }
+  function randomExtras() {
+    const o = { bottom: rnd(BOTTOMS)[0], hat: Math.random() < 0.35 ? rnd(HATS.slice(1))[0] : 'none', suit: Math.random() < 0.12 ? rnd(SUITS.slice(1))[0] : 'none' };
+    if (o.hat !== 'none') { o.cap = false; o.santa = false; }
+    return o;
   }
   function taskOf(w) { if (w.remote) return w.netTask ? { title: w.netTask.title, progress: w.netTask.p } : null; return currentTask(w); }
   function myState() {
@@ -3471,7 +3737,7 @@ function main(){
       const w = peerW(m.id); if (w) post(null, w.name + ' left the office');
       closeVPeer(String(m.id)); gamesPeerLeft(String(m.id)); removePeer(m.id); netStatus('on');
     } else if (m.t === 'state') { const w = peerW(m.id); if (w) applyPatch(w, m.patch); }
-    else if (m.t === 'chat') { const w = peerW(m.from); if (w && m.text) post(w.id, String(m.text).slice(0, 300), { net: true, to: m.to ? 'me' : null, voice: !!m.voice, priv: !!m.priv }); }
+    else if (m.t === 'chat') { const w = peerW(m.from); if (w && m.text) post(w.id, String(m.text).slice(0, 300), { net: true, to: m.to ? 'me' : null, voice: !!m.voice, priv: !!m.priv, mid: m.mid ? String(m.mid).slice(0, 24) : null, re: reIn(m.re) }); }
     else if (m.t === 'muf') { const w = peerW(m.from); if (w) muffled(w); }
     else if (m.t === 'ev' && m.k === 'game') gameNet(m);
     else if (m.t === 'ev') netEvent(peerW(m.from), m);
@@ -3948,7 +4214,7 @@ function main(){
     document.getElementById('pChat').hidden = tab !== 'chat';
     document.getElementById('pTasks').hidden = tab !== 'tasks';
     document.getElementById('pMusic').hidden = tab !== 'music';
-    if (tab === 'chat') { unread = 0; document.getElementById('unread').hidden = true; msgsEl.scrollTop = msgsEl.scrollHeight; }
+    if (tab === 'chat') { unread = 0; document.getElementById('unread').hidden = true; document.getElementById('unread').classList.remove('at'); msgsEl.scrollTop = msgsEl.scrollHeight; }
   });
   function showTab(t) { const b = tabsEl.querySelector('[data-tab="' + t + '"]'); if (b) b.click(); }
 
@@ -3957,13 +4223,14 @@ function main(){
   chatTo.innerHTML = '<option value="all">Everyone</option>' + workers.filter(w => w.id !== 'me').map(w => '<option value="' + w.id + '">🤫 ' + esc(w.name) + '</option>').join('');
   function refreshChatTo() { const v = chatTo.value; chatTo.innerHTML = '<option value="all">Everyone</option>' + workers.filter(w => w.id !== 'me').map(w => '<option value="' + w.id + '">🤫 ' + esc(w.name) + '</option>').join(''); chatTo.value = byId[v] ? v : 'all'; updateCompose(); }
   const toVal = () => (chatTo.value && chatTo.value !== 'all' && chatTo.value !== 'me' && byId[chatTo.value]) ? chatTo.value : null;
-  function updateCompose() { const t = toVal(); compose.classList.toggle('wh', !!t); chatIn.placeholder = t ? 'Whisper to ' + byId[t].name + '…' : inRoom(me) ? '🔒 Harbour room: only people inside hear you…' : 'Message the office… (try @Avery or /w Casey hi)'; compose.classList.toggle('rm', !t && inRoom(me)); }
+  function updateCompose() { const t = toVal(); compose.classList.toggle('wh', !!t); chatIn.placeholder = t ? 'Whisper to ' + byId[t].name + '…' : inRoom(me) ? '🔒 Harbour room: only people inside hear you…' : 'Message the office… (type @ to mention, ↩ to reply)'; compose.classList.toggle('rm', !t && inRoom(me)); }
   chatTo.addEventListener('change', updateCompose);
   function setWhisperTarget(id) { chatTo.value = id || 'all'; updateCompose(); }
   const plain = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   function findByName(s) { s = plain(String(s).replace(/^@/, '')).replace(/\s+/g, ''); if (!s) return null; return workers.find(w => w.id !== 'me' && (w.id === s || plain(w.name).replace(/\s+/g, '') === s)) || workers.find(w => w.id !== 'me' && (w.id.indexOf(s) === 0 || plain(w.full || '').replace(/\s+/g, '').indexOf(s) === 0)) || null; }
   function sendText(text, o) {
     o = o || {};
+    const re = o.re || null;
     let to = toVal();
     const wm = /^\/w(?:hisper)?\s+@?([\s\S]+)$/i.exec(text);
     if (wm) {
@@ -3972,10 +4239,11 @@ function main(){
       if (hit) { to = hit.w.id; text = rest.slice(rl.indexOf(hit.n + ' ') === 0 ? hit.n.length : hit.n.replace(/ /g, '').length).trim(); }
       else { const cmd = /^(\S+)\s+([\s\S]+)$/.exec(rest); if (cmd) { const t = findByName(cmd[1]); if (t) { to = t.id; text = cmd[2].trim(); } } }
     }
-    if (to) { whisper(to, text); return; }
-    post('me', text, { voice: !!o.voice });
+    if (to) { whisper(to, text, re); return; }
+    const mid = newMid();
+    post('me', text, { voice: !!o.voice, re: re, mid: mid });
     if (!ONLINE) { if (!workers.some(w => w !== me)) return; }
-    if (ONLINE) { if (NET.on) { netFlush(); netSend({ t: 'chat', text: text, priv: inRoom(me), voice: !!o.voice }); } else toast('You’re offline right now, so nobody else saw that.'); return; }
+    if (ONLINE) { if (NET.on) { netFlush(); netSend({ t: 'chat', text: text, priv: inRoom(me), voice: !!o.voice, mid: mid, re: reOut(re) }); } else toast('You’re offline right now, so nobody else saw that.'); return; }
     const low = plain(text);
     const rawTx = ' ' + String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9@ ]+/g, ' ') + ' ';
     const lowTx = rawTx.toLowerCase();
@@ -3984,6 +4252,8 @@ function main(){
       return lowTx.indexOf('@' + nm.replace(/ /g, '')) > -1 || lowTx.indexOf('@' + nm + ' ') > -1 || (uniq && lowTx.indexOf('@' + fst + ' ') > -1)
         || rawTx.indexOf(' ' + cap + ' ') > -1 || (uniq && rawTx.indexOf(' ' + cap.split(' ')[0] + ' ') > -1); };
     let targets = workers.filter(w => w.id !== 'me' && named(w));
+    if (re && re.who && re.who !== 'me' && byId[re.who] && targets.indexOf(byId[re.who]) < 0) targets.unshift(byId[re.who]);
+    const myRe = { mid: mid, who: 'me', n: me.name, t: text };
     const meIn = inRoom(me);
     const deaf = targets.filter(w => inRoom(w) !== meIn);
     if (deaf.length) toast(deaf.map(w => w.name).join(' and ') + (meIn ? ' can’t hear you from inside the Harbour room.' : ' is in the Harbour room and can’t hear you.') + ' Whisper instead.');
@@ -3994,7 +4264,7 @@ function main(){
         if (!pool.length) { if (!deaf.length) toast('🔒 Only people in the Harbour room can hear you, and no one else is in here.'); return; }
         targets = [rnd(pool)];
       }
-      targets.slice(0, 2).forEach((w, k) => setTimeout(() => post(w.id, rnd(MEET_REPLY)), 1300 + k * 1400 + Math.random() * 1200));
+      targets.slice(0, 2).forEach((w, k) => setTimeout(() => post(w.id, rnd(MEET_REPLY), { re: myRe }), 1300 + k * 1400 + Math.random() * 1200));
       return;
     }
     if (deaf.length && !targets.length) return;
@@ -4006,13 +4276,88 @@ function main(){
         else if (st === 'lunch') r = 'On lunch, back soon';
         else if (text.indexOf('?') > -1) r = rnd(['Let me check and get back to you', 'Yes, I can take that', 'Good question, give me 5 minutes']);
         else r = rnd(['Sounds good 👍', 'On it!', 'Thanks, ' + me.name + '!', 'Noted', 'Will do']);
-        post(w.id, r);
+        post(w.id, r, { re: myRe });
       }, 1400 + k * 1500 + Math.random() * 1500);
     });
   }
-  function sendChat() { const text = chatIn.value.trim(); if (!text) return; chatIn.value = ''; sendText(text); }
+  function sendChat() { const text = chatIn.value.trim(); if (!text) return; chatIn.value = ''; mpClose(); const re = replyTo; clearReply(); sendText(text, { re: re }); }
   $('chatSend').addEventListener('click', sendChat);
-  chatIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendChat(); } e.stopPropagation(); });
+
+  // ================= replies & mentions =================
+  function setReply(mid) {
+    const m = MSGS.get(mid); if (!m) return;
+    replyTo = { mid: mid, who: m.who, n: m.who === 'me' ? me.name : m.name, t: m.text, wh: m.wh };
+    if (m.wh && m.who !== 'me') setWhisperTarget(m.who);
+    else if (m.wh && m.to) setWhisperTarget(m.to);
+    renderReplyBar(); showTab('chat'); chatIn.focus();
+  }
+  function clearReply() { replyTo = null; renderReplyBar(); }
+  function renderReplyBar() {
+    const b = $('rBar'); if (!b) return;
+    if (!replyTo) { b.hidden = true; b.innerHTML = ''; return; }
+    b.hidden = false;
+    b.innerHTML = '<span>↩ Replying to <b>' + esc(replyTo.who === 'me' ? 'yourself' : replyTo.n) + '</b>: ' + esc(snip(replyTo.t, 60)) + '</span><button data-rb="x" aria-label="Cancel reply" title="Cancel (Esc)">×</button>';
+  }
+  $('rBar').addEventListener('click', e => { if (e.target.closest('[data-rb]')) { clearReply(); chatIn.focus(); } });
+  msgsEl.addEventListener('click', e => {
+    const r = e.target.closest('[data-reply]'); if (r) { setReply(r.dataset.reply); return; }
+    const j = e.target.closest('[data-jump]');
+    if (j) {
+      const m = MSGS.get(j.dataset.jump);
+      if (!m || !m.el || !m.el.parentNode) { toast('That message is too old to show.'); return; }
+      try { m.el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) { msgsEl.scrollTop = m.el.offsetTop - 40; }
+      m.el.classList.remove('flash'); void m.el.offsetWidth; m.el.classList.add('flash');
+    }
+  });
+  function pingMe(w, text, kind) {
+    tsound('ding');
+    if (w && w.v) floatFx(w, kind === 'reply' ? '↩️' : '🔔');
+    toast((kind === 'reply' ? '↩ ' + w.name + ' replied to you: “' : '🔔 ' + w.name + ' mentioned you: “') + snip(text, 60) + '”');
+    if (tab !== 'chat') { const u = $('unread'); u.classList.add('at'); }
+  }
+
+  // ---- @ name picker ----
+  const MP = { el: null, inp: null, items: [], sel: 0, at: -1 };
+  function mpEl() { if (!MP.el) { MP.el = document.createElement('div'); MP.el.className = 'mpick'; MP.el.hidden = true; document.body.appendChild(MP.el);
+    MP.el.addEventListener('mousedown', e => { const b = e.target.closest('[data-mp]'); if (b) { e.preventDefault(); mpPick(+b.dataset.mp); } }); } return MP.el; }
+  function mpClose() { if (MP.el) MP.el.hidden = true; MP.items = []; MP.inp = null; }
+  function mpUpdate(inp) {
+    const v = inp.value, c = inp.selectionStart == null ? v.length : inp.selectionStart;
+    const m = /(^|[^\w@])@([^\s@]{0,20})$/.exec(v.slice(0, c));
+    if (!m) { mpClose(); return; }
+    const q = plain(m[2]);
+    const ppl = workers.filter(w => w !== me).filter(w => { const n = plain(w.name); return !q || n.indexOf(q) === 0 || n.split(' ').some(p => p.indexOf(q) === 0) || n.replace(/\s+/g, '').indexOf(q) === 0; })
+      .sort((a, b) => plain(a.name).localeCompare(plain(b.name))).slice(0, 6).map(w => ({ w: w, label: w.name }));
+    if (!q || 'everyone'.indexOf(q) === 0) ppl.push({ w: null, label: 'everyone' });
+    if (!ppl.length) { mpClose(); return; }
+    MP.items = ppl; MP.inp = inp; MP.at = c - m[2].length - 1; MP.sel = Math.min(MP.sel, ppl.length - 1);
+    const el = mpEl();
+    el.innerHTML = ppl.map((p, i) => '<button data-mp="' + i + '" class="' + (i === MP.sel ? 'on' : '') + '">' + (p.w ? '<span class="av sm" style="--c:' + p.w.color + '">' + esc(p.w.name[0]) + '</span>' + esc(p.w.name) + '<small>' + esc(stInfo(p.w).label || '') + '</small>' : '<span class="av sm" style="--c:#8b5cf6">@</span>everyone<small>notify the room</small>') + '</button>').join('');
+    el.hidden = false;
+    const r = inp.getBoundingClientRect(), hh = el.offsetHeight || ppl.length * 34 + 8;
+    el.style.left = Math.max(8, Math.min(innerWidth - 270, r.left)) + 'px';
+    el.style.top = Math.max(8, r.top - hh - 6) + 'px';
+  }
+  function mpPick(i) {
+    const p = MP.items[i], inp = MP.inp; if (!p || !inp) return;
+    const v = inp.value, c = inp.selectionStart == null ? v.length : inp.selectionStart;
+    const ins = '@' + (p.w ? p.w.name : 'everyone') + ' ';
+    inp.value = v.slice(0, MP.at) + ins + v.slice(c);
+    const pos = MP.at + ins.length; try { inp.setSelectionRange(pos, pos); } catch (e) {}
+    mpClose(); inp.focus();
+  }
+  function mpKey(e, inp) {
+    if (!MP.el || MP.el.hidden || MP.inp !== inp || !MP.items.length) return false;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); MP.sel = (MP.sel + (e.key === 'ArrowDown' ? 1 : -1) + MP.items.length) % MP.items.length; mpUpdate(inp); return true; }
+    if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); mpPick(MP.sel); return true; }
+    if (e.key === 'Escape') { e.preventDefault(); mpClose(); return true; }
+    return false;
+  }
+  [chatIn, $('hbIn')].forEach(inp => {
+    inp.addEventListener('input', () => { MP.sel = 0; mpUpdate(inp); });
+    inp.addEventListener('blur', () => setTimeout(() => { if (MP.inp === inp) mpClose(); }, 120));
+  });
+  chatIn.addEventListener('keydown', e => { e.stopPropagation(); if (mpKey(e, chatIn)) return; if (e.key === 'Enter') { e.preventDefault(); sendChat(); } else if (e.key === 'Escape' && replyTo) { e.preventDefault(); clearReply(); } });
   updateCompose();
 
   // tasks pane
@@ -4093,9 +4438,11 @@ function main(){
       '<div class="lbl">Skin tone</div>' + sw('skin', SKINS) +
       '<div class="lbl">Hair</div>' + op('hair', HAIRS) + sw('hairColor', HAIRC) +
       '<div class="lbl">Outfit</div>' + op('top', TOPS) + sw('topColor', TOPC) +
-      '<div class="lbl">Pants</div>' + sw('pants', PANTSC) +
+      '<div class="lbl">Bottoms</div>' + op('bottom', BOTTOMS) + sw('pants', PANTSC) +
+      '<div class="lbl">Headwear</div>' + op('hat', HATS) +
+      '<div class="lbl">🦸 Hero costumes</div>' + op('suit', SUITS) + (SUIT[L.suit] ? '<p class="wnote">Costume on. It covers your outfit. Pick “No costume” to go back.</p>' : '') +
       '<div class="lbl">Extras</div><div class="lopts">' + EXTRAS.map(o => '<button data-act="lkt" data-f="' + o[0] + '" class="' + (L[o[0]] ? 'on' : '') + '" aria-pressed="' + !!L[o[0]] + '">' + o[1] + '</button>').join('') + '</div>' +
-      ((L.cap || L.headphones || L.hair === 'ponytail') ? '<div class="lbl">Cap, headphones and hair tie color</div>' + sw('accent', ACC) : '') +
+      ((L.cap || L.headphones || ['ponytail', 'pigtails', 'braid'].indexOf(L.hair) > -1 || (L.hat && L.hat !== 'none')) ? '<div class="lbl">Headwear, headphones and hair tie color</div>' + sw('accent', ACC) : '') +
       '<div class="acts"><button data-act="lkrand">🎲 Surprise me</button><button data-act="lkdone" class="on">Done</button></div>' +
       (w === me ? '<button class="linkb" data-act="lkreset">Set up my profile again</button>' : '');
   }
@@ -4172,10 +4519,10 @@ function main(){
     else if (act === 'emo2') { if (b.dataset.k === 'dance') danceButton(); else setEmote(me, b.dataset.k); }
     else if (act === 'dtog') danceWith(w);
     else if (act === 'look' && !w.remote) { cs.look = true; renderCard(); flyToWorker(w); }
-    else if (act === 'lk') { const f = b.dataset.f, v = b.dataset.v; w.look[f] = (f === 'hair' || f === 'top') ? v : +v; applyLook(w); }
-    else if (act === 'lkt') { const f = b.dataset.f; w.look[f] = !w.look[f]; applyLook(w); }
+    else if (act === 'lk') { setLookField(w.look, b.dataset.f, b.dataset.v); applyLook(w); }
+    else if (act === 'lkt') { toggleLookExtra(w.look, b.dataset.f); applyLook(w); }
     else if (act === 'lkrand') {
-      Object.assign(w.look, { skin: rnd(SKINS), hair: rnd(HAIRS)[0], hairColor: rnd(HAIRC), top: rnd(TOPS)[0], topColor: rnd(TOPC), pants: rnd(PANTSC), accent: rnd(ACC), glasses: Math.random() < 0.35, cap: Math.random() < 0.2, headphones: Math.random() < 0.2, beard: Math.random() < 0.25, santa: xmasOn && Math.random() < 0.6 });
+      Object.assign(w.look, { skin: rnd(SKINS), hair: rnd(HAIRS)[0], hairColor: rnd(HAIRC), top: rnd(TOPS)[0], topColor: rnd(TOPC), pants: rnd(PANTSC), accent: rnd(ACC), glasses: Math.random() < 0.35, cap: Math.random() < 0.2, headphones: Math.random() < 0.2, beard: Math.random() < 0.25, santa: xmasOn && Math.random() < 0.6 }, randomExtras());
       applyLook(w);
     }
     else if (act === 'lkdone') { cs.look = false; renderCard(); if (w === me) { saveProfile(); post(null, 'You updated your look ✨'); } }
@@ -4186,8 +4533,8 @@ function main(){
   const ctl = { target: new THREE.Vector3(0, 0, 0), theta: 0.3, phi: 0.82, r: 32 };
   const VIEWS = {
     overview: { x: 11, y: 0, z: 0, theta: 0.3, phi: 0.82, r: 40 },
-    games: { x: 21, y: 0.5, z: -6.3, theta: 0.7, phi: 1.0, r: 11 },
-    pool: { x: 21, y: 0.3, z: 0.3, theta: 0.7, phi: 1.0, r: 11 },
+    games: { x: 21, y: 0.5, z: 0.3, theta: 0.7, phi: 1.0, r: 11 },
+    pool: { x: 21, y: 0.3, z: -6.3, theta: 0.7, phi: 1.0, r: 11 },
     sleep: { x: 21, y: 0.5, z: 6.8, theta: 0.7, phi: 1.0, r: 11 },
     court: { x: 32, y: 0.8, z: -5, theta: 0.7, phi: 1.0, r: 12 },
     party: { x: 32, y: 0.5, z: 5, theta: 0.7, phi: 1.0, r: 12 },
@@ -4500,6 +4847,7 @@ function main(){
     applyHeld(w, dt); applyReach(w);
     applyReact(w, dt);
     bbPose(w); applySwim(w, dt); applyLie(w);
+    if (V.cape) V.cape.rotation.x = w.mode === 'walk' ? 0.38 + Math.sin(elapsed * 9 + w.i) * 0.08 : w.mode === 'sit' ? 0.15 : 0.06 + Math.sin(elapsed * 1.5 + w.i) * 0.03;
   }
   function bubbleHTML(w) {
     const sp = !habbo && w.speech && w.speech.until > Date.now();
@@ -4560,7 +4908,7 @@ function main(){
 
   renderAV(); renderMe(); renderTeam(); renderTasks(); renderCounts(); renderEmoteBar(); renderDock();
   $('dock').addEventListener('click', e => { if (e.target.closest('[data-dance]')) { toggleDancePicker(); return; } const b = e.target.closest('[data-rx]'); if (b) react(me, b.dataset.rx); });
-  { const hbIn = $('hbIn'); hbIn.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { const t = hbIn.value.trim(); if (t) { hbIn.value = ''; sendText(t); } } }); }
+  { const hbIn = $('hbIn'); hbIn.addEventListener('keydown', e => { e.stopPropagation(); if (mpKey(e, hbIn)) return; if (e.key === 'Enter') { const t = hbIn.value.trim(); if (t) { hbIn.value = ''; mpClose(); const re = replyTo; clearReply(); sendText(t, { re: re }); } } }); }
   $('emoBar').addEventListener('click', e => { const b = e.target.closest('[data-emo]'); if (!b) return; if (b.dataset.emo === 'dance') danceButton(); else setEmote(me, b.dataset.emo); });
   post(null, 'Welcome to the office chat · ' + fmtT(new Date()));
   post(null, '🎄 The office is decorated for Christmas! Play 🔔 Jingle Bells in the Music tab.');
@@ -5002,9 +5350,12 @@ function main(){
   const pracOf = g => GMS.prac[g] || (GMS.prac[g] = { s: GRULES[g].init(), moves: [] });
   const tblOf = g => GMS.tb[g] || (GMS.tb[g] = { s: GRULES[g].init(), moves: [], seats: [null, null] });
   const gModeOf = g => GMS.mode[g] || 'cpu';
-  const gCur = g => gModeOf(g) === 'online' ? tblOf(g) : pracOf(g);
+  const isLive = g => gModeOf(g) === 'online' || gModeOf(g) === 'watch';
+  const gCur = g => isLive(g) ? tblOf(g) : pracOf(g);
+  const liveTables = () => GAME_IDS.filter(g => { const T = GMS.tb[g]; return T && T.seats[0] && T.seats[1]; });
   const mySeat = g => NET.id ? tblOf(g).seats.indexOf(NET.id) : -1;
   function gFlip(g) { if (g !== 'chess' && g !== 'checkers') return false; const m = gModeOf(g); return m === 'online' ? mySeat(g) === 1 : m === 'cpu' ? (GMS.side[g] || 0) === 1 : false; }
+  function lastMoveTxt(g) { const T = tblOf(g); if (!T.moves.length) return ''; const k = T.moves[T.moves.length - 1], G = GRULES[g]; if (g === 'chess') return k.slice(0, 2) + '→' + k.slice(2, 4) + (k[4] ? '=' + k[4].toUpperCase() : ''); if (g === 'checkers') return k.split('-').map(n => 'abcdefgh'[n % 8] + (8 - (n >> 3))).join('→'); if (g === 'connect4') return 'column ' + (+k.slice(1) + 1); if (g === 'reversi') return k === 'pass' ? 'pass' : 'abcdefgh'[k.slice(1) % 8] + (8 - (k.slice(1) >> 3)); return 'square ' + (+k.slice(1) + 1); }
   function seatName(g, i) {
     const id = tblOf(g).seats[i]; if (!id) return null;
     if (id === NET.id) return 'You';
@@ -5021,6 +5372,7 @@ function main(){
   function gStatus(g) {
     const S = gCur(g), G = GRULES[g], m = gModeOf(g), res = G.result(S.s), t = G.turn(S.s);
     const who = i => m === 'cpu' ? (i === (GMS.side[g] || 0) ? 'You' : 'The computer') : m === 'local' ? G.seats[i] : (seatName(g, i) || G.seats[i]);
+    if (m === 'watch' && !res && !(tblOf(g).seats[0] && tblOf(g).seats[1])) return tblOf(g).moves.length ? '⏸ This match ended or a player left' : '👀 No match at this table right now';
     if (res) return res.draw ? '🤝 Draw · ' + res.why : '🏆 ' + who(res.win) + (who(res.win) === 'You' ? ' win!' : ' wins!') + ' · ' + res.why;
     if (m === 'online' && !(tblOf(g).seats[0] && tblOf(g).seats[1])) return '⏳ Waiting for two players to sit down';
     if (GMS.think) return '🤔 The computer is thinking…';
@@ -5055,10 +5407,18 @@ function main(){
     h += '<div class="lbl">Play</div><div class="gbmodes">' +
       '<button data-gb="mode" data-v="cpu" class="' + (m === 'cpu' ? 'on' : '') + '">🤖 Computer</button>' +
       '<button data-gb="mode" data-v="local" class="' + (m === 'local' ? 'on' : '') + '">👥 Same screen</button>' +
-      (ONLINE ? '<button data-gb="mode" data-v="online" class="' + (m === 'online' ? 'on' : '') + '">🌐 Online</button>' : '') + '</div>';
+      (ONLINE ? '<button data-gb="mode" data-v="online" class="' + (m === 'online' ? 'on' : '') + '">🌐 Online</button><button data-gb="mode" data-v="watch" class="' + (m === 'watch' ? 'on' : '') + '">👀 Watch</button>' : '') + '</div>';
     if (m === 'cpu') {
       h += '<div class="lbl">Difficulty</div><div class="gbmodes">' + ['Easy', 'Normal', 'Hard'].map((n, i) => '<button data-gb="lvl" data-v="' + i + '" class="' + (GMS.lvl === i ? 'on' : '') + '">' + n + '</button>').join('') + '</div>' +
         '<div class="gbsub">You play ' + esc(G.seats[GMS.side[g] || 0]) + '</div>';
+    }
+    if (m === 'watch') {
+      const nm0 = seatName(g, 0), nm1 = seatName(g, 1), lm = lastMoveTxt(g);
+      h += '<div class="lbl">Match</div><div class="gbseat"><b>' + esc(G.seats[0]) + '</b><span>' + esc(nm0 || 'Empty') + '</span></div><div class="gbseat"><b>' + esc(G.seats[1]) + '</b><span>' + esc(nm1 || 'Empty') + '</span></div>' +
+        (lm ? '<div class="gbsub">Last move: ' + esc(lm) + '</div>' : '') + '<div class="gbsub">You’re watching. Moves show up live.</div>';
+      const others = liveTables().filter(t => t !== g);
+      if (others.length) h += '<div class="lbl">Other live matches</div><div class="gbmodes">' + others.map(t => '<button data-gb="watchg" data-v="' + t + '">' + GRULES[t].e + ' ' + esc(GRULES[t].name) + ' · ' + esc(seatName(t, 0) || '?') + ' vs ' + esc(seatName(t, 1) || '?') + '</button>').join('') + '</div>';
+      if (!(tblOf(g).seats[0] && tblOf(g).seats[1]) && !others.length) h += '<div class="gbsub">No one is playing online right now. Pick 🌐 Online and take a seat to start one.</div>';
     }
     if (m === 'online') {
       h += '<div class="lbl">Seats at this table</div>';
@@ -5068,12 +5428,12 @@ function main(){
           (!nm && seated < 0 ? '<button data-gb="seat" data-v="' + i + '">Sit here</button>' : '') + (nm === 'You' ? '<button data-gb="unseat">Leave</button>' : '') + '</div>';
       });
       if (!NET.on) h += '<div class="gbsub">You’re offline right now.</div>';
-      else if (seated < 0) h += '<div class="gbsub">' + (T.seats[0] && T.seats[1] ? 'You’re watching this game.' : 'Take a seat to play someone else in the office.') + '</div>';
+      else if (seated < 0) h += '<div class="gbsub">' + (T.seats[0] && T.seats[1] ? 'Both seats are taken. You’re watching this game.' : 'Take a seat to play someone else in the office.') + '</div>';
     }
     const pass = gCanMove(g) && G.legal(S.s).some(mm => mm.pass);
     h += '<div class="acts">' + (pass ? '<button data-gb="pass" class="on">Pass (no moves)</button>' : '') +
-      (m !== 'online' || seated > -1 ? '<button data-gb="new">New game</button>' : '') +
-      (m !== 'online' && S.moves.length ? '<button data-gb="undo">Undo</button>' : '') +
+      (m === 'watch' ? '' : m !== 'online' || seated > -1 ? '<button data-gb="new">New game</button>' : '') +
+      ((m === 'cpu' || m === 'local') && S.moves.length ? '<button data-gb="undo">Undo</button>' : '') +
       (m === 'cpu' ? '<button data-gb="swap">Switch sides</button>' : '') + '</div>' +
       '<div class="gbsub">' + S.moves.length + ' moves</div>';
     $('gbS').innerHTML = h;
@@ -5133,14 +5493,23 @@ function main(){
     if (!GRULES[g] && g !== 'snake') return;
     GMS.open = g; GMS.sel = null;
     closeCard(); closePantry(); closeBar();
-    if (g !== 'snake' && !GMS.mode[g]) { const T = tblOf(g); GMS.mode[g] = ONLINE && (T.seats[0] || T.seats[1]) ? 'online' : 'cpu'; }
+    if (g !== 'snake') { const T = tblOf(g); if (ONLINE && T.seats[0] && T.seats[1] && mySeat(g) < 0) GMS.mode[g] = 'watch'; else if (!GMS.mode[g]) GMS.mode[g] = ONLINE && (T.seats[0] || T.seats[1]) ? 'online' : 'cpu'; }
     $('gameBox').hidden = false; $('gameBox').classList.toggle('snakebox', g === 'snake');
     if (g === 'snake') snakeOpen(); else gRender();
     if (g !== 'snake') { const S = gCur(g); if (gModeOf(g) === 'cpu') gAfter(g, S); }
   }
   function closeGame() { $('gameBox').hidden = true; if (GMS.open === 'snake' && GMS.snake) GMS.snake.run = false; GMS.open = null; }
+  function watchGame(g) {
+    const T = WING.tables[g]; if (!T) return;
+    GMS.mode[g] = 'watch';
+    const tb = WING.tables[g].spots[0], p = NAVG.snap(tb.pos[0] + 1.0, (T.spots[0].pos[1] + T.spots[1].pos[1]) / 2);
+    if (Math.hypot(me.x - p[0], me.z - p[1]) > 1.2) { const face = Math.atan2(tb.pos[0] - p[0], 0); sendMeTo({ area: 'game', pos: p, anchor: p.slice(), via: [], face: -Math.PI / 2, sit: 0, by: null }); }
+    if (!me.emote) floatFx(me, '👀');
+    openGame(g);
+  }
   function goGame(g) {
     const T = WING.tables[g]; if (!T) return;
+    { const tb = tblOf(g); if (ONLINE && tb.seats[0] && tb.seats[1] && mySeat(g) < 0) { watchGame(g); toast('👀 ' + (seatName(g, 0) || 'Someone') + ' and ' + (seatName(g, 1) || 'someone') + ' are playing. You’re watching.'); return; } }
     if (me.at && me.at.game === g && !me.path.length) { openGame(g); return; }
     const free = T.spots.filter(s => !s.by || s.by === 'me').sort((a, b) => Math.hypot(a.pos[0] - me.x, a.pos[1] - me.z) - Math.hypot(b.pos[0] - me.x, b.pos[1] - me.z))[0];
     if (free) { sitAt(free); me.pendingGame = g; } else openGame(g);
@@ -5156,7 +5525,10 @@ function main(){
     if (a === 'mode') {
       const v = b.dataset.v;
       if (v === 'online' && !NET.on) { toast('Connect to the server to play online.'); return; }
+      if (v === 'watch' && mySeat(g) > -1) netSend({ t: 'ev', k: 'game', table: g, act: 'unseat' });
       GMS.mode[g] = v; GMS.sel = null; gRender(); gRedraw3D(g); if (v === 'cpu') gAfter(g, pracOf(g));
+      if (v === 'watch' && !NET.on) { toast('Connect to the server to watch matches.'); }
+    } else if (a === 'watchg') { watchGame(b.dataset.v); return;
     } else if (a === 'lvl') { GMS.lvl = +b.dataset.v; gRender(); }
     else if (a === 'new') {
       if (gModeOf(g) === 'online') { if (mySeat(g) < 0) return; const T = tblOf(g); T.s = G.init(); T.moves = []; netSend({ t: 'ev', k: 'game', table: g, act: 'reset' }); gAfter(g, T); post(null, G.e + ' You started a new game of ' + G.name); }
@@ -5180,7 +5552,7 @@ function main(){
       T.seats = T.seats.map(x => x === from ? null : x); T.seats[i] = from;
       if (!T.seats[1 - i]) { T.s = G.init(); T.moves = []; }
       if (from === NET.id) { GMS.mode[g] = 'online'; toast(G.e + ' You sat down as ' + G.seats[i] + '.'); }
-      else { const w = peerW(from); if (w && mySeat(g) > -1) toast(G.e + ' ' + w.name + ' sat down to play ' + G.name + ' with you!'); }
+      else { const w = peerW(from); if (w && mySeat(g) > -1) toast(G.e + ' ' + w.name + ' sat down to play ' + G.name + ' with you!'); else if (w && T.seats[0] && T.seats[1] && mySeat(g) < 0 && !GMS.toldLive) { GMS.toldLive = 1; toast(G.e + ' A ' + G.name + ' match just started in the game room. Click the table to watch 👀'); } }
     } else if (m.act === 'seatno') toast('Someone just took that seat.');
     else if (m.act === 'unseat') T.seats = T.seats.map(x => x === from ? null : x);
     else if (m.act === 'reset') { T.s = G.init(); T.moves = []; }
@@ -5188,7 +5560,8 @@ function main(){
       if (+m.n !== T.moves.length || T.seats[G.turn(T.s)] !== from) return;
       const mv = gFind(g, T.s, String(m.mv)); if (!mv) return;
       T.s = G.apply(T.s, mv); T.moves.push(String(m.mv));
-      if (GMS.open === g && gModeOf(g) === 'online') tsound('click');
+      if (GMS.open === g && isLive(g)) tsound('click');
+      if (GMS.open === g && gModeOf(g) === 'watch' && G.result(T.s)) react(me, 'clap', true);
       if (G.result(T.s)) gAnnounce(g, T);
     }
     if (GMS.open === g) gRender();

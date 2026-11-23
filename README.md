@@ -4,16 +4,17 @@ A pixel-hotel style virtual office that runs in the browser. Real people open th
 
 ## What you can do
 
-- **Set up your character** on your first visit: name, role, skin tone, hair, outfit and extras. Your browser remembers it.
+- **Set up your character** on your first visit: name, role, skin tone, 14 hairstyles (pigtails, braid, bob, afro and more), 12 outfits (dresses, blouses, blazers, overalls and more), pants, shorts or skirts, 15 kinds of headwear (crown, tiara, flower crown, cat ears, hijab, cowboy hat and more), and extras. Your browser remembers it.
+- **Hero costumes:** 10 original superhero costumes inspired by the Avengers, like Star Captain with a shield on his back, Red Armor, and Thunder God with a cape and hammer. They are original designs, not official Marvel costumes.
 - **Talk with live voice:** unmute and people near you hear you. Voices get quieter with distance and fade out about 10 tiles away.
 - **See everyone live:** where people walk and sit, their status, emotes, what they're eating or drinking, and who's talking.
-- **Chat and whisper:** messages to the whole room, or a private whisper to one person (`/w Name hi`).
+- **Chat, reply and mention:** messages to the whole room, or a private whisper to one person (`/w Name hi`). Hover a message and click **↩** to reply to it. Type **@** to pick someone to mention, or use `@everyone`. The person you mention or reply to gets a sound and a pop-up.
 - **Soundproof meeting room:** inside the Harbour room, only people inside hear your voice and get your chat messages. Everyone else sees `· · ·`.
 - **Lock a room:** click **🔒 Lock room** in the top-left panel and choose a passcode. People who join later need it.
 - **Do things together:** emoji reactions, 20 dances (invite someone to dance with you), slaps with a trout, treating everyone to coffee or pizza, and touching the tree, presents, corgi, plants, lamp, whiteboard, bell and laptops.
 - **Shared music:** the office radio and YouTube / YouTube Music links play for everyone in the room. Songs from your own computer only play for you.
 - **Play any link for the room:** the jukebox plays YouTube, YouTube Music, Vimeo, Dailymotion, Spotify, SoundCloud, Twitch, Google Drive videos, direct video files (`.mp4`, `.webm`) and most other embeddable links. Click **⛶** on the player for the big screen and have a movie night. Late joiners jump to the right spot in direct video files. Some sites, like Netflix, don't allow playing inside other pages. Songs from your own computer only play for you.
-- **Game room:** chess, checkers, reversi, Connect Four and tic-tac-toe on real tables. Play the computer (easy, normal or hard), two people on one screen, or sit down **online** against someone in the office while others watch. There's also a Snake arcade cabinet.
+- **Game room:** chess, checkers, reversi, Connect Four and tic-tac-toe on real tables. Play the computer (easy, normal or hard), two people on one screen, or sit down **online** against someone in the office. Click a table where two people are playing, or pick **👀 Watch**, to watch their match live. You can switch between live matches. There's also a Snake arcade cabinet.
 - **Swimming pool:** click the water to jump in and swim. Lie on a sun lounger by the pool.
 - **Sleeping quarters:** click a bed to lie down and nap.
 - **Basketball court:** walk onto the court and your character plays by itself: dribbling, shooting and scoring. The scoreboard shows the top scorers. Walk off the court to stop.
