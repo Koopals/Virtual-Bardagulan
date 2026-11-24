@@ -269,9 +269,11 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpg{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .dpg button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 3px;font-size:11px;min-width:0;line-height:1.2}
 .dpg .de{font-size:19px;line-height:1.1}
+.dplbl{font-size:11px;font-weight:700;color:var(--color-text-secondary);margin:8px 2px 4px}
 .dpg button.cur,.dpf button.cur{background:#ec4899;border-color:#ec4899;color:#fff}
 .dpf{display:flex;gap:6px;margin-top:8px}
 .dpf button{flex:1}
+.ipick{width:min(420px,calc(100% - var(--panel-w) - 28px))}
 .pantry{width:330px}
 .gamebox{left:14px;bottom:70px;width:330px;max-height:calc(100% - 100px);overflow:auto;padding:12px 12px 14px;z-index:58}
 .gbh{display:flex;align-items:center;gap:8px;margin:0 0 8px}.gbh b{flex:1;font-size:15px}
@@ -530,6 +532,7 @@ body.watching #bubbles,body.watching .dock,body.watching .camctl,body.watching .
 
 <div class="float gamebox" id="gameBox" hidden><div class="gbh"><b id="gbT">Game</b><button id="gbX" aria-label="Close the game">×</button></div><canvas id="gbCv" width="480" height="480"></canvas><div id="gbS"></div></div>
 <div class="float dpick" id="dpick" hidden></div>
+<div class="float dpick ipick" id="ipick" hidden></div>
 <div class="setup" id="setup" hidden></div>
 <div class="setup pwbox" id="pwBox" hidden><div class="setup-card pwcard" role="dialog" aria-modal="true" aria-labelledby="pwT">
   <h1 id="pwT">This room is locked</h1><p class="sub" id="pwP"></p>
@@ -2402,6 +2405,7 @@ function main(){
     if (still && k === 'help') el[1] = -0.2 - Math.max(0, Math.sin(t * 7)) * 0.35;
     if (still && k === 'call') el[0] = -2.35;
     V.elbows[0].rotation.x = el[0]; V.elbows[1].rotation.x = el[1];
+    if (V._ik && e && isInst(e)) { V.elbows[0].rotation.x = V._ik.el[0]; V.elbows[1].rotation.x = V._ik.el[1]; if (V._ik.kn) { V.knees[0].rotation.x = V._ik.kn[0]; V.knees[1].rotation.x = V._ik.kn[1]; } }
     if (e === 'dance' && V._dk) { V.elbows[0].rotation.x = V._dk.el[0]; V.elbows[1].rotation.x = V._dk.el[1]; if (V._dk.kn && !sit) { V.knees[0].rotation.x = V._dk.kn[0]; V.knees[1].rotation.x = V._dk.kn[1]; } }
   }
 
@@ -3333,14 +3337,21 @@ function main(){
     dance: { label: 'Dancing', emoji: '💃', color: '#ec4899', short: 'Dance' },
     sing: { label: 'Singing', emoji: '🎤', color: '#8b5cf6', short: 'Sing' },
     guitar: { label: 'Playing guitar', emoji: '🎸', color: '#f97316', short: 'Guitar' },
+    egtr: { label: 'Playing electric guitar', emoji: '⚡', color: '#dc2626', short: 'E-guitar' },
+    drums: { label: 'Playing the drums', emoji: '🥁', color: '#b45309', short: 'Drums' },
+    keys: { label: 'Playing the keyboard', emoji: '🎹', color: '#475569', short: 'Keyboard' },
+    dj: { label: 'DJing', emoji: '🎧', color: '#0ea5e9', short: 'DJ set' },
     sleep: { label: 'Sleeping', emoji: '😴', color: '#3b82f6', short: 'Sleep' }
   };
 
-  // ================= 20 dances =================
+  // ================= 27 dances (23 classics + 4 Pinoy TikTok) =================
   const DANCES = [['groove', 'Groove', '🕺'], ['disco', 'Disco point', '✨'], ['robot', 'Robot', '🤖'], ['floss', 'Floss', '🧵'], ['dab', 'Dab', '😎'],
     ['twist', 'Twist', '🌀'], ['runman', 'Running man', '🏃'], ['sprinkler', 'Sprinkler', '💦'], ['cart', 'Shopping cart', '🛒'], ['roof', 'Raise the roof', '🙌'],
     ['chicken', 'Chicken dance', '🐔'], ['hula', 'Hula', '🌺'], ['spin', 'Spin', '💫'], ['jacks', 'Jumping jacks', '⭐'], ['headbang', 'Headbang', '🤘'],
-    ['wave', 'Arm wave', '🌊'], ['cabbage', 'Cabbage patch', '🥬'], ['cancan', 'Can-can', '🦵'], ['salsa', 'Salsa', '💃'], ['moonwalk', 'Moonwalk', '🌙']];
+    ['wave', 'Arm wave', '🌊'], ['cabbage', 'Cabbage patch', '🥬'], ['cancan', 'Can-can', '🦵'], ['salsa', 'Salsa', '💃'], ['moonwalk', 'Moonwalk', '🌙'],
+    ['hiphop', 'Hip-hop', '🧢'], ['shuffle', 'Shuffle', '👟'], ['toprock', 'Breakdance', '🔥'],
+    // Pinoy TikTok dances (simple takes on the moves, made for the office characters)
+    ['ikembot', 'Ikembot Mo', '🏄', 'ph'], ['ale', 'Ale fit check', '👗', 'ph'], ['budots', 'Budots', '🔊', 'ph'], ['drbeat', 'Dr. Beat', '🩺', 'ph']];
   const DN = {}; DANCES.forEach(d => { DN[d[0]] = { name: d[1], e: d[2] }; });
   const DANCE_IDS = DANCES.map(d => d[0]);
   function emInfo(e) {
@@ -3416,6 +3427,41 @@ function main(){
       case 'salsa':
         legs(-0.35 * s, 0.35 * s); kn = [0.2 + N * 0.4, 0.2 + P * 0.4]; B.rotation.z = Math.sin(b * 2) * 0.06; side(Math.sin(b * 2) * 0.035);
         arm(0, -0.6, -0.8); arm(1, -0.9, 0.3); el = [-1.3, -1.6]; B.rotation.y = s * 0.2; Hd.rotation.y = -s * 0.25; up(as * 0.03); break;
+      case 'ikembot': { const w2 = Math.sin(b * 2), hips = Math.sin(b / 4) > 0;
+        // Ikembot Mo: quick side-to-side hip wiggle; hands on hips, then surfer "paddle" arms
+        side(w2 * 0.06); B.rotation.z = -w2 * 0.12; B.rotation.y = Math.sin(b) * 0.12;
+        kn = [0.3 + Math.max(0, w2) * 0.35, 0.3 + Math.max(0, -w2) * 0.35]; up(-0.03 - as * 0.02);
+        if (hips) { arm(0, 0.3, -0.6); arm(1, 0.3, 0.6); el = [-1.6, -1.6]; }
+        else { arm(0, -1.4 + s * 0.45, -0.3); arm(1, -1.4 - s * 0.45, 0.3); el = [-0.3, -0.3]; }
+        Hd.rotation.set(0, -Math.sin(b) * 0.15, w2 * 0.1); break; }
+      case 'ale': { const st2 = Math.sin(b), sweep = 0.5 - 0.5 * Math.cos(b / 2);
+        // Ale fit check: step-touch bounce, one hand on the hip, the other sweeps down to show off the outfit
+        side(st2 * 0.05); legz(-0.12 * P, 0.12 * N); kn = [0.15 + N * 0.35, 0.15 + P * 0.35]; up(as * 0.04);
+        arm(1, -2.3 + sweep * 2.0, 0.35); arm(0, 0.15, -0.6); el = [-1.7, -0.25 - sweep * 0.3];
+        B.rotation.y = -0.2 + st2 * 0.15; Hd.rotation.set(-0.05 + sweep * 0.25, st2 * 0.2, -st2 * 0.12); break; }
+      case 'budots': { const k2 = Math.max(0, Math.sin(b * 1.5)), r1 = Math.sin(b * 0.7), r2 = Math.sin(b * 1.1 + 1);
+        // Budots: low loose squat, knees opening and closing, ragdoll arms swaying and pointing
+        up(-0.1 - as * 0.03); legs(-0.55, -0.55); kn = [1.0 + as * 0.2, 1.0 + as * 0.2]; legz(-0.15 - k2 * 0.35, 0.15 + k2 * 0.35);
+        B.rotation.x = 0.25; B.rotation.z = Math.sin(b) * 0.12; B.rotation.y = r1 * 0.3;
+        arm(0, -1.0 + r1 * 0.7, -0.3 - Math.max(0, r2) * 0.8); arm(1, -1.0 + r2 * 0.7, 0.3 + Math.max(0, -r1) * 0.8);
+        el = [-0.6 - Math.max(0, r2) * 0.9, -0.6 - Math.max(0, r1) * 0.9];
+        Hd.rotation.set(-0.15, r2 * 0.3, Math.sin(b) * 0.15); break; }
+      case 'drbeat': { const k3 = Math.floor(b * 2 / Math.PI) % 4, kick = Math.max(0, Math.sin(b * 2));
+        // Dr. Beat (emergency budots trend): stiff little kick steps, bent arms pumping, deadpan head tilts
+        if (k3 % 2 === 0) { legs(-0.45 * kick, 0); kn = [0.2 * kick, 0.08]; } else { legs(0, -0.45 * kick); kn = [0.08, 0.2 * kick]; }
+        arm(0, -0.25 - kick * 0.15, -0.2); arm(1, -0.25 - kick * 0.15, 0.2); el = [-1.4, -1.4];
+        B.rotation.y = k3 < 2 ? 0.2 : -0.2; Hd.rotation.set(0.05, 0, k3 < 2 ? 0.12 : -0.12); up(kick * 0.03); break; }
+      case 'hiphop':
+        kn = [0.35 + as * 0.4, 0.35 + as * 0.4]; up(-as * 0.05); legs(-0.12 - as * 0.15, -0.12 - as * 0.15); legz(-0.12, 0.12);
+        B.rotation.x = 0.12 + as * 0.08; B.rotation.y = Math.sin(b / 2) * 0.35;
+        arm(0, -0.5 - P * 0.7, -0.3 - P * 0.45); arm(1, -0.5 - N * 0.7, 0.3 + N * 0.45); el = [-1.25, -1.25];
+        Hd.rotation.x = as * 0.28; Hd.rotation.y = -Math.sin(b / 2) * 0.2; break;
+      case 'shuffle':
+        legz(-P * 0.55, N * 0.55); legs(-P * 0.3, -N * 0.3); kn = [0.1 + P * 0.7, 0.1 + N * 0.7]; up(as * 0.05); side(Math.sin(b / 2) * 0.05);
+        arm(0, -0.6 + s * 0.35, -0.2); arm(1, -0.6 - s * 0.35, 0.2); el = [-1.45, -1.45]; Hd.rotation.x = as * 0.12; break;
+      case 'toprock':
+        legs(-P * 0.7, -N * 0.7); kn = [0.3 + P * 0.8, 0.3 + N * 0.8]; B.rotation.x = 0.22; B.rotation.y = s * 0.4; up(-0.02 + as * 0.04);
+        arm(0, -1.1, -0.2 - c * 0.8); arm(1, -1.1, 0.2 + c * 0.8); el = [-1.0, -1.0]; Hd.rotation.y = -s * 0.25; Hd.rotation.x = 0.1; break;
       case 'moonwalk':
         legs(s * 0.3, -s * 0.3); kn = [N * 0.9 + 0.05, P * 0.9 + 0.05]; if (!sit) B.position.z = -0.22 * (0.5 - 0.5 * Math.cos(b / 4));
         arm(0, -0.2 * s, -0.15); arm(1, 0.2 * s, 0.15); el = [-0.5, -0.5]; Hd.rotation.x = 0.1; B.rotation.x = 0.05; up(as * 0.02); break;
@@ -3466,11 +3512,11 @@ function main(){
     const el = document.getElementById('dpick'); if (!el || el.hidden) return;
     const e = me.emote && me.emote.type === 'dance' ? me.emote : null;
     el.innerHTML = '<div class="dph"><b>Dances</b><span>' + (e ? (e.mix ? 'Party mix · ' : 'Now: ') + esc(DN[e.style].name) : 'Pick one to start dancing') + '</span><button class="x" data-dp="close" aria-label="Close">×</button></div>' +
-      '<div class="dpg">' + DANCES.map(d => '<button data-dp="go" data-v="' + d[0] + '" class="' + (e && !e.mix && e.style === d[0] ? 'cur' : '') + '"><span class="de">' + d[2] + '</span>' + esc(d[1]) + '</button>').join('') + '</div>' +
+      ['', 'ph'].map(g => { const ds = DANCES.filter(d => (d[3] || '') === g); return (g === 'ph' ? '<div class="dplbl">🇵🇭 Pinoy TikTok</div>' : '') + '<div class="dpg">' + ds.map(d => '<button data-dp="go" data-v="' + d[0] + '" class="' + (e && !e.mix && e.style === d[0] ? 'cur' : '') + '"><span class="de">' + d[2] + '</span>' + esc(d[1]) + '</button>').join('') + '</div>'; }).join('') +
       '<div class="dpf"><button data-dp="go" data-v="mix" class="' + (e && e.mix ? 'cur' : '') + '">🎲 Party mix</button><button data-dp="stop"' + (e ? '' : ' disabled') + '>Stop dancing</button></div>';
   }
   function openDancePicker() { const el = document.getElementById('dpick'); el.hidden = false; renderDancePicker(); }
-  function toggleDancePicker() { const el = document.getElementById('dpick'); if (el.hidden) openDancePicker(); else el.hidden = true; }
+  function toggleDancePicker() { const el = document.getElementById('dpick'); if (el.hidden) { const ip = document.getElementById('ipick'); if (ip) ip.hidden = true; openDancePicker(); } else el.hidden = true; }
   function danceButton() { if (!(me.emote && me.emote.type === 'dance')) startDance(me, me.lastDance || 'groove'); openDancePicker(); }
   document.getElementById('dpick').addEventListener('click', ev => {
     const b = ev.target.closest('[data-dp]'); if (!b) return;
@@ -3496,6 +3542,104 @@ function main(){
     part(sphG, mMicProp, 0, 0.075, 0, g, 0.035, 0.035, 0.035);
     g.position.set(0, -0.01, 0.04); g.rotation.x = Math.PI; w.v.hands[1].add(g); w.v.micp = g; applyStyleTo(g); return g;
   }
+
+  // ================= instruments =================
+  const INSTR = ['guitar', 'egtr', 'drums', 'keys', 'dj'];
+  const INST_FX = { guitar: ['♪', '♫'], egtr: ['⚡', '🤘', '♫'], drums: ['🥁', '💥', '♪'], keys: ['♪', '♫', '🎹'], dj: ['🎶', '🔊', '♫'] };
+  const isInst = t => INSTR.indexOf(t) > -1;
+  const mInRed = M(0xc81e2a, { roughness: 0.45 }), mInBlk = M(0x1c1d22, { roughness: 0.5 }), mInWht = M(0xf4f4f4, { roughness: 0.6 }), mInChr = M(0xd2d6dc, { metalness: 0.7, roughness: 0.25 });
+  const mInGold = M(0xe0b030, { metalness: 0.6, roughness: 0.3 }), mInWood = M(0x8a5a2c, { roughness: 0.6 }), mInNeon = new THREE.MeshBasicMaterial({ color: 0x3fd0ff }), mInDisc = M(0x2a2b30, { roughness: 0.3 });
+  function instProp(w, type) {
+    const V = w.v, key = 'p_' + type;
+    if (V[key]) return V[key];
+    if (type === 'guitar') { V[key] = guitarProp(w); return V[key]; }
+    const g = new THREE.Group(), bx = (a, b, c, m, x, y, z) => part(BX(a, b, c), m, x, y, z, g), cy = (r1, r2, h, m, x, y, z, seg) => part(new THREE.CylinderGeometry(r1, r2, h, seg || 16), m, x, y, z, g);
+    if (type === 'egtr') {
+      bx(0.3, 0.2, 0.05, mInRed, 0, -0.05, 0); bx(0.2, 0.1, 0.05, mInRed, 0.08, 0.08, 0); bx(0.14, 0.12, 0.012, mInWht, -0.02, -0.04, 0.028);
+      [-0.08, 0.0].forEach(y => bx(0.08, 0.025, 0.012, mInBlk, 0.02, y, 0.036));
+      bx(0.04, 0.36, 0.025, mInBlk, 0, 0.3, 0); bx(0.07, 0.09, 0.03, mInBlk, 0, 0.52, 0);
+      g.position.set(0.02, 0.86, 0.2); g.rotation.set(0, 0, 1.05); g.scale.set(1.2, 1.2, 1.2); V.body.add(g);
+      const amp = new THREE.Group(); amp.position.set(0.6, 0, 0.15); V.root.add(amp);
+      part(BX(0.38, 0.42, 0.26), mInBlk, 0, 0.21, 0, amp); part(BX(0.3, 0.26, 0.01), M(0x3a3b42, { roughness: 1 }), 0, 0.2, 0.135, amp); part(BX(0.36, 0.06, 0.02), mInGold, 0, 0.37, 0.13, amp);
+      g.userData.extra = [amp]; applyStyleTo(amp);
+    } else if (type === 'drums') {
+      const bd = cy(0.27, 0.27, 0.22, mInRed, 0, 0.29, 0.62); bd.rotation.x = Math.PI / 2;
+      const bf = cy(0.25, 0.25, 0.01, mInWht, 0, 0.29, 0.735); bf.rotation.x = Math.PI / 2;
+      cy(0.15, 0.15, 0.1, mInWht, -0.27, 0.62, 0.42); cy(0.152, 0.152, 0.02, mInChr, -0.27, 0.57, 0.42); cy(0.012, 0.012, 0.56, mInChr, -0.27, 0.3, 0.42, 6);
+      cy(0.16, 0.16, 0.3, mInRed, 0.3, 0.48, 0.42); cy(0.162, 0.162, 0.01, mInWht, 0.3, 0.635, 0.42);
+      const rt = cy(0.11, 0.11, 0.12, mInRed, 0.02, 0.66, 0.55); rt.rotation.x = -0.35;
+      const cym = cy(0.22, 0.2, 0.012, mInGold, 0.45, 1.1, 0.6, 20); cym.rotation.x = 0.25; cy(0.012, 0.012, 1.08, mInChr, 0.45, 0.54, 0.6, 6);
+      cy(0.15, 0.15, 0.012, mInGold, -0.47, 0.86, 0.38, 18); cy(0.15, 0.15, 0.012, mInGold, -0.47, 0.84, 0.38, 18); cy(0.012, 0.012, 0.84, mInChr, -0.47, 0.42, 0.38, 6);
+      const stool = new THREE.Group(); g.add(stool); part(new THREE.CylinderGeometry(0.19, 0.19, 0.06, 14), mInBlk, 0, 0.42, -0.02, stool); part(new THREE.CylinderGeometry(0.025, 0.025, 0.4, 6), mInChr, 0, 0.2, -0.02, stool);
+      V.root.add(g); g.userData.cym = cym; g.userData.stool = stool;
+      const sticks = V.hands.map(h => { const s = part(new THREE.CylinderGeometry(0.01, 0.013, 0.3, 6), mInWood, 0, -0.04, 0.12, h); s.rotation.x = 1.25; return s; });
+      g.userData.sticks = sticks;
+    } else if (type === 'keys') {
+      [-0.32, 0.32].forEach(x => { const l1 = bx(0.03, 0.92, 0.03, mInChr, x, 0.42, 0.42); l1.rotation.x = 0.35; const l2 = bx(0.03, 0.92, 0.03, mInChr, x, 0.42, 0.42); l2.rotation.x = -0.35; });
+      bx(0.95, 0.07, 0.3, mInBlk, 0, 0.86, 0.42); bx(0.9, 0.015, 0.16, mInWht, 0, 0.9, 0.36);
+      for (let k = 0; k < 13; k++) if ([2, 6, 9, 13].indexOf(k % 7) < 0 && k % 7 !== 3) bx(0.03, 0.02, 0.09, mInBlk, -0.39 + k * 0.065, 0.91, 0.39);
+      bx(0.3, 0.03, 0.06, M(0x2a2b30), 0.25, 0.905, 0.53); [0.15, 0.22, 0.29].forEach(x => cy(0.012, 0.012, 0.02, mInRed, x, 0.925, 0.53, 8));
+      V.root.add(g);
+    } else if (type === 'dj') {
+      bx(1.1, 0.06, 0.48, mInBlk, 0, 0.88, 0.48); bx(1.1, 0.85, 0.06, mInBlk, 0, 0.43, 0.7); bx(1.1, 0.03, 0.065, mInNeon, 0, 0.62, 0.705);
+      [-1, 1].forEach(s => bx(0.06, 0.85, 0.46, mInBlk, s * 0.52, 0.43, 0.48));
+      const plats = [-0.3, 0.3].map(x => { bx(0.32, 0.03, 0.32, M(0x3a3b42), x, 0.925, 0.46); const p = cy(0.13, 0.13, 0.02, mInDisc, x, 0.95, 0.46, 20); const lb = cy(0.04, 0.04, 0.022, mInRed, x, 0.952, 0.46, 12); return [p, lb]; });
+      bx(0.16, 0.04, 0.28, M(0x2a2b30), 0, 0.93, 0.46); [-0.04, 0, 0.04].forEach(x => bx(0.015, 0.02, 0.1, mInNeon, x, 0.955, 0.44));
+      V.root.add(g); g.userData.plats = plats;
+      const hp = new THREE.Group(); V.head.add(hp);
+      part(BX(0.44, 0.03, 0.06), mInBlk, 0, 0.3, 0, hp); [-1, 1].forEach(s => { part(BX(0.03, 0.24, 0.05), mInBlk, s * 0.225, 0.18, 0, hp); part(BX(0.07, 0.14, 0.13), mInRed, s * 0.225, 0.02, 0, hp); });
+      g.userData.extra = [hp]; applyStyleTo(hp);
+    }
+    applyStyleTo(g); V[key] = g; return g;
+  }
+  function showInst(w, type) {
+    const V = w.v;
+    INSTR.forEach(k => { const g = V['p_' + k] || (k === 'guitar' ? V.gtr : null); if (!g) return; const on = k === type; g.visible = on; (g.userData.extra || []).forEach(x => { x.visible = on; }); (g.userData.sticks || []).forEach(x => { x.visible = on; }); });
+  }
+  function poseInst(w, type, t, bp, sitting) {
+    const V = w.v, A = V.arms, Hd = V.head, B = V.body, g = instProp(w, type), beat = t * Math.PI * bp;
+    if (type === 'egtr') {
+      A[0].rotation.x = -1.1; A[0].rotation.z = 0.75; A[1].rotation.x = -0.75 + Math.sin(t * 22) * 0.32; A[1].rotation.z = 0.35;
+      Hd.rotation.set(0.15 + Math.max(0, Math.sin(beat)) * 0.35, 0.1, 0); if (!sitting) { B.position.y = Math.abs(Math.sin(beat)) * 0.04; B.rotation.x = 0.08; }
+      V._ik = { el: [-1.1, -1.0], kn: sitting ? null : [0.25, 0.25] };
+    } else if (type === 'drums') {
+      const hitL = Math.max(0, Math.sin(beat * 2)), hitR = Math.max(0, Math.sin(beat * 2 + Math.PI));
+      A[0].rotation.x = -0.85 - hitL * 0.55; A[0].rotation.z = -0.15; A[1].rotation.x = -0.85 - hitR * 0.55; A[1].rotation.z = 0.15;
+      Hd.rotation.set(0.1 + Math.abs(Math.sin(beat)) * 0.15, 0, Math.sin(beat / 2) * 0.1);
+      g.userData.stool.visible = !sitting;
+      if (!sitting) { V.legs[0].rotation.x = V.legs[1].rotation.x = -1.45; B.position.y = 0.45 + SADJ + Math.abs(Math.sin(beat)) * 0.01; }
+      V._ik = { el: [-0.5 - hitL * 0.6, -0.5 - hitR * 0.6], kn: [1.5, 1.5] };
+      if (g.userData.cym) g.userData.cym.rotation.z = Math.sin(t * 9) * 0.06 * hitR;
+    } else if (type === 'keys') {
+      const s = Math.sin(t * 6);
+      A[0].rotation.x = -1.2; A[0].rotation.z = -0.25 + s * 0.12; A[1].rotation.x = -1.2; A[1].rotation.z = 0.25 + Math.sin(t * 6 + 1.7) * 0.12;
+      Hd.rotation.set(0.3, Math.sin(beat / 2) * 0.15, 0); if (!sitting) B.position.y = Math.abs(Math.sin(beat)) * 0.015;
+      V._ik = { el: [-0.75 + Math.max(0, Math.sin(t * 12)) * 0.1, -0.75 + Math.max(0, Math.sin(t * 12 + 2)) * 0.1], kn: null };
+    } else if (type === 'dj') {
+      const bar = Math.floor(t * bp / 2) % 4, pump = bar === 3;
+      A[0].rotation.x = -1.15; A[0].rotation.z = -0.1 + Math.sin(t * 8) * 0.12;
+      if (pump) { A[1].rotation.x = -0.2; A[1].rotation.z = 2.7 + Math.max(0, Math.sin(beat)) * 0.3; } else { A[1].rotation.x = -1.1; A[1].rotation.z = 0.2; }
+      Hd.rotation.set(0.2 + Math.max(0, Math.sin(beat)) * 0.3, 0, 0); if (!sitting) B.position.y = Math.abs(Math.sin(beat)) * 0.03;
+      V._ik = { el: [-0.8, pump ? -0.3 : -0.8], kn: sitting ? null : [0.12 + Math.abs(Math.sin(beat)) * 0.25, 0.12 + Math.abs(Math.sin(beat)) * 0.25] };
+      (g.userData.plats || []).forEach((p, k) => { const r = elapsed * (k ? 3.4 : 3.4 + Math.sin(t * 8) * 2.5); p[0].rotation.y = r; p[1].rotation.y = r; });
+    }
+  }
+  function renderInstPicker() {
+    const el = document.getElementById('ipick'); if (!el || el.hidden) return;
+    const cur = me.emote && isInst(me.emote.type) ? me.emote.type : null;
+    el.innerHTML = '<div class="dph"><b>Instruments</b><span>' + (cur ? 'Now: ' + esc(EMOTES[cur].short) : 'Pick one to start playing') + '</span><button class="x" data-ip="close" aria-label="Close">×</button></div>' +
+      '<div class="dpg">' + INSTR.map(k => '<button data-ip="go" data-v="' + k + '" class="' + (cur === k ? 'cur' : '') + '"><span class="de">' + EMOTES[k].emoji + '</span>' + esc(EMOTES[k].short) + '</button>').join('') + '</div>' +
+      '<div class="dpf"><button data-ip="stop"' + (cur ? '' : ' disabled') + '>Stop playing</button></div>';
+  }
+  function toggleInstPicker() { const el = document.getElementById('ipick'), dp = document.getElementById('dpick'); if (el.hidden) { if (dp) dp.hidden = true; el.hidden = false; renderInstPicker(); } else el.hidden = true; }
+  document.getElementById('ipick').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-ip]'); if (!b) return;
+    const a = b.dataset.ip;
+    if (a === 'close') document.getElementById('ipick').hidden = true;
+    else if (a === 'stop') { if (me.emote && isInst(me.emote.type)) setEmote(me, null); }
+    else if (a === 'go') { if (!(me.emote && me.emote.type === b.dataset.v)) setEmote(me, b.dataset.v); }
+    renderInstPicker();
+  });
   function setEmote(w, type, secs, style) {
     const prev = w.emote ? w.emote.type : null;
     if (!type || prev === type) {
@@ -3515,12 +3659,13 @@ function main(){
       const ei = emInfo(w.emote);
       post(null, nmOf(w) + (w === me ? ' are ' : ' is ') + emPhrase(w.emote) + ' ' + ei.emoji + (w.emote.mix ? ' (party mix)' : ''));
     }
-    w.bkey = ''; renderEmoteBar(); renderTeam(); if (w === me) renderDancePicker();
+    w.bkey = ''; renderEmoteBar(); renderTeam(); if (w === me) { renderDancePicker(); if (typeof renderInstPicker === 'function') renderInstPicker(); }
     if (card.dataset.id === w.id && !card.hidden && !cs.wsp && !cs.open && !cs.look) renderCard();
   }
   function renderEmoteBar() {
     const el = $('emoBar'); if (!el) return;
-    el.innerHTML = Object.keys(EMOTES).map(k => { const on = !!(me.emote && me.emote.type === k); return '<button data-emo="' + k + '" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>'; }).join('') +
+    const ion = !!(me.emote && isInst(me.emote.type));
+    el.innerHTML = Object.keys(EMOTES).filter(k => !isInst(k) || k === 'guitar').map(k => { if (k === 'guitar') return '<button data-emo="band" class="' + (ion ? 'cur' : '') + '" aria-pressed="' + ion + '" title="Instruments (3)">' + (ion ? EMOTES[me.emote.type].emoji + ' ' + EMOTES[me.emote.type].short : '🎸 Instruments') + '</button>'; const on = !!(me.emote && me.emote.type === k); return '<button data-emo="' + k + '" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>'; }).join('') +
       (function () { const sOn = typeof isSittingDown === 'function' && isSittingDown(); const on = typeof isResting === 'function' && isResting(); return '<button data-emo="sit" class="' + (sOn ? 'cur' : '') + '" aria-pressed="' + sOn + '" title="Sit down (6)">' + (sOn ? '🧍 Stand up' : '🪑 Sit') + '</button><button data-emo="lie" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '" title="Lie down (5)">🛌 ' + (on ? 'Get up' : 'Lie down') + '</button>'; })();
   }
   function floatFx(w, txt, cls) {
@@ -3559,14 +3704,14 @@ function main(){
     if (e.nx <= 0) {
       if (e.type === 'sleep') { floatFx(w, rnd(['z', 'Z', 'Zz']), 'z'); e.nx = 1.1; }
       else if (e.type === 'sing') { floatFx(w, rnd(['♪', '♫', '♬'])); e.nx = 0.55; }
-      else if (e.type === 'guitar') { floatFx(w, rnd(['♪', '♫'])); e.nx = 0.5; if (w === me) strum(); }
+      else if (isInst(e.type)) { floatFx(w, rnd(INST_FX[e.type])); e.nx = e.type === 'drums' ? 0.4 : 0.5; }
       else { if (Math.random() < 0.5) floatFx(w, rnd(['✨', '♪'])); e.nx = 0.8; }
     }
   }
   function poseEmote(w) {
     const e = w.emote, V = w.v;
     const type = e && w.mode !== 'walk' ? e.type : null;
-    if (V.gtr) V.gtr.visible = type === 'guitar';
+    showInst(w, isInst(type) ? type : null); V._ik = null;
     if (V.micp) V.micp.visible = type === 'sing';
     const blink = Math.sin(elapsed * 0.9 + w.i * 2.1) > 0.985 || (!type && stInfo(w).key === 'away' && w.mode !== 'walk') ? 0.15 : 1;
     V.eyes.forEach(m => { m.scale.y = type === 'sleep' ? 0.12 : blink; });
@@ -3590,6 +3735,8 @@ function main(){
       V.arms[0].rotation.x = -1.1; V.arms[0].rotation.z = 0.75;
       V.arms[1].rotation.x = -0.75 + Math.sin(t * 14) * 0.28; V.arms[1].rotation.z = 0.35;
       V.head.rotation.set(0.25, 0.1, Math.sin(t * Math.PI * bp * 0.5) * 0.12);
+    } else if (isInst(type)) {
+      poseInst(w, type, t, bp, sitting);
     } else if (type === 'sleep') {
       V.head.rotation.set(0.5, 0, 0.25);
       V.arms[0].rotation.x = sitting ? -0.9 : 0; V.arms[1].rotation.x = sitting ? -0.9 : 0;
@@ -3601,7 +3748,7 @@ function main(){
     const k = stInfo(w).key;
     if (k === 'meeting') return;
     let type;
-    if (k === 'break') type = rnd(['guitar', 'sleep', 'sing', 'dance']);
+    if (k === 'break') type = rnd(['guitar', 'egtr', 'drums', 'keys', 'dj', 'sleep', 'sing', 'dance']);
     else if (k === 'lunch') type = rnd(['sing', 'dance']);
     else type = audible() ? rnd(['dance', 'sing', 'dance']) : rnd(['sleep', 'sing']);
     setEmote(w, type, 14 + Math.random() * 14);
@@ -3742,7 +3889,7 @@ function main(){
     }
   }
   function renderDock() {
-    $('dock').innerHTML = '<input id="hbIn" maxlength="160" autocomplete="off" placeholder="Say something…" aria-label="Chat message">' + '<button data-dance="1" title="Dances" aria-label="Dances">💃</button>' + REACTS.map(r => '<button data-rx="' + r[0] + '" title="' + r[2] + '" aria-label="' + r[2] + '">' + r[1] + '</button>').join('');
+    $('dock').innerHTML = '<input id="hbIn" maxlength="160" autocomplete="off" placeholder="Say something…" aria-label="Chat message">' + '<button data-dance="1" title="Dances" aria-label="Dances">💃</button><button data-inst="1" title="Instruments" aria-label="Instruments">🎸</button>' + REACTS.map(r => '<button data-rx="' + r[0] + '" title="' + r[2] + '" aria-label="' + r[2] + '">' + r[1] + '</button>').join('');
   }
 
   // ================= first-time setup =================
@@ -5481,7 +5628,7 @@ function main(){
   const walkBtn = document.getElementById('walkBtn'), help = document.getElementById('help');
   function setWalk(on) {
     walking = on; walkBtn.classList.toggle('on', on); walkBtn.textContent = on ? 'Exit walk' : 'Walk around';
-    help.textContent = on ? 'W A S D or arrow keys to move · Drag to look · Esc to exit' : habbo ? 'Click a tile to walk, anything to touch it, a desk or chair to sit · 💃 for 20 dances · Click a person to whisper or slap · Drag to move the view · Right-drag or Q / E to rotate · T to change the angle · Scroll to zoom · M: mic · 1–4: emotes' : 'Click the floor to walk, a desk or chair to sit · Click a person to whisper or slap · Drag to orbit · Right-drag to pan · Scroll to zoom · M: mic · 1–4: emotes';
+    help.textContent = on ? 'W A S D or arrow keys to move · Drag to look · Esc to exit' : habbo ? 'Click a tile to walk, anything to touch it, a desk or chair to sit · 💃 for 24 dances · Click a person to whisper or slap · Drag to move the view · Right-drag or Q / E to rotate · T to change the angle · Scroll to zoom · M: mic · 1–4: emotes' : 'Click the floor to walk, a desk or chair to sit · Click a person to whisper or slap · Drag to orbit · Right-drag to pan · Scroll to zoom · M: mic · 1–4: emotes';
     persp.rotation.order = 'YXZ'; camera = on ? persp : (habbo ? ortho : persp); updateWalls();
     if (on) { tw = null; wk.x = 0.8; wk.z = 9.2; wk.yaw = 0; wk.pitch = -0.05; document.querySelectorAll('#views button').forEach(b => b.classList.remove('on')); cvs.focus(); }
   }
@@ -5832,9 +5979,9 @@ function main(){
   if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
 
   renderAV(); renderMe(); renderTeam(); renderTasks(); renderCounts(); renderEmoteBar(); renderDock();
-  $('dock').addEventListener('click', e => { if (e.target.closest('[data-dance]')) { toggleDancePicker(); return; } const b = e.target.closest('[data-rx]'); if (b) react(me, b.dataset.rx); });
+  $('dock').addEventListener('click', e => { if (e.target.closest('[data-inst]')) { toggleInstPicker(); return; } if (e.target.closest('[data-dance]')) { toggleDancePicker(); return; } const b = e.target.closest('[data-rx]'); if (b) react(me, b.dataset.rx); });
   { const hbIn = $('hbIn'); mpAttach(hbIn); if (hbIn) hbIn.addEventListener('keydown', e => { e.stopPropagation(); if (mpKey(e, hbIn)) return; if (e.key === 'Enter') { const t = hbIn.value.trim(); if (t) { hbIn.value = ''; mpClose(); const re = replyTo; clearReply(); sendText(t, { re: re }); } } }); }
-  $('emoBar').addEventListener('click', e => { const b = e.target.closest('[data-emo]'); if (!b) return; if (b.dataset.emo === 'lie') toggleLie(); else if (b.dataset.emo === 'sit') toggleSit(); else if (b.dataset.emo === 'dance') danceButton(); else setEmote(me, b.dataset.emo); });
+  $('emoBar').addEventListener('click', e => { const b = e.target.closest('[data-emo]'); if (!b) return; if (b.dataset.emo === 'lie') toggleLie(); else if (b.dataset.emo === 'sit') toggleSit(); else if (b.dataset.emo === 'dance') danceButton(); else if (b.dataset.emo === 'band') toggleInstPicker(); else setEmote(me, b.dataset.emo); });
   post(null, 'Welcome to the office chat · ' + fmtT(new Date()));
   post(null, '🎄 The office is decorated for Christmas! Play 🔔 Jingle Bells in the Music tab.');
   if (ONLINE) post(null, '🌐 This is the multiplayer office. Everyone you see here is a real person who opened the same link.');
