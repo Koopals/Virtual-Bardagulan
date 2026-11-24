@@ -18,7 +18,7 @@ A pixel-hotel style virtual office that runs in the browser. Real people open th
 - **Play any link for the room:** the jukebox plays YouTube, YouTube Music, Vimeo, Dailymotion, Spotify, SoundCloud, Twitch, Google Drive videos, direct video files (`.mp4`, `.webm`) and most other embeddable links. Click **⛶** on the player for the big screen and have a movie night. Late joiners jump to the right spot in direct video files. Some sites, like Netflix, don't allow playing inside other pages. Songs from your own computer only play for you.
 - **Office, hallway and rooms:** you start in the office, with a hallway (half the office's size) right in front of it, so you see both at once. Walk through the opening in the low wall to get from one to the other. The hallway is a lobby lounge with sofas, armchairs, coffee tables, rugs, lamps, plants, art, a room directory, a vending machine and a water cooler. The hallway has a row of glowing doors, one for each room: game room, pool, basketball court, sleeping quarters, bar, movie room, gym and beach. Hover over a door to see which room it is and how many people are inside, then click it to go in. Each room is as big as the office (with windows along the back) and shows on its own. Use the room's door to come back, or the **Rooms** buttons to jump anywhere. People only show up, and can only hear each other, when they're in the same area. Chat still reaches everyone.
 - **Entertainment wing:** a hallway runs through the east wing, with a door into each room: game room, pool and basketball court on one side, sleeping quarters, bar and movie room on the other, and the gym at the end with a door out to the beach.
-- **Movie room:** click the big screen to put a movie on (paste a YouTube, Vimeo or video link) and press **▶ Watch**. Your character takes a seat and the view switches to first person, looking straight at the screen with the movie playing on it. Only people who press Watch see the movie up close and hear it; everyone else sees “Now showing” on the screen. Press **✕ Exit** or Esc to stop watching. People who join later start at the same point in the movie.
+- **Movie room:** click the big screen to put a movie on (paste a YouTube, Vimeo or video link). When something is showing, just **sit in any seat** and you join the movie: the view switches to first person, looking straight at the screen with the movie playing on it. You only need to go to the screen to start, change or stop a movie. Only people sitting in the seats see the movie up close and hear it; everyone else sees “Now showing” on the screen. Press **✕ Exit** or Esc to stop watching (you join again when you sit down again or a new movie starts). People who join later start at the same point in the movie.
 - **Fitness gym:** treadmills, exercise bikes, a punching bag, a bench press, dumbbells and yoga mats. Your character works out on each one, and a long workout makes you walk faster for a minute.
 - **Beach:** walk through the gym's east door onto a huge beach with palm trees, towels and umbrellas, sun loungers, a tiki bar, a bonfire, a lifeguard tower, a sandcastle, surfboards, a beach ball and crabs. Your character changes into a beach outfit as soon as you step on the sand, and back again when you come inside. Walk into the sea to swim.
 - **Camera angle:** use the buttons on the right edge of the office view (⟲ ⟳ to rotate, 📐 to change the tilt, ⌂ to reset), right-drag to turn the view freely, or press Q / E to rotate, T to tilt and R to reset. Walls between you and the room fade out so you can always see inside.
@@ -61,13 +61,13 @@ GitHub Pages can only host files, and multiplayer needs a small server. Render c
 
 ## Song search (optional)
 
-To search any song from the 🎵 Music menu, give the server a free YouTube Data API key:
+The 🔍 search in the 🎵 Music menu (YouTube and YouTube Music tabs) always works: without a key it opens the search on YouTube or YouTube Music in a new tab, and you paste the song's link into the link box. To see results right inside the office, give the server a free YouTube Data API key:
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com), create a project, open **APIs & Services → Library**, and turn on **YouTube Data API v3**.
 2. Open **APIs & Services → Credentials → Create credentials → API key**, and copy the key.
 3. On Render, open your service, go to **Environment**, add **YOUTUBE_API_KEY** with that key, and save. Render restarts the server.
 
-The free daily quota allows about 100 searches; results are cached for 30 minutes.
+The free daily quota allows about 100 searches; results are cached for 30 minutes. If a search fails, open **Logs** on Render: the server prints Google's reason (for example, the API isn't turned on or the key is wrong). YouTube Music has no separate key; the same key covers both tabs.
 
 ## Room passcodes
 
@@ -98,14 +98,20 @@ People type the passcode once, and their browser remembers it. After 5 wrong tri
 
 There are no made-up coworkers anywhere. Everyone in the office is a real person.
 
-- **The Render address** (`https://virtual-office-xxxx.onrender.com`) connects on its own. This is the easiest link to share.
-- **The GitHub Pages address** starts out not connected, with just you in the office. Click **🔌 Connect to server** in the top-left panel and paste your Render address. Your browser remembers it.
-- **To skip that step for everyone,** share a link with the server in it, like `https://<you>.github.io/<repo>/?server=virtual-office-xxxx.onrender.com`. The **🔗 Copy invite link** button builds this for you.
-- **To build the address into the page itself,** edit this line near the top of `index.html`:
+This copy is already connected to **https://virtual-bardagulan.onrender.com**. Both links open the same office, rooms, chat and voice:
 
-  ```js
-  window.VO_SERVER = 'https://virtual-office-xxxx.onrender.com';
-  ```
+- **Render:** https://virtual-bardagulan.onrender.com
+- **GitHub Pages:** `https://<you>.github.io/<repo>/`. Song search goes through the same Render server.
+
+The free Render server sleeps when nobody is using it. The first person in waits about a minute and sees "Connecting to the office… (a sleeping server can take a minute)".
+
+To use a different server, change this line near the top of `index.html` (the server ignores it and always uses its own address):
+
+```js
+window.VO_SERVER = 'https://virtual-bardagulan.onrender.com';
+```
+
+You can also click **🔌 Change server** in the top-left panel, or share a link like `?server=other-app.onrender.com`.
 
 ## Run it on your own computer
 

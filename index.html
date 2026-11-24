@@ -11,7 +11,7 @@
 /* Multiplayer server. Leave empty for the offline demo with made-up coworkers.
    The included server.js switches this to 'same' automatically. To make a GitHub Pages copy
    join a server too, put its address here, e.g. window.VO_SERVER = 'https://your-app.onrender.com'; */
-window.VO_SERVER = '';
+window.VO_SERVER = 'https://virtual-bardagulan.onrender.com';
 </script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 <style>
@@ -3245,12 +3245,12 @@ function main(){
     const row = (key, img, emo, title, sub) => '<div class="pk" data-pk="' + key + '">' + (img ? '<img src="' + img + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '<span class="pke">' + emo + '</span>') + '<div class="pkt"><b>' + esc(title) + '</b><span>' + esc(sub || '') + '</span></div><button data-pk="' + key + '" data-act="play" title="Play for everyone">▶</button><button data-pk="' + key + '" data-act="q" title="Add to queue">＋</button></div>';
     if (PK.src === 'yt' || PK.src === 'ytm') {
       const ytm = PK.src === 'ytm';
-      h += '<div class="pksearch"><input id="pkQ" maxlength="80" autocomplete="off" placeholder="' + (SEARCH_ON ? 'Search ' + (ytm ? 'YouTube Music' : 'YouTube') + ' for a song or artist…' : 'Search needs a YouTube key on the server (see below)') + '" value="' + esc(PK.q) + '"' + (SEARCH_ON ? '' : ' disabled') + '><button data-pkgo="1"' + (SEARCH_ON ? '' : ' disabled') + '>🔍</button></div>';
+      h += '<div class="pksearch"><input id="pkQ" maxlength="80" autocomplete="off" placeholder="Search ' + (ytm ? 'YouTube Music' : 'YouTube') + ' for a song or artist…" value="' + esc(PK.q) + '"><button data-pkgo="1" title="Search">🔍</button></div>';
       if (PK.busy) h += '<div class="pknote">Searching…</div>';
       if (PK.results) h += '<div class="lbl">Results</div>' + (PK.results.length ? PK.results.map((r, k) => row('s' + k, r.thumb || thumb(r.id), '🎵', r.title, r.channel + (ytm ? ' · starts a radio' : ''))).join('') : '<div class="pknote">No songs found. Try another search.</div>');
       if (ytm) h += '<div class="pknote">🎵 YouTube Music picks start a <b>song radio</b>: the song plays, then similar songs keep coming.</div>';
       YT_GROUPS.forEach((g, gi) => { h += '<div class="lbl">' + g[0] + '</div>' + g[1].map((s, si) => row('g' + gi + '_' + si, thumb(s[0]), '🎵', s[1], s[2] + (ytm && gi ? ' · radio' : ''))).join(''); });
-      if (!SEARCH_ON) h += '<p class="wnote">To search any song here, the server owner adds a free YouTube Data API key to the Render service as <b>YOUTUBE_API_KEY</b>. Until then, pick from the lists above or paste a link below.</p>';
+      if (!SEARCH_ON) h += '<p class="wnote">🔍 Search opens ' + (ytm ? 'YouTube Music' : 'YouTube') + ' in a new tab. Copy the song’s link and paste it in the <b>Or paste any link</b> box below. To see results right here, the server owner adds a free YouTube Data API key to Render as <b>YOUTUBE_API_KEY</b>.</p>';
     } else if (PK.src === 'sp') {
       h += '<div class="pknote">🟢 Spotify plays in the little player for each person. Press ▶ on it to start. Full songs need you to be logged in to Spotify Premium in this browser; otherwise Spotify plays 30-second previews.</div>';
       h += SP_LISTS.map((p, k) => row('p' + k, null, p[2], p[1], 'Spotify playlist')).join('');
@@ -3276,14 +3276,29 @@ function main(){
     P.unshift(it); savePicks(P); toast('⭐ Saved to My picks'); if (PK.src === 'my') renderPicks();
   }
   function doSearch(q) {
-    q = String(q || '').trim(); PK.q = q; if (!q || !SEARCH_ON) return;
+    q = String(q || '').trim(); PK.q = q; if (!q) { toast('Type a song or artist first.'); return; }
+    if (!SEARCH_ON) { openYTSearch(q); return; }
     PK.busy = true; renderPicks();
-    fetch('/api/yt-search?q=' + encodeURIComponent(q)).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+    fetch(API_BASE + '/api/yt-search?q=' + encodeURIComponent(q)).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
       PK.busy = false; PK.results = Array.isArray(d.items) ? d.items.slice(0, 10).filter(r => r && /^[\w-]{11}$/.test(String(r.id))).map(r => ({ id: String(r.id), title: String(r.title || '').slice(0, 100), channel: String(r.channel || '').slice(0, 60), thumb: /^https:\/\/i\.ytimg\.com\//.test(String(r.thumb || '')) ? String(r.thumb) : '' })) : [];
       renderPicks();
-    }).catch(err => { PK.busy = false; PK.results = []; renderPicks(); toast(err === 429 ? 'Too many searches. Wait a minute and try again.' : 'Search isn’t working right now. Pick from the lists or paste a link.'); });
+    }).catch(err => { PK.busy = false; PK.results = null; renderPicks(); if (err === 429) toast('Too many searches. Wait a minute and try again.'); else { toast('Search on the server isn’t working right now, so I opened it on YouTube instead.'); openYTSearch(q); } });
   }
-  const SEARCH_ON = !!window.VO_YTSEARCH && ONLINE;
+  let SEARCH_ON = !!window.VO_YTSEARCH && ONLINE;
+  const API_BASE = ONLINE ? String(ONLINE_URL).replace(/^ws/i, 'http').replace(/\/ws(\?.*)?$/i, '') : '';
+  // the page may be on GitHub Pages while the server sleeps, so keep asking until it answers
+  function probeSearch(n) {
+    if (!ONLINE || SEARCH_ON || !API_BASE) return;
+    try { fetch(API_BASE + '/api/yt-config').then(r => r.ok ? r.json() : null).then(d => { if (d && d.search) { SEARCH_ON = true; renderPicks(); } })
+      .catch(() => { if (n < 6) setTimeout(() => probeSearch(n + 1), 15000 * (n + 1)); }); } catch (e) {}
+  }
+  probeSearch(0);
+  function openYTSearch(q) {
+    q = String(q || '').trim(); if (!q) return;
+    const u = PK.src === 'ytm' ? 'https://music.youtube.com/search?q=' + encodeURIComponent(q) : 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
+    const w = window.open(u, '_blank', 'noopener'); 
+    toast(w === null ? 'Your browser blocked the new tab. Allow pop-ups for this page.' : '🔍 Opened ' + (PK.src === 'ytm' ? 'YouTube Music' : 'YouTube') + ' search in a new tab. Copy the song’s link and paste it in the link box below.');
+  }
   $('picks').addEventListener('click', e => {
     const t = e.target.closest('[data-src]'); if (t) { PK.src = t.dataset.src; PK.results = null; renderPicks(); return; }
     if (e.target.closest('[data-pkgo]')) { const q = document.getElementById('pkQ'); if (q) doSearch(q.value); return; }
@@ -7647,7 +7662,7 @@ function main(){
       x.fillStyle = '#ffffff'; x.beginPath(); x.moveTo(w / 2 - 13, hh * 0.36 - 21); x.lineTo(w / 2 + 23, hh * 0.36); x.lineTo(w / 2 - 13, hh * 0.36 + 21); x.closePath(); x.fill();
       x.fillStyle = '#ffd23f'; x.font = 'bold 22px Segoe UI, Arial, sans-serif'; x.fillText('NOW SHOWING', w / 2, hh * 0.62);
       x.fillStyle = '#ffffff'; x.font = 'bold 26px Segoe UI, Arial, sans-serif'; const t = String(MOVIE.title || ''); x.fillText(t.length > 30 ? t.slice(0, 29) + '…' : t, w / 2, hh * 0.75);
-      x.fillStyle = '#d8dce6'; x.font = '18px Segoe UI, Arial, sans-serif'; x.fillText('Click the screen and press ▶ Watch to join', w / 2, hh * 0.88);
+      x.fillStyle = '#d8dce6'; x.font = '18px Segoe UI, Arial, sans-serif'; x.fillText('Take a seat to watch', w / 2, hh * 0.88);
     } else {
       x.fillStyle = '#ffd23f'; x.font = 'bold 40px Segoe UI, Arial, sans-serif'; x.fillText('🎬 MOVIE NIGHT', w / 2, hh * 0.4);
       x.fillStyle = '#d8dce6'; x.font = '22px Segoe UI, Arial, sans-serif'; x.fillText('Click the screen to put a movie on', w / 2, hh * 0.62);
@@ -7674,8 +7689,9 @@ function main(){
     if ((by || 'me') === 'me' && NET.on && !NET.rx) netSend(url ? { t: 'ev', k: 'movie', kind: 'link', url: MOVIE.url, title: MOVIE.title, t0: MOVIE.t0 } : { t: 'ev', k: 'movie', kind: 'stop' });
     const who = byId[MOVIE.by] || me;
     if (url) post(null, '🎬 ' + nmOf(who) + ' put “' + MOVIE.title + '” on in the Movie room'); else post(null, '🎬 The movie was stopped');
+    if (url) MV.skip = null;
     drawMovie(); renderMovieBox(); if (MV.on) loadMoviePlayer();
-    if (url && !MV.on && !MV.pendSeat && zoneAt(me.x, me.z) === 'movie' && !inMovieSeat() && !setupOpen) { seatForMovie(false); if (MV.pendSeat) toast('🍿 The movie is starting. Taking an open seat… press ▶ Watch on the screen to see and hear it.'); }
+    if (url && !MV.on && !MV.pendSeat && zoneAt(me.x, me.z) === 'movie' && !inMovieSeat() && !setupOpen) { seatForMovie(true); if (MV.pendSeat) { MV.auto = true; toast('🍿 The movie is starting. Taking an open seat…'); } }
     return true;
   }
   function applyNetMovie(m, w) {
@@ -7697,7 +7713,7 @@ function main(){
       '<input id="mvUrl" maxlength="1000" autocomplete="off" placeholder="Paste a YouTube, Vimeo or video link" style="width:100%;margin:0 0 6px">' +
       '<input id="mvTitle" maxlength="80" autocomplete="off" placeholder="Name (optional)" style="width:100%;margin:0 0 6px">' +
       '<div class="acts" style="margin-top:0"><button data-mv="play">🎬 Play on the big screen</button></div>' +
-      '<p class="wnote">Only people who press ▶ Watch see the movie up close and hear it. Everyone else just sees “Now showing” on the screen.</p>';
+      '<p class="wnote">Anyone who sits in a seat joins the movie automatically and hears it. Everyone else just sees “Now showing” on the screen.</p>';
     ['mvUrl', 'mvTitle'].forEach(id => { const i = document.getElementById(id); if (i) i.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') playFromBox(); }); });
   }
   function playFromBox() { const u = (document.getElementById('mvUrl') || {}).value || '', t = (document.getElementById('mvTitle') || {}).value || ''; if (!u.trim()) { toast('Paste a link first'); return; } if (setMovie(u.trim(), t, 'me')) { closeMovieBox(); startWatch(); } }
@@ -7732,12 +7748,13 @@ function main(){
   }
   function startWatch() {
     if (setupOpen) return;
+    MV.auto = false; MV.skip = null;
     if (zoneAt(me.x, me.z) !== 'movie') { goZone('movie', () => startWatch()); return; }
     if (!seatForMovie(true)) { if (MV.pendSeat) { toast('🍿 Taking an open seat…'); return; } }
     beginWatch();
   }
   function beginWatch() {
-    MV.on = true; MV.k = 0; MV.from = persp.position.clone(); MV.fromQ = (camera === persp ? persp.quaternion.clone() : null);
+    MV.auto = !!MV.auto; MV.on = true; MV.k = 0; MV.from = persp.position.clone(); MV.fromQ = (camera === persp ? persp.quaternion.clone() : null);
     if (camera !== persp) { MV.from.copy(camera.position); }
     document.body.classList.add('watching'); $('movieView').hidden = false;
     closeCard(); closeMovieBox(); if (typeof closeDD === 'function') closeDD(); tileCur.visible = false; hideDoorTip();
@@ -7748,6 +7765,7 @@ function main(){
   function exitWatch() {
     MV.pendSeat = null; MV.pendWatch = false;
     if (!MV.on) return;
+    MV.skip = inMovieSeat() ? me.at : null; MV.auto = false;
     MV.on = false; document.body.classList.remove('watching'); $('movieView').hidden = true;
     const host = $('mvHost'); clearHost(host); MV.el = null; MV.key = '';
     duckMusic(false); applyCam();
@@ -7835,7 +7853,12 @@ function main(){
     workers.forEach(ballTick);
     if (Math.floor(elapsed * 2) !== Math.floor((elapsed - dt) * 2)) drawMovie();
     movieLight.intensity = night ? 0.7 : 0.25;
-    if (me.at && me.at.area === 'movie' && me.mode === 'sit' && !me.path.length) { if (!me._mvTold) { me._mvTold = true; const n = music.now; toast(MOVIE.url ? '🍿 “' + MOVIE.title + '” is on. Click the screen and press ▶ Watch.' : '🍿 Comfy! Click the screen and press ▶ Watch.'); } } else if (me._mvTold && (!me.at || me.at.area !== 'movie')) me._mvTold = false;
+    if (MV.skip && me.at !== MV.skip) MV.skip = null;
+    if (inMovieSeat() && zoneAt(me.x, me.z) === 'movie') {
+      if (MOVIE.url && !MV.on && !MV.pendSeat && !setupOpen && MV.skip !== me.at) { MV.auto = true; beginWatch(); toast('🍿 You joined “' + MOVIE.title + '”. Press ✕ Exit or Esc to stop watching.'); }
+      else if (!MOVIE.url && !MV.on && !me._mvTold) { me._mvTold = true; toast('🍿 Comfy! Nothing is showing yet. Click the screen to put a movie on.'); }
+    } else if (me._mvTold && (!me.at || me.at.area !== 'movie')) me._mvTold = false;
+    if (MV.on && MV.auto && !MOVIE.url) { exitWatch(); toast('🎬 The movie ended.'); }
   }
 
 
