@@ -269,13 +269,14 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpg{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .dpg button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 3px;font-size:11px;min-width:0;line-height:1.2}
 .dpg .de{font-size:19px;line-height:1.1}
-.carrybar{left:50%;bottom:86px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:14px;z-index:30;font-size:13px}.carrybar span{padding:0 4px}
+.carrybar{left:50%;bottom:86px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:14px;z-index:30;font-size:13px}.carrybar span{padding:0 4px}.carrybar{flex-wrap:wrap;justify-content:center;max-width:min(560px,calc(100% - 28px))}.cyaim{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding-top:6px;border-top:1px solid var(--color-border-light)}.cyaim .cyh{font-size:11.5px;color:var(--color-text-secondary)}.cyaim button small{color:var(--color-text-muted)}
 .ipg{grid-template-columns:repeat(3,1fr)}
 .dplbl{font-size:11px;font-weight:700;color:var(--color-text-secondary);margin:8px 2px 4px}
 .dpg button.cur,.dpf button.cur{background:#ec4899;border-color:#ec4899;color:#fff}
 .dpf{display:flex;gap:6px;margin-top:8px}
 .dpf button{flex:1}
 .pantry{width:330px}
+.billbox{width:min(520px,calc(100% - 28px))}#billCv{display:block;width:100%;height:auto;border-radius:8px;cursor:crosshair;touch-action:none;box-shadow:0 2px 0 rgba(0,0,0,.25)}#bucketBar{bottom:132px}
 .gamebox{left:14px;bottom:70px;width:330px;max-height:calc(100% - 100px);overflow:auto;padding:12px 12px 14px;z-index:58}
 .gbh{display:flex;align-items:center;gap:8px;margin:0 0 8px}.gbh b{flex:1;font-size:15px}
 .gbh button{border:0;background:transparent;font-size:18px;line-height:1;padding:2px 8px;color:var(--color-text-muted)}
@@ -289,6 +290,7 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpad{display:grid;grid-template-columns:repeat(3,44px);gap:4px;justify-content:center;margin:8px 0}.dpad button{height:38px;padding:0;font-size:15px}
 .meter{height:8px;border-radius:4px;background:var(--color-surface-active);overflow:hidden;margin:0 0 4px}.meter i{display:block;height:100%;background:linear-gradient(90deg,#f5c542,#f08a24,#d6262f)}
 #lkHost{display:none;width:100%;height:100%}#lkHost iframe,#lkHost video{display:block;width:100%;height:100%;border:0;background:#000}
+.ytmini:not(.theater){position:fixed!important;left:-10000px!important;top:0!important;right:auto!important;width:320px!important;opacity:0;pointer-events:none}
 .ytmini.theater{top:50%;left:calc((100% - var(--panel-w)) / 2);right:auto;transform:translate(-50%,-50%);width:min(960px,calc(100% - var(--panel-w) - 40px));z-index:70}
 .ytmini.theater .ytframe{height:auto;aspect-ratio:16/9;max-height:calc(100vh - 120px)}
 .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 10px}
@@ -643,7 +645,6 @@ function main(){
   const rnd = a => a[Math.floor(Math.random() * a.length)];
   const fmtT = d => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   // band stage state (filled in when the Bar room is built)
-  const TABLE_TOPS = [];   // table tops where a beer bucket can go
   const BAND = { sound: false, rect: null, leds: [], lights: [], cym: [], heads: [], platters: [], spot: {}, bpm: 112, last: -1, bus: null, noise: null, standGtr: null, keyLcd: null, djScr: null, live: false, hit: 0 };
   function makeEGuitar() {
     const g = new THREE.Group(), mR = new THREE.MeshStandardMaterial({ color: 0xd6262f, metalness: 0.35, roughness: 0.3 }), mW = new THREE.MeshStandardMaterial({ color: 0xf4f1ea, roughness: 0.5 }), mN = new THREE.MeshStandardMaterial({ color: 0x5a3417, roughness: 0.6 }), mM = new THREE.MeshStandardMaterial({ color: 0xc8ccd2, metalness: 0.8, roughness: 0.25 });
@@ -1250,26 +1251,6 @@ function main(){
   cyl(0.01, 0.01, 0.45, mDark, DF.x, 3.0, DF.z, null, 4);
   const partyLights = [0xff3fa4, 0x3fd0ff, 0xffd23f].map(c => { const L = new THREE.PointLight(c, 0.3, 6, 2); L.position.set(DF.x, 1.8, DF.z); scene.add(L); return L; });
 
-  // ---- disco lights: bigger mirror ball, light beams, moving floor spots ----
-  disco.scale.setScalar(1.9); disco.position.y = 2.7;
-  const DISCO = { beams: [], spots: [], spotPh: [] };
-  {
-    const mB = c => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
-    const bg = new THREE.Group(); bg.position.set(DF.x, 2.7, DF.z); scene.add(bg); DISCO.beamGroup = bg;
-    const cone = new THREE.ConeGeometry(0.42, 2.9, 14, 1, true); cone.translate(0, -1.45, 0);
-    const cols = [0xff3fa4, 0x3fd0ff, 0xffd23f, 0x7cff6b, 0xb46bff, 0xff7a3f, 0x3fffe0, 0xff3f3f];
-    cols.forEach((c, k) => { const m = new THREE.Mesh(cone, mB(c)); const a = k / cols.length * Math.PI * 2; m.rotation.set(0, a, 0.62 + (k % 2) * 0.18); m.raycast = () => {}; m.castShadow = false; bg.add(m); DISCO.beams.push(m); });
-    const ring = new THREE.CircleGeometry(0.42, 18);
-    for (let k = 0; k < 14; k++) {
-      const m = new THREE.Mesh(ring, new THREE.MeshBasicMaterial({ color: cols[k % cols.length], transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
-      m.rotation.x = -Math.PI / 2; m.position.set(DF.x + (k % 7 - 3) * 1.2, 0.03 + k * 0.0005, DF.z + (k < 7 ? -1.5 : 1.5)); m.raycast = () => {}; scene.add(m); DISCO.spots.push(m); DISCO.spotPh.push(Math.random() * 6.28);
-    }
-    // sparkle glints on the ball
-    const gl = new THREE.Group(); disco.add(gl); DISCO.glints = [];
-    for (let k = 0; k < 18; k++) { const s = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 4), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false })); const u = Math.random() * 6.28, v = Math.acos(Math.random() * 2 - 1); s.position.set(Math.sin(v) * Math.cos(u) * 0.31, Math.cos(v) * 0.31, Math.sin(v) * Math.sin(u) * 0.31); gl.add(s); DISCO.glints.push(s); }
-  }
-  [0xff3fa4, 0x3fd0ff].forEach(c => { const L = new THREE.PointLight(c, 0.6, 7, 2); L.position.set(DF.x, 1.8, DF.z); scene.add(L); partyLights.push(L); });
-
   reloMark('movie');
   // ---- movie room (front right) ----
   box(6.3, 0.02, 8.3, M(0x5a1e24, { roughness: 1 }), 33.75, 0.011, 5.75).castShadow = false;
@@ -1486,7 +1467,8 @@ function main(){
     SPOTS.sleep.push({ area: 'sleep', pos: p, anchor: a, via: [], face: rot, sit: 0.6, lie: true, by: null, rect: r });
     return g;
   }
-  function ftable(x, z, w, d, top, h) { TABLE_TOPS.push({ x: x, z: z, y: h || 0.45 }); const g = fgrp(x, z, 0); fp(g, w, 0.05, d, top, 0, (h || 0.45) - 0.025, 0); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(o => fp(g, 0.06, (h || 0.45) - 0.05, 0.06, mDark, o[0] * (w / 2 - 0.08), ((h || 0.45) - 0.05) / 2, o[1] * (d / 2 - 0.08))); nb(x - w / 2, x + w / 2, z - d / 2, z + d / 2); return g; }
+  const FTABLES = [];
+  function ftable(x, z, w, d, top, h) { FTABLES.push({ x: x, z: z, h: (h || 0.45), w: w, d: d }); const g = fgrp(x, z, 0); fp(g, w, 0.05, d, top, 0, (h || 0.45) - 0.025, 0); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(o => fp(g, 0.06, (h || 0.45) - 0.05, 0.06, mDark, o[0] * (w / 2 - 0.08), ((h || 0.45) - 0.05) / 2, o[1] * (d / 2 - 0.08))); nb(x - w / 2, x + w / 2, z - d / 2, z + d / 2); return g; }
   function fplant(x, z, s) { plant(x, z, s); nb(x - 0.25 * (s || 1), x + 0.25 * (s || 1), z - 0.25 * (s || 1), z + 0.25 * (s || 1)); }
   function fposter(x, z, title, a, b) {
     const t = canvasTex(160, 240, (c, W2, H2) => { const gr = c.createLinearGradient(0, 0, 0, H2); gr.addColorStop(0, a); gr.addColorStop(1, '#0b0d14'); c.fillStyle = gr; c.fillRect(0, 0, W2, H2); c.fillStyle = b; c.beginPath(); c.arc(80, 95, 46, 0, Math.PI * 2); c.fill(); c.fillStyle = '#ffffff'; c.font = 'bold 20px Segoe UI, Arial, sans-serif'; c.textAlign = 'center'; title.split('\n').forEach((l, k) => c.fillText(l, 80, 182 + k * 24)); c.strokeStyle = '#d9b46a'; c.lineWidth = 6; c.strokeRect(3, 3, W2 - 6, H2 - 6); });
@@ -1502,10 +1484,11 @@ function main(){
     { const g = fgrp(c + 8, 1.2, 0), felt = MC(0x2d8a4a, { roughness: 1 }), rail = MC(0x6b3f22, { roughness: 0.5 });
       fp(g, 2.6, 0.12, 1.4, rail, 0, 0.75, 0); fp(g, 2.36, 0.02, 1.16, felt, 0, 0.82, 0);
       [[-1.15, -0.55], [1.15, -0.55], [-1.15, 0.55], [1.15, 0.55]].forEach(o => fp(g, 0.16, 0.7, 0.16, rail, o[0], 0.35, o[1]));
-      const cols = [0xffd23f, 0x2f6fd6, 0xd6262f, 0x7a2f8a, 0xff8a3a, 0x2d8a4a, 0x7a1f2b, 0x111111, 0xffffff];
-      cols.forEach((cc, k) => { const b = add(new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), MC(cc, { roughness: 0.3 })), (k < 8 ? 0.35 + (k % 4) * 0.09 : -0.6), 0.875, (k < 8 ? (Math.floor(k / 4) - 0.5) * 0.1 : 0), g); b.castShadow = true; });
+      const cols = [0xffffff, 0xf5c518, 0x1f4fbf, 0xd0242b, 0x6a2b8a, 0xf2791c, 0x1f8a3f, 0x7a1f2b, 0x111111, 0xf5c518, 0x1f4fbf, 0xd0242b, 0x6a2b8a, 0xf2791c, 0x1f8a3f, 0x7a1f2b];
+      const rk = [[110, 110], [300, 110], [313, 102], [326, 110], [339, 87], [339, 102], [352, 95], [326, 95], [313, 118], [326, 125], [339, 133], [339, 118], [352, 110], [352, 125], [352, 140], [352, 80]];
+      FURN.bill = cols.map((cc, k) => { const b = add(new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 8), MC(cc, { roughness: 0.3 })), (rk[k][0] / 440 - 0.5) * 2.28, 0.87, (rk[k][1] / 220 - 0.5) * 1.1, g); b.castShadow = true; if (k >= 9) { const s2 = add(new THREE.Mesh(new THREE.SphereGeometry(0.041, 10, 4, 0, Math.PI * 2, Math.PI * 0.35, Math.PI * 0.3), MC(0xffffff, { roughness: 0.3 })), 0, 0, 0, b); s2.castShadow = false; } return b; });
       fp(g, 1.5, 0.03, 0.03, MC(0xd9b46a), -0.3, 0.9, 0.3).rotation.y = 0.2; blockAt(c + 8, 1.2, 2.6, 1.4, 0);
-      FURN_ITEMS.push(['pool table', [g], (w, it) => { itemAnim(it, 'shake', 0.3, 0.2); tsound('knock'); floatAt(it, rnd(['🎱', 'Nice shot!', 'Scratch! 😅'])); }]); }
+      FURN_ITEMS.push(['pool table', [g], (w, it) => { tsound('knock'); if (w === me) openBill(); else floatAt(it, rnd(['🎱', 'Nice shot!', 'Scratch! 😅'])); }]); }
     { const g = fgrp(c - 8, -6.5, 0), mW = MC(0x8a5a3c, { roughness: 0.6 }); fp(g, 1.4, 0.3, 0.8, mW, 0, 0.75, 0); fp(g, 1.3, 0.02, 0.7, MC(0x2d8a4a), 0, 0.91, 0);
       [-0.45, -0.15, 0.15, 0.45].forEach((xx, k) => { fp(g, 0.025, 0.025, 1.2, MC(0xcccccc), xx, 0.85, 0); [-0.15, 0.15].forEach(zz => fp(g, 0.05, 0.1, 0.03, MC(k % 2 ? 0xd6262f : 0x2f6fd6), xx, 0.86, zz)); });
       [[-0.6, -0.33], [0.6, -0.33], [-0.6, 0.33], [0.6, 0.33]].forEach(o => fp(g, 0.08, 0.6, 0.08, mW, o[0], 0.3, o[1])); blockAt(c - 8, -6.5, 1.4, 1.2, 0);
@@ -1670,7 +1653,7 @@ function main(){
         FURN_ITEMS.push(['DJ set', [g], (w, it) => instrTouch(w, 'dj')]); }
     }
 
-    [[b0 - 10, -6], [b0 - 10, -2.4]].forEach(p => { cyl(0.45, 0.45, 0.05, mDark, p[0], 1.0, p[1]); TABLE_TOPS.push({ x: p[0], z: p[1], y: 1.025 }); cyl(0.04, 0.04, 1.0, MC(0xc8ccd2, { metalness: 0.6, roughness: 0.3 }), p[0], 0.5, p[1], null, 8); nb(p[0] - 0.3, p[0] + 0.3, p[1] - 0.3, p[1] + 0.3);
+    [[b0 - 10, -6], [b0 - 10, -2.4]].forEach(p => { cyl(0.45, 0.45, 0.05, mDark, p[0], 1.0, p[1]); cyl(0.04, 0.04, 1.0, MC(0xc8ccd2, { metalness: 0.6, roughness: 0.3 }), p[0], 0.5, p[1], null, 8); nb(p[0] - 0.3, p[0] + 0.3, p[1] - 0.3, p[1] + 0.3);
       [-0.75, 0.75].forEach(o => { stool(p[0] + o, p[1]); xseat('party', p[0] + o, p[1], o < 0 ? Math.PI / 2 : -Math.PI / 2, 0.45, { anchor: [p[0] + o, p[1] + 0.95] }); }); });
     frug(b0 - 1, 6, 6, 4, '#3a1840', '#ff7ad9');
     fsofa(b0 - 1, 4.4, 3.0, 0, 0x5a2d82, 'party'); fsofa(b0 - 1, 7.6, 3.0, Math.PI, 0x5a2d82, 'party'); ftable(b0 - 1, 6, 1.6, 0.8, MC(0x2b2d33), 0.42);
@@ -3288,8 +3271,8 @@ function main(){
     if (!n) s = '<div class="npe">Nothing playing. Pick a station, or play a song from your computer.</div>';
     else {
       const by = byId[n.by] || me;
-      s = '<div class="npc"><div class="eq' + (audible() ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 On the player · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
-        (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">⛶ Big screen</button><button data-m="save">⭐ Save</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
+      s = '<div class="npc"><div class="eq' + (audible() ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 Playing for the room · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
+        (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">' + (($('ytMini') && $('ytMini').classList.contains('theater')) ? '🗗 Close big screen' : '⛶ Big screen') + '</button><button data-m="save">⭐ Save</button>' : '') + (n.kind === 'link' && n.mode === 'video' && n.el && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
         (n.kind === 'yt' && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') +
         (n.kind === 'yt' && !(n.yt === 'playing' || n.yt === 'paused' || n.yt === 'loading') ? '<a class="btn yt" href="' + esc(n.url) + '" target="_blank" rel="noopener">' + (n.yt === 'search' ? 'Search on ' : 'Open on ') + esc(n.src) + '</a>' : '') +
         (n.kind !== 'yt' && n.kind !== 'link' || ytPlayable(n) ? '<div class="lvl"><i id="npLvl"></i></div>' : '') + '<button data-m="skip">' + (music.queue.some(q => q.kind === 'file' || q.kind === 'link' || ytPlayable(q)) ? 'Next song' : n.kind === 'radio' ? 'Next station' : 'Skip') + '</button><button data-m="stop">Stop</button></div>';
@@ -3304,6 +3287,7 @@ function main(){
     if (d.radio) { if (music.key === d.radio) stopMusic(); else playRadio(d.radio, 'me'); }
     else if (d.m === 'stop') stopMusic();
     else if (d.m === 'test') testSound();
+    else if (d.m === 'pp' && music.now && music.now.kind === 'link' && music.now.el && music.now.el.play) { try { if (music.now.yt === 'playing') music.now.el.pause(); else { const pr = music.now.el.play(); if (pr && pr.catch) pr.catch(() => {}); } } catch (e) {} }
     else if (d.m === 'pp' && yt.player && yt.ready) { try { if (music.now.yt === 'playing') yt.player.pauseVideo(); else yt.player.playVideo(); } catch (e) {} }
     else if (d.m === 'skip') skipMusic();
     else if (d.m === 'th') toggleTheater();
@@ -3445,11 +3429,12 @@ function main(){
     sleep: { label: 'Sleeping', emoji: '😴', color: '#3b82f6', short: 'Sleep' }
   };
 
-  // ================= 30 dances (20 classics + 4 Pinoy TikTok + 6 TikTok viral) =================
+  // ================= 33 dances (23 classics + 4 Pinoy TikTok + 6 TikTok viral) =================
   const DANCES = [['groove', 'Groove', '🕺'], ['disco', 'Disco point', '✨'], ['robot', 'Robot', '🤖'], ['floss', 'Floss', '🧵'], ['dab', 'Dab', '😎'],
     ['twist', 'Twist', '🌀'], ['runman', 'Running man', '🏃'], ['sprinkler', 'Sprinkler', '💦'], ['cart', 'Shopping cart', '🛒'], ['roof', 'Raise the roof', '🙌'],
     ['chicken', 'Chicken dance', '🐔'], ['hula', 'Hula', '🌺'], ['spin', 'Spin', '💫'], ['jacks', 'Jumping jacks', '⭐'], ['headbang', 'Headbang', '🤘'],
     ['wave', 'Arm wave', '🌊'], ['cabbage', 'Cabbage patch', '🥬'], ['cancan', 'Can-can', '🦵'], ['salsa', 'Salsa', '💃'], ['moonwalk', 'Moonwalk', '🌙'],
+    ['hiphop', 'Hip-hop', '🧢'], ['shuffle', 'Shuffle', '👟'], ['toprock', 'Breakdance', '🔥'],
     // Pinoy TikTok dances (simple takes on the moves, made for the office characters)
     ['ikembot', 'Ikembot Mo', '🏄', 'ph'], ['ale', 'Ale fit check', '👗', 'ph'], ['budots', 'Budots', '🔊', 'ph'], ['drbeat', 'Dr. Beat', '🩺', 'ph'],
     // global TikTok viral dances
@@ -3579,6 +3564,17 @@ function main(){
         if (k3 % 2 === 0) { legs(-0.45 * kick, 0); kn = [0.2 * kick, 0.08]; } else { legs(0, -0.45 * kick); kn = [0.08, 0.2 * kick]; }
         arm(0, -0.25 - kick * 0.15, -0.2); arm(1, -0.25 - kick * 0.15, 0.2); el = [-1.4, -1.4];
         B.rotation.y = k3 < 2 ? 0.2 : -0.2; Hd.rotation.set(0.05, 0, k3 < 2 ? 0.12 : -0.12); up(kick * 0.03); break; }
+      case 'hiphop':
+        kn = [0.35 + as * 0.4, 0.35 + as * 0.4]; up(-as * 0.05); legs(-0.12 - as * 0.15, -0.12 - as * 0.15); legz(-0.12, 0.12);
+        B.rotation.x = 0.12 + as * 0.08; B.rotation.y = Math.sin(b / 2) * 0.35;
+        arm(0, -0.5 - P * 0.7, -0.3 - P * 0.45); arm(1, -0.5 - N * 0.7, 0.3 + N * 0.45); el = [-1.25, -1.25];
+        Hd.rotation.x = as * 0.28; Hd.rotation.y = -Math.sin(b / 2) * 0.2; break;
+      case 'shuffle':
+        legz(-P * 0.55, N * 0.55); legs(-P * 0.3, -N * 0.3); kn = [0.1 + P * 0.7, 0.1 + N * 0.7]; up(as * 0.05); side(Math.sin(b / 2) * 0.05);
+        arm(0, -0.6 + s * 0.35, -0.2); arm(1, -0.6 - s * 0.35, 0.2); el = [-1.45, -1.45]; Hd.rotation.x = as * 0.12; break;
+      case 'toprock':
+        legs(-P * 0.7, -N * 0.7); kn = [0.3 + P * 0.8, 0.3 + N * 0.8]; B.rotation.x = 0.22; B.rotation.y = s * 0.4; up(-0.02 + as * 0.04);
+        arm(0, -1.1, -0.2 - c * 0.8); arm(1, -1.1, 0.2 + c * 0.8); el = [-1.0, -1.0]; Hd.rotation.y = -s * 0.25; Hd.rotation.x = 0.1; break;
       case 'moonwalk':
         legs(s * 0.3, -s * 0.3); kn = [N * 0.9 + 0.05, P * 0.9 + 0.05]; if (!sit) B.position.z = -0.22 * (0.5 - 0.5 * Math.cos(b / 4));
         arm(0, -0.2 * s, -0.15); arm(1, 0.2 * s, 0.15); el = [-0.5, -0.5]; Hd.rotation.x = 0.1; B.rotation.x = 0.05; up(as * 0.02); break;
@@ -4111,6 +4107,7 @@ function main(){
     pizza: { e: '🍕', name: 'Pizza', a: 'a slice of pizza', kind: 'food', at: 'food', n: 4, short: 'Pepperoni', note: 'Pepperoni slice' },
     sandwich: { e: '🥪', name: 'Sandwich', a: 'a sandwich', kind: 'food', at: 'food', n: 4, short: 'Ham & cheese', note: 'Ham and cheese' },
     apple: { e: '🍎', name: 'Apple', a: 'an apple', kind: 'food', at: 'food', n: 3, short: 'Healthy', note: 'The healthy pick' },
+    bucket: { e: '🪣', name: 'Beer bucket', a: 'a bucket of 6 beers', kind: 'bucket', at: 'fridge', n: 6, short: '6 beers', note: 'Share with friends' },
     cookie: { e: '🍪', name: 'Cookie', a: 'a cookie', kind: 'food', at: 'food', n: 2, short: 'Santa’s tray', note: 'Christmas cookie' }
   };
   const DRINKS = ['coffee', 'water', 'cola', 'beer'];
@@ -4228,6 +4225,7 @@ function main(){
   function fxIcons(w) { const f = w.fx; if (!f) return ''; const n = Date.now(); return (f.spdUntil > n ? '⚡' : '') + (drunkLv(w) ? '😵‍💫' : f.tipsy > n ? '🥴' : ''); }
   function giveItem(w, id, quiet) {
     const it = ITEMS[id]; if (!it) return;
+    if (id === 'bucket') { holdBucket(w, 6, quiet && w !== me); if (w === me) renderPantry(); return; }
     if (w.held) dropItem(w, true);
     const prop = makeProp(id); w.v.hands[1].add(prop);
     w.held = { id: id, prop: prop, left: it.n, nx: 1.2 + Math.random() * 1.5, sip: 0 };
@@ -4312,6 +4310,8 @@ function main(){
   }
   function fetchItem(id, where) {
     const it = ITEMS[id]; if (!it || setupOpen) return;
+    if (id === 'bucket' && me.bucket) { toast('🪣 You already have a bucket. Put it on a table first.'); return; }
+    if (id === 'bucket' && me.carrying) { toast('Your hands are full!'); return; }
     if (me.downUntil > Date.now()) { toast('💫 You’re still seeing stars…'); return; }
     const sk = where && PST[where] ? where : it.at, st = PST[sk], pos = freeStation(sk, me) || st.spots[0].slice();
     const spot = { area: where === 'bar' ? 'party' : where === 'tiki' ? 'beach' : 'kitchen', pos: pos, anchor: pos.slice(), via: [], face: st.face, sit: 0, by: null };
@@ -4774,7 +4774,7 @@ function main(){
       loadGames(m.games, new Set(peers.map(p => String(p.id))));
     } else if (m.t === 'join') {
       const w = addPeer(m.id, m.state);
-      if (w) { post(null, '👋 ' + w.name + ' joined the office'); blip(); ddBadge('team'); }
+      if (w) { post(null, '👋 ' + w.name + ' joined the office'); blip(); ddBadge('team'); setTimeout(bucketSyncTo, 800); }
       netStatus('on');
     } else if (m.t === 'leave') {
       const w = peerW(m.id); if (w) post(null, w.name + ' left the office');
@@ -4912,7 +4912,7 @@ function main(){
       else if (m.k === 'bbsteal') { if (!MATCH.fl) { MATCH.holder = pidOf(w); MATCH.lastEv = elapsed; } }
       else if (m.k === 'hit' && MELEE[m.type]) { const tgt = m.to === NET.id ? me : m.to === 'dummy' ? DUMMY : peerW(m.to); if (tgt && tgt !== w) doMelee(w, tgt, m.type); }
       else if (m.k === 'carry' && ['pick', 'throw', 'drop', 'free'].indexOf(m.act) > -1) applyNetCarry(m, w);
-      else if (m.k === 'bucket' && (m.act === 'place' || m.act === 'take')) applyNetBucket(m, w);
+      else if (m.k === 'bucket' && ['hold', 'place', 'take', 'pickup'].indexOf(m.act) > -1) applyNetBucket(m, w);
       else if (m.k === 'throw' && THROWS[m.item]) { const tgt = m.to === NET.id ? me : m.to === 'dummy' ? DUMMY : peerW(m.to); if (tgt && tgt !== w) doThrow(w, tgt, m.item); }
       else if (m.k === 'arcade' && +m.score > 0) post(null, '🐍 ' + w.name + ' scored ' + Math.min(999, Math.floor(+m.score)) + ' at Snake');
       else if (m.k === 'treat' && ITEMS[m.item]) {
@@ -5833,9 +5833,10 @@ function main(){
       const w = pickAt(e.clientX, e.clientY);
       if (w === JUKE) { showTab('music'); closeCard(); itemAnim(jukeItem, 'bounce', 0.6, 0.7); tsound('boop'); }
       else if (w && w.pantry) { openPantry(); if (w.pantry === 'coffee') fetchItem('coffee'); }
+      else if (w && me.carrying && w !== me && w !== me.carrying && !w.isDummy) throwAt(w);
       else if (w) openCard(w.id);
       else if (me.downUntil > Date.now()) toast('💫 You’re still seeing stars… give it a few seconds.');
-      else { closeCard(); if (!walking) { const fp = floorPoint(), ih = itemFromHit(); if (ih && ih.it && ih.it.slide) { goSlide(); } else if (ih && ih.it && ih.it.door) { useDoor(ih.it.door); } else if (ih && ih.it && ih.it.game) { goGame(ih.it.game); } else if (ih && ih.it === barItem) { openBar(); } else if (ih && ih.it === dummyItem) { openAtk(); } else if (fp && POOL_IN(fp[0], fp[1]) && !(ih && ih.it)) { swimClick({ x: fp[0], z: fp[1] }); } else if (ih && (ih.it || ih.laptop)) startTouch(me, ih); else { const seat = seatFromHit(); if (seat) sitAt(seat); else if (ih && ih.gen) startTouch(me, ih); else { const p = floorPoint(); if (p) walkMeTo(p[0], p[1]); } } } }
+      else { closeCard(); if (!walking) { const fp = floorPoint(), bk = bucketFromHit(), ih = bk ? null : itemFromHit(); if (bk) { clickBucket(bk); } else if (ih && ih.it && ih.it.slide) { goSlide(); } else if (ih && ih.it && ih.it.door) { useDoor(ih.it.door); } else if (ih && ih.it && ih.it.game) { goGame(ih.it.game); } else if (ih && ih.it === barItem) { openBar(); } else if (ih && ih.it === dummyItem) { openAtk(); } else if (fp && POOL_IN(fp[0], fp[1]) && !(ih && ih.it)) { swimClick({ x: fp[0], z: fp[1] }); } else if (ih && (ih.it || ih.laptop)) startTouch(me, ih); else { const seat = seatFromHit(); if (seat) sitAt(seat); else if (ih && ih.gen) startTouch(me, ih); else { const p = floorPoint(); if (p) walkMeTo(p[0], p[1]); } } } }
     }
     drag = null;
   });
@@ -7129,9 +7130,9 @@ function main(){
       (F ? '<div class="held"><span class="pe">' + ITEMS[F.id].e + '</span><div><b>Getting ' + esc(ITEMS[F.id].a) + '…</b><span>At the bar</span></div></div>' :
         H ? '<div class="held"><span class="pe">' + ITEMS[H.id].e + '</span><div><b>Holding ' + esc(ITEMS[H.id].a) + '</b><span>' + H.left + ' sips left</span></div><button data-br="cheers">🍻 Cheers!</button></div>' : '') +
       '<div class="lbl">Tonight</div><div class="meter"><i style="width:' + Math.min(100, Math.round(n * 100 / 6)) + '%"></i></div><div class="gbsub">' + n + (n === 1 ? ' beer' : ' beers') + ' · ' + mood + (dk ? ' · wobbly for about ' + dk + ' more min (water helps)' : '') + (n === 2 ? ' · one more and you’ll be drunk' : n >= 5 ? ' · one more and you’re off to bed' : '') + '</div>' +
-      '<div class="lbl">Order</div><div class="pgrid">' + ['beer', 'cola', 'water'].map(id => '<button class="pit" data-br="get" data-v="' + id + '"><span class="pe">' + ITEMS[id].e + '</span><b>' + ITEMS[id].name + '</b></button>').join('') +
+      '<div class="lbl">Order</div><div class="pgrid">' + ['beer', 'bucket', 'cola', 'water'].map(id => '<button class="pit" data-br="get" data-v="' + id + '"><span class="pe">' + ITEMS[id].e + '</span><b>' + ITEMS[id].name + '</b></button>').join('') +
       '<button class="pit" data-br="cheers"><span class="pe">🍻</span><b>Cheers</b></button></div>' +
-      '<div class="acts"><button data-br="bucket" class="on">🪣 Bucket of 5 beers for the table</button><button data-br="round">🍺 Buy a round for everyone</button></div>';
+      '<div class="acts"><button data-br="round">🍺 Buy a round for everyone</button></div>';
   }
   $('barBox').addEventListener('click', e => {
     const b = e.target.closest('[data-br]'); if (!b) return;
@@ -7140,7 +7141,6 @@ function main(){
     else if (a === 'get') fetchItem(b.dataset.v, ON_BEACH(me.x, me.z) ? 'tiki' : 'bar');
     else if (a === 'cheers') cheers();
     else if (a === 'round') treatRound('beer');
-    else if (a === 'bucket') { orderBucket(); return; }
     renderBar();
   });
   function cheers() {
@@ -7350,85 +7350,6 @@ function main(){
     const g = makeEGuitar(); g.position.set(0.02, 0.84, 0.2); g.rotation.set(0, 0, 1.1); g.scale.set(1.25, 1.25, 1.25); w.v.body.add(g); w.v.egtr = g; applyStyleTo(g); return g;
   }
 
-
-  // ================= bucket of beer (shared, 5 bottles on the table) =================
-  const BUCKETS = []; let bucketN = 0;
-  const mBkt = new THREE.MeshStandardMaterial({ color: 0xc8ccd2, metalness: 0.75, roughness: 0.3, side: THREE.DoubleSide }), mIce = new THREE.MeshStandardMaterial({ color: 0xe8f6ff, roughness: 0.15, transparent: true, opacity: 0.85 }),
-    mBot = new THREE.MeshStandardMaterial({ color: 0x7a3f10, roughness: 0.2, metalness: 0.1 }), mCapB = new THREE.MeshStandardMaterial({ color: 0xd4a93a, metalness: 0.8, roughness: 0.3 }), mLblB = new THREE.MeshStandardMaterial({ color: 0xf2d36b, roughness: 0.6 });
-  function makeBucket(x, y, z) {
-    const g = new THREE.Group(); g.position.set(x, y, z);
-    const mk = (geo, mat, px, py, pz, par) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = true; (par || g).add(m); return m; };
-    mk(new THREE.CylinderGeometry(0.2, 0.15, 0.26, 18, 1, true), mBkt, 0, 0.13, 0); mk(new THREE.CylinderGeometry(0.15, 0.15, 0.012, 18), mBkt, 0, 0.006, 0);
-    const rim = mk(new THREE.TorusGeometry(0.2, 0.012, 6, 20), mBkt, 0, 0.26, 0); rim.rotation.x = Math.PI / 2;
-    [-1, 1].forEach(s => mk(new THREE.BoxGeometry(0.03, 0.05, 0.06), mBkt, s * 0.205, 0.2, 0));
-    mk(new THREE.CylinderGeometry(0.188, 0.188, 0.03, 18), mIce, 0, 0.225, 0);
-    [[0.1, 0.05], [-0.08, 0.1], [0.02, -0.12], [-0.12, -0.04], [0.13, -0.07]].forEach((p, k) => { const c = mk(new THREE.BoxGeometry(0.05, 0.04, 0.05), mIce, p[0], 0.25, p[1]); c.rotation.y = k; });
-    const bottles = [];
-    [[0, 0], [0.09, 0.03], [-0.07, 0.07], [-0.05, -0.08], [0.06, -0.08]].forEach((p, k) => {
-      const b = new THREE.Group(); b.position.set(p[0], 0.24, p[1]); b.rotation.set(p[1] * 1.6, 0, -p[0] * 1.6); g.add(b);
-      mk(new THREE.CylinderGeometry(0.03, 0.03, 0.17, 10), mBot, 0, 0.0, 0, b); mk(new THREE.CylinderGeometry(0.031, 0.031, 0.06, 10), mLblB, 0, 0.0, 0, b);
-      mk(new THREE.CylinderGeometry(0.012, 0.026, 0.07, 10), mBot, 0, 0.12, 0, b); mk(new THREE.CylinderGeometry(0.014, 0.014, 0.012, 8), mCapB, 0, 0.16, 0, b);
-      bottles.push(b);
-    });
-    return { g: g, bottles: bottles };
-  }
-  const bucketZone = (x, z) => (ZBY[zoneAt(x, z)] || ZBY.office).bit;
-  function showBottles(B) { B.bottles.forEach((b, k) => { b.visible = k < B.n; }); }
-  function addBucket(id, x, y, z, n, by) {
-    if (BUCKETS.some(b => b.id === id)) return null;
-    const M2 = makeBucket(x, y, z);
-    const B = { id: id, x: x, y: y, z: z, n: Math.max(0, Math.min(5, Math.round(n))), by: by, t0: Date.now(), g: M2.g, bottles: M2.bottles };
-    const it = { name: 'bucket of beer', els: [M2.g], touch: w => takeFromBucket(w, B) }; B.it = it;
-    M2.g.traverse(o => { o.userData.item = it; });
-    scene.add(M2.g); applyStyleTo(M2.g); setMask(M2.g, bucketZone(x, z));
-    showBottles(B); BUCKETS.push(B); return B;
-  }
-  function bucketSpot() {
-    const zc = GRP(zoneAt(me.x, me.z)); let best = null, bd = 7;
-    TABLE_TOPS.forEach(t => {
-      if (GRP(zoneAt(t.x, t.z)) !== zc || BUCKETS.some(b => Math.hypot(b.x - t.x, b.z - t.z) < 0.45)) return;
-      const d = Math.hypot(t.x - me.x, t.z - me.z); if (d < bd) { bd = d; best = t; }
-    });
-    if (best) return [best.x, best.y, best.z, true];
-    const p = NAVG.snap(me.x + Math.sin(me.yaw) * 0.7, me.z + Math.cos(me.yaw) * 0.7) || [me.x + 0.5, me.z];
-    return [p[0], 0, p[1], false];
-  }
-  function orderBucket() {
-    if (me.downUntil > Date.now()) { toast('💫 You’re still seeing stars…'); return; }
-    const mine = BUCKETS.find(b => b.by === 'me' && b.n > 0);
-    if (mine) { toast('🪣 Your bucket still has ' + mine.n + (mine.n === 1 ? ' bottle' : ' bottles') + ' left. Finish those first!'); return; }
-    const s = bucketSpot(), id = (NET.on && NET.id ? NET.id : 'me') + ':' + (++bucketN) + ':' + (Date.now() % 100000);
-    const B = addBucket(id, s[0], s[1], s[2], 5, 'me'); if (!B) return;
-    tsound('chime'); floatAt(B.it, '🪣🍺');
-    toast('🪣 A bucket of 5 ice-cold beers is ' + (s[3] ? 'on the table' : 'by your feet') + '! Click it to grab a bottle. Anyone can share.');
-    post(null, '🍻 ' + me.name + ' ordered a bucket of beer for the table!');
-    if (NET.on) netSend({ t: 'ev', k: 'bucket', act: 'place', id: id, mv: r2(s[0]) + ',' + r2(s[1]) + ',' + r2(s[2]), n: 5 });
-    closeBar();
-    const zc = GRP(zoneAt(s[0], s[2]));
-    workers.filter(w => w !== me && !w.remote && !w.path.length && !w.held && !w.fetch && GRP(zoneAt(w.x, w.z)) === zc && Math.hypot(w.x - s[0], w.z - s[2]) < 7).slice(0, 2)
-      .forEach((w, k) => setTimeout(() => { if (B.n > 1 && !w.held && BUCKETS.includes(B)) { B.n--; showBottles(B); giveItem(w, 'beer', true); post(w.id, rnd(['Cheers! 🍻', 'Ooh, a bucket! Thanks ' + me.name + '!', 'Don’t mind if I do 🍺'])); } }, 2500 + k * 3000));
-  }
-  function takeFromBucket(w, B) {
-    if (w !== me) return;
-    if (!BUCKETS.includes(B) || B.n <= 0) { toast('🪣 The bucket is empty. Order another one at the bar!'); return; }
-    if (me.held && me.held.id === 'beer') { toast('🍺 Finish the beer in your hand first!'); return; }
-    B.n--; showBottles(B); giveItem(me, 'beer', true); floatAt(B.it, '🍺');
-    toast('🍺 You grabbed a bottle from the bucket. ' + (B.n ? B.n + ' left.' : 'That was the last one!'));
-    if (NET.on) netSend({ t: 'ev', k: 'bucket', act: 'take', id: B.id });
-    if (B.n <= 0) emptyBucket(B);
-  }
-  function emptyBucket(B) { if (B.gone) return; B.gone = true; post(null, '🪣 The beer bucket is empty. Cheers, everyone! 🍻'); setTimeout(() => removeBucket(B), 4000); }
-  function removeBucket(B) { const i = BUCKETS.indexOf(B); if (i > -1) BUCKETS.splice(i, 1); if (B.g.parent) B.g.parent.remove(B.g); }
-  function applyNetBucket(m, w) {
-    const id = String(m.id || '').slice(0, 60); if (!id) return;
-    if (m.act === 'place') {
-      const p = String(m.mv || '').split(',').map(Number); if (p.length !== 3 || !p.every(v => isFinite(v))) return;
-      const B = addBucket(id, p[0], Math.max(0, Math.min(1.3, p[1])), p[2], +m.n || 5, w.id);
-      if (B) post(null, '🍻 ' + w.name + ' ordered a bucket of beer for the table!');
-    } else if (m.act === 'take') { const B = BUCKETS.find(b => b.id === id); if (B && B.n > 0) { B.n--; showBottles(B); if (B.n <= 0) emptyBucket(B); } }
-  }
-  function bucketTick() { const n = Date.now(); BUCKETS.slice().forEach(B => { if (n - B.t0 > 15 * 60000) removeBucket(B); }); }
-
   // ================= drunk walking (3+ beers) =================
   // 3 beers = drunk for 3 minutes: slow, weaving walk, stumbles, and sometimes you fall flat.
   const DRUNK_MS = 180000;
@@ -7480,6 +7401,7 @@ function main(){
   const cIdOf = w => w === me ? NET.id : w.netId;
   const cByNet = id => id === NET.id ? me : peerW(id);
   function canCarry(tgt) {
+    if (me.bucket) return 'Put the beer bucket down first!';
     if (!tgt || tgt === me || tgt.isDummy) return 'You can’t pick that up.';
     if (me.carrying) return 'Your hands are full! Throw or put down ' + me.carrying.name + ' first.';
     if (me.carriedBy) return 'You’re being carried yourself!';
@@ -7530,13 +7452,14 @@ function main(){
     if (NET.on && tgt.remote) netSend({ t: 'ev', k: 'carry', act: drop ? 'drop' : 'throw', to: tgt.netId, mv: r2(to[0]) + ',' + r2(to[1]) });
     release(me, tgt, to, !drop);
   }
-  function release(from, tgt, to, thrown) {
+  function release(from, tgt, to, thrown, at) {
     if (from) { from.carrying = null; if (thrown) from.act = { kind: 'throw', t0: elapsed, dur: 0.6 }; }
     tgt.carriedBy = null;
     if (thrown) {
-      const R = from ? from.v.root.position : tgt.v.root.position;
-      CARRY.flights.push({ w: tgt, from: [R.x, R.z], to: to, t0: elapsed, dur: 0.95 }); tgt.flying = true;
-      post(null, '🚀 ' + nmOf(from) + ' threw ' + objOf(tgt) + ' across the room!');
+      const R = from ? from.v.root.position : tgt.v.root.position, dist = Math.hypot(to[0] - R.x, to[1] - R.z);
+      CARRY.flights.push({ w: tgt, from: [R.x, R.z], to: to, t0: elapsed, dur: at ? Math.max(0.6, Math.min(1.4, 0.45 + dist * 0.09)) : 0.95, at: at || null, by: from }); tgt.flying = true;
+      if (!at) post(null, '🚀 ' + nmOf(from) + ' threw ' + objOf(tgt) + ' across the room!');
+      else floatFx(at, rnd(['Wait—', 'Uh oh…', 'NO NO NO', '😨']));
       floatFx(tgt, rnd(['AAAAH!', 'Wheee!', 'Noooo!', '😵']));
     } else place(tgt, to, false);
     renderCarryBar();
@@ -7563,11 +7486,11 @@ function main(){
     post(null, '🤸 You wiggled free from ' + c.name + '!'); renderCarryBar();
   }
   function applyNetCarry(m, w) {
-    const tgt = m.act === 'free' ? w : cByNet(String(m.to || '')), from = m.act === 'free' ? cByNet(String(m.to || '')) : w;
+    const tgt = m.act === 'free' ? w : (m.to ? cByNet(String(m.to)) : w && w.carrying), from = m.act === 'free' ? cByNet(String(m.to || '')) : w;
     if (!tgt || !from || tgt === from) return;
     const mp = String(m.mv == null ? '' : m.mv).split(',').map(Number), to = mp.length === 2 && isFinite(mp[0]) && isFinite(mp[1]) && m.mv !== '' ? NAVG.snap(mp[0], mp[1]) || [from.x, from.z] : [from.x, from.z];
     if (m.act === 'pick') { if (from.carrying) from.carrying.carriedBy = null; if (tgt.carriedBy && tgt.carriedBy !== from) tgt.carriedBy.carrying = null; grab(from, tgt); }
-    else if (m.act === 'throw' || m.act === 'drop') { if (tgt.carriedBy === from || from.carrying === tgt) release(from, tgt, to, m.act === 'throw'); }
+    else if (m.act === 'throw' || m.act === 'drop') { if (tgt.carriedBy === from || from.carrying === tgt) { const at = m.act === 'throw' && m.key ? cByNet(String(m.key)) : null; release(from, tgt, to, m.act === 'throw', at && at !== tgt && at !== from ? at : null); } }
     else if (m.act === 'free') { if (from.carrying === tgt) from.carrying = null; tgt.carriedBy = null; if (tgt !== me) place(tgt, to, false); post(null, '🤸 ' + tgt.name + ' wiggled free from ' + objOf(from) + '!'); renderCarryBar(); }
   }
   function carryPose(w) {
@@ -7598,6 +7521,7 @@ function main(){
       if (!workers.includes(c)) { me.carriedBy = null; place(me, NAVG.snap(me.x, me.z) || [me.x, me.z], false); renderCarryBar(); }
       else { me.x = c.x; me.z = c.z; }
     }
+    if (me.carrying && Math.floor(elapsed) !== Math.floor(elapsed - dt)) renderCarryBar();
     if (me.carrying) {
       const tg = me.carrying;
       if (!workers.includes(tg) || tg.carriedBy !== me) { me.carrying = null; renderCarryBar(); }
@@ -7615,16 +7539,410 @@ function main(){
         const wet = WATER_IN(F.to[0], F.to[1]);
         fxSound(wet ? 'thud' : 'crash'); pow(screenPos(F.w)); floatFx(F.w, wet ? '💦 SPLASH!' : '💥');
         place(F.w, F.to, !wet);
+        if (F.at) hitByThrow(F.at, F.w, F.by);
       }
     }
   }
   const carryBar = document.createElement('div'); carryBar.id = 'carryBar'; carryBar.className = 'float carrybar'; carryBar.hidden = true; document.body.appendChild(carryBar);
   function renderCarryBar() {
-    if (me.carrying) { carryBar.hidden = false; carryBar.innerHTML = '<span>🤲 Carrying <b>' + esc(me.carrying.name) + '</b></span><button data-cy="throw" class="on">🚀 Throw</button><button data-cy="drop">⬇ Put down</button>'; }
+    if (me.carrying) { const tt = throwTargets(); carryBar.hidden = false; carryBar.innerHTML = '<span>🤲 Carrying <b>' + esc(me.carrying.name) + '</b></span><button data-cy="throw" class="on">🚀 Throw</button>' + (tt.length ? '<button data-cy="aim"' + (carryBar._aim ? ' class="on"' : '') + '>🎯 Throw at…</button>' : '') + '<button data-cy="drop">⬇ Put down</button>' +
+      (carryBar._aim && tt.length ? '<div class="cyaim"><span class="cyh">Throw ' + esc(me.carrying.name) + ' at:</span>' + tt.map(w => '<button data-cy="at" data-id="' + esc(w.id) + '">' + esc(w.name) + ' <small>' + Math.round(Math.hypot(w.x - me.x, w.z - me.z)) + 'm</small></button>').join('') + '<span class="cyh">or click someone in the office</span></div>' : ''); }
+    else carryBar._aim = false;
+    if (me.carrying) return;
     else if (me.carriedBy) { carryBar.hidden = false; carryBar.innerHTML = '<span>😱 <b>' + esc(me.carriedBy.name) + '</b> is carrying you!</span><button data-cy="wiggle" class="on">🤸 Wiggle free</button>'; }
     else carryBar.hidden = true;
   }
-  carryBar.addEventListener('click', e => { const b = e.target.closest('[data-cy]'); if (!b) return; const a = b.dataset.cy; if (a === 'throw') throwCarried(false); else if (a === 'drop') throwCarried(true); else if (a === 'wiggle') wiggleFree(); });
+  carryBar.addEventListener('click', e => { const b = e.target.closest('[data-cy]'); if (!b) return; const a = b.dataset.cy; if (a === 'throw') { carryBar._aim = false; throwCarried(false); } else if (a === 'aim') { carryBar._aim = !carryBar._aim; renderCarryBar(); } else if (a === 'at') { carryBar._aim = false; throwAt(byId[b.dataset.id]); } else if (a === 'drop') { carryBar._aim = false; throwCarried(true); } else if (a === 'wiggle') wiggleFree(); });
+
+  // ---- throw the person you carry at someone else ----
+  function throwTargets() {
+    if (!me.carrying) return [];
+    const g = GRP(zoneAt(me.x, me.z));
+    return workers.filter(w => w !== me && w !== me.carrying && !w.isDummy && !w.carriedBy && !w.flying && GRP(zoneAt(w.x, w.z)) === g && Math.hypot(w.x - me.x, w.z - me.z) < 12)
+      .sort((a, b) => Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z)).slice(0, 6);
+  }
+  function throwAt(tgtW) {
+    const tg = me.carrying; if (!tg || !tgtW || tgtW === tg || tgtW === me) return;
+    if (GRP(zoneAt(tgtW.x, tgtW.z)) !== GRP(zoneAt(me.x, me.z))) { toast(tgtW.name + ' is in another room.'); return; }
+    const d = Math.hypot(tgtW.x - me.x, tgtW.z - me.z);
+    if (d > 12) { toast(tgtW.name + ' is too far away to hit. Get closer!'); return; }
+    me.tyaw = me.yaw = Math.atan2(tgtW.x - me.x, tgtW.z - me.z);
+    const back = Math.min(0.5, d * 0.3), to = NAVG.snap(tgtW.x - Math.sin(me.yaw) * back, tgtW.z - Math.cos(me.yaw) * back) || [tgtW.x, tgtW.z];
+    if (NET.on) netSend({ t: 'ev', k: 'carry', act: 'throw', to: tg === me ? '' : (tg.remote ? tg.netId : ''), mv: r2(to[0]) + ',' + r2(to[1]), key: cIdOf(tgtW) || '' });
+    release(me, tg, to, true, tgtW);
+  }
+  function hitByThrow(victim, missile, thrower) {
+    if (!victim || victim.flying || victim.carriedBy) return;
+    if (WATER_IN(victim.x, victim.z)) { floatFx(victim, '💦'); return; }
+    pow(screenPos(victim)); floatFx(victim, rnd(['OOF!', 'BONK!', 'STRIKE! 🎳', '😵']));
+    if (victim === me) { knockDown(5); toast('🎳 ' + (missile === me ? 'You' : missile.name) + ' got thrown into you! Down for 5 s…'); }
+    else victim.hit = 2.2;
+    post(null, '🎳 Strike! ' + nmOf(thrower) + ' threw ' + objOf(missile) + ' right into ' + (victim === me ? 'you' : victim.name) + '!');
+  }
+
+
+
+  // ================= 🎱 billiards (8-ball) =================
+  const BL = { W: 440, H: 220, R: 7.5, PR: 15, VMAX: 1500, open: false, mode: 'cpu', lvl: 1, s: null, aim: { x: 300, y: 110 }, hold: false, h0: 0, pw: 0, think: 0, clack: 0 };
+  const BCOL = [0xffffff, 0xf5c518, 0x1f4fbf, 0xd0242b, 0x6a2b8a, 0xf2791c, 0x1f8a3f, 0x7a1f2b, 0x111111, 0xf5c518, 0x1f4fbf, 0xd0242b, 0x6a2b8a, 0xf2791c, 0x1f8a3f, 0x7a1f2b];
+  const BPOCK = [[0, 0], [220, -4], [440, 0], [0, 220], [220, 224], [440, 220]];
+  const hexc = c => '#' + c.toString(16).padStart(6, '0');
+  const isSolid = id => id >= 1 && id <= 7, isStripe = id => id >= 9 && id <= 15;
+  const inGrp = (id, g) => g === 'solid' ? isSolid(id) : g === 'stripe' ? isStripe(id) : (id !== 0 && id !== 8);
+  function blNew() {
+    const s = { balls: [], turn: 0, grp: [null, null], over: null, msg: 'Break!', moving: false, shot: null, shots: 0 };
+    s.balls.push({ id: 0, x: 110, y: 110, vx: 0, vy: 0, in: false });
+    const order = [1, 9, 2, 10, 8, 3, 11, 7, 14, 4, 5, 13, 15, 6, 12], R = BL.R; let k = 0;
+    for (let row = 0; row < 5; row++) for (let i = 0; i <= row; i++) s.balls.push({ id: order[k++], x: 300 + row * R * 1.76, y: 110 + (i - row / 2) * R * 2.03, vx: 0, vy: 0, in: false });
+    s.balls.sort((a, b) => a.id - b.id);
+    return s;
+  }
+  const blNames = () => BL.mode === 'cpu' ? ['You', 'The computer'] : ['Player 1', 'Player 2'];
+  const blHumanTurn = () => { const s = BL.s; return s && !s.over && !s.moving && (BL.mode === 'local' || s.turn === 0); };
+  function segDist(ax, ay, bx, by, px, py) { const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy || 1; let t = ((px - ax) * dx + (py - ay) * dy) / L; t = Math.max(0, Math.min(1, t)); return Math.hypot(ax + dx * t - px, ay + dy * t - py); }
+  function blShoot(ang, pw) {
+    const s = BL.s, c = s.balls[0]; if (!s || s.moving || s.over || c.in) return;
+    const v = BL.VMAX * Math.max(0.05, Math.min(1, pw));
+    c.vx = Math.cos(ang) * v; c.vy = Math.sin(ang) * v; s.moving = true; s.shot = { pot: [], first: null }; s.shots++;
+    tsound('knock'); BL.pw = 0;
+  }
+  function blStep(s, dt) {
+    const R = BL.R, B = s.balls;
+    for (const b of B) {
+      if (b.in) continue;
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      const sp = Math.hypot(b.vx, b.vy);
+      if (sp > 0) { const ns = Math.max(0, sp * Math.exp(-0.75 * dt) - 22 * dt); if (ns < 3) { b.vx = 0; b.vy = 0; } else { b.vx *= ns / sp; b.vy *= ns / sp; } }
+      for (const p of BPOCK) if (Math.hypot(b.x - p[0], b.y - p[1]) < BL.PR) { b.in = true; b.vx = b.vy = 0; if (s.shot) s.shot.pot.push(b.id); tsound('pop'); break; }
+      if (b.in) continue;
+      if (b.x < R) { b.x = R; b.vx = Math.abs(b.vx) * 0.78; } else if (b.x > BL.W - R) { b.x = BL.W - R; b.vx = -Math.abs(b.vx) * 0.78; }
+      if (b.y < R) { b.y = R; b.vy = Math.abs(b.vy) * 0.78; } else if (b.y > BL.H - R) { b.y = BL.H - R; b.vy = -Math.abs(b.vy) * 0.78; }
+    }
+    for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++) {
+      const a = B[i], b = B[j]; if (a.in || b.in) continue;
+      const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+      if (d >= 2 * R || d === 0) continue;
+      const nx = dx / d, ny = dy / d, ov = (2 * R - d) / 2;
+      a.x -= nx * ov; a.y -= ny * ov; b.x += nx * ov; b.y += ny * ov;
+      const vn = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+      if (vn > 0) {
+        const j2 = vn * 0.97; a.vx -= j2 * nx; a.vy -= j2 * ny; b.vx += j2 * nx; b.vy += j2 * ny;
+        if (s.shot && s.shot.first == null && (a.id === 0 || b.id === 0)) s.shot.first = a.id === 0 ? b.id : a.id;
+        if (vn > 60 && elapsed - BL.clack > 0.06) { BL.clack = elapsed; tsound('click'); }
+      }
+    }
+  }
+  function blCueBack(s) {
+    const c = s.balls[0]; c.in = false; c.vx = c.vy = 0;
+    for (let k = 0; k < 40; k++) { const x = 110 - (k % 8) * 10, y = 110 + (Math.floor(k / 8) - 2) * 22; if (!s.balls.some(b => b !== c && !b.in && Math.hypot(b.x - x, b.y - y) < BL.R * 2.2)) { c.x = x; c.y = y; return; } }
+    c.x = 60; c.y = 110;
+  }
+  function blResolve(s) {
+    const sh = s.shot || { pot: [], first: null }, t = s.turn, nm = blNames();
+    s.moving = false; s.shot = null;
+    const g = s.grp[t], pot = sh.pot, scratch = pot.indexOf(0) > -1;
+    const leftOf = gg => s.balls.filter(b => !b.in && inGrp(b.id, gg) && b.id !== 8).length;
+    const clearedBefore = !!g && leftOf(g) + pot.filter(id => inGrp(id, g)).length === 0;
+    let foul = scratch || sh.first == null;
+    if (!foul && g) foul = clearedBefore ? sh.first !== 8 : !inGrp(sh.first, g);
+    if (pot.indexOf(8) > -1) {
+      const win = !foul && clearedBefore;
+      s.over = { win: win ? t : 1 - t, why: win ? 'sank the 8-ball' : scratch ? 'scratched on the 8-ball' : 'sank the 8-ball too early' };
+      const w = nm[s.over.win];
+      s.msg = '🏆 ' + w + (w === 'You' ? ' win' : ' wins') + '! ' + nm[t] + ' ' + s.over.why + '.';
+      tsound('chime');
+      if (BL.mode === 'cpu' && s.over.win === 0) { post(null, '🎱 You beat the computer at billiards (' + ['Easy', 'Normal', 'Hard'][BL.lvl] + ')!'); react(me, 'party', true); }
+      else if (BL.mode === 'cpu') post(null, '🎱 The computer won a game of billiards. Rematch?');
+      return;
+    }
+    if (!g && !foul) { const f = pot.find(id => id !== 0 && id !== 8); if (f) { s.grp[t] = isSolid(f) ? 'solid' : 'stripe'; s.grp[1 - t] = isSolid(f) ? 'stripe' : 'solid'; } }
+    const g2 = s.grp[t], own = pot.filter(id => id !== 0 && id !== 8 && (g2 ? inGrp(id, g2) : true)).length;
+    if (scratch) blCueBack(s);
+    if (foul) { s.turn = 1 - t; s.msg = (scratch ? '😬 Scratch! The cue ball went in.' : sh.first == null ? '😬 Missed every ball.' : '😬 Foul: hit the wrong ball first.') + ' ' + nm[s.turn] + '’s turn.'; }
+    else if (own > 0) s.msg = '✅ ' + own + ' in! ' + nm[t] + ' ' + (nm[t] === 'You' ? 'go' : 'goes') + ' again.' + (s.grp[t] && !g ? ' (' + (s.grp[t] === 'solid' ? 'solids ●' : 'stripes ◐') + ')' : '');
+    else { s.turn = 1 - t; s.msg = 'No ball in. ' + nm[s.turn] + '’s turn.'; }
+    BL.think = 0;
+  }
+  function blAI(s) {
+    const R = BL.R, c = s.balls[0], g = s.grp[s.turn];
+    let cands = s.balls.filter(b => !b.in && b.id && b.id !== 8 && (g ? inGrp(b.id, g) : true));
+    if (!cands.length) cands = s.balls.filter(b => !b.in && b.id === 8);
+    let best = null;
+    for (const b of cands) for (const p of BPOCK) {
+      const tx = p[0] - b.x, ty = p[1] - b.y, td = Math.hypot(tx, ty) || 1, ux = tx / td, uy = ty / td;
+      const gx = b.x - ux * 2 * R, gy = b.y - uy * 2 * R, cx = gx - c.x, cy = gy - c.y, cd = Math.hypot(cx, cy) || 1;
+      const cut = (cx * ux + cy * uy) / cd; if (cut < 0.25) continue;
+      const blk1 = s.balls.some(o => !o.in && o !== c && o !== b && segDist(c.x, c.y, gx, gy, o.x, o.y) < 2 * R);
+      const blk2 = s.balls.some(o => !o.in && o !== c && o !== b && segDist(b.x, b.y, p[0], p[1], o.x, o.y) < 2 * R);
+      const sc = cut * cut / (1 + (cd + td) / 320) * (blk1 ? 0.1 : 1) * (blk2 ? 0.25 : 1);
+      if (!best || sc > best.sc) best = { sc: sc, ang: Math.atan2(cy, cx), dist: cd + td * 1.6 };
+    }
+    if (!best) { const b = cands[0] || s.balls.find(o => !o.in && o.id); best = { ang: Math.atan2(b.y - c.y, b.x - c.x), dist: 400 }; }
+    if (s.shots === 0) best = { ang: Math.atan2(110 - c.y + (Math.random() - 0.5) * 6, 300 - c.x), dist: 900 };
+    const noise = [0.075, 0.035, 0.012][BL.lvl] * (Math.random() * 2 - 1);
+    return { ang: best.ang + noise, pw: Math.min(1, 0.32 + best.dist / 650) };
+  }
+  // ---- panel ----
+  const billBox = document.createElement('div'); billBox.id = 'billBox'; billBox.className = 'float gamebox billbox'; billBox.hidden = true;
+  billBox.innerHTML = '<div class="gbh"><b>🎱 Billiards · 8-ball</b><button id="billX" aria-label="Close">×</button></div><canvas id="billCv" width="480" height="260"></canvas><div id="billS"></div>';
+  document.body.appendChild(billBox);
+  function openBill() {
+    closeCard(); closePantry(); closeBar(); closeGame();
+    if (!BL.s) BL.s = blNew();
+    BL.open = true; $('billBox').hidden = false; billUI(); billDraw();
+  }
+  function closeBill() { BL.open = false; BL.hold = false; $('billBox').hidden = true; }
+  function billUI() {
+    const s = BL.s, nm = blNames(), el = $('billS'); if (!el || !s) return;
+    const g = gg => gg === 'solid' ? 'solids ●' : gg === 'stripe' ? 'stripes ◐' : 'open table';
+    const left = gg => gg ? s.balls.filter(b => !b.in && inGrp(b.id, gg) && b.id !== 8).length : null;
+    const st = s.over ? s.msg : s.moving ? '🎱 Rolling…' : (blHumanTurn() ? '👉 ' + (BL.mode === 'local' ? nm[s.turn] + ', your shot' : 'Your shot') : '🤔 The computer is lining up…');
+    el.innerHTML = '<div class="gbstat">' + esc(st) + '</div>' + (!s.over && s.msg && !s.moving ? '<div class="gbsub">' + esc(s.msg) + '</div>' : '') +
+      '<div class="gbsub">' + [0, 1].map(i => '<b>' + esc(nm[i]) + '</b>: ' + g(s.grp[i]) + (s.grp[i] ? ' (' + left(s.grp[i]) + ' left)' : '')).join(' · ') + '</div>' +
+      '<div class="lbl">Play</div><div class="gbmodes"><button data-bl="mode" data-v="cpu" class="' + (BL.mode === 'cpu' ? 'on' : '') + '">🤖 Computer</button><button data-bl="mode" data-v="local" class="' + (BL.mode === 'local' ? 'on' : '') + '">👥 Same screen</button></div>' +
+      (BL.mode === 'cpu' ? '<div class="gbmodes">' + ['Easy', 'Normal', 'Hard'].map((n, i) => '<button data-bl="lvl" data-v="' + i + '" class="' + (BL.lvl === i ? 'on' : '') + '">' + n + '</button>').join('') + '</div>' : '') +
+      '<div class="gbsub">Point at where to shoot, <b>hold</b> the mouse to power up, let go to shoot. Sink your group, then the 8-ball.</div>' +
+      '<div class="acts"><button data-bl="new">New game</button></div>';
+  }
+  function billDraw() {
+    const cv = $('billCv'); if (!cv || !BL.s) return; const x = cv.getContext('2d'), s = BL.s, R = BL.R, ox = 20, oy = 20;
+    x.fillStyle = '#5a3418'; x.fillRect(0, 0, 480, 260); x.fillStyle = '#6e4220'; x.fillRect(6, 6, 468, 248);
+    x.fillStyle = '#1f7a45'; x.fillRect(ox, oy, BL.W, BL.H);
+    x.strokeStyle = 'rgba(255,255,255,.18)'; x.lineWidth = 1; x.beginPath(); x.moveTo(ox + 110, oy); x.lineTo(ox + 110, oy + BL.H); x.stroke();
+    x.fillStyle = 'rgba(255,255,255,.25)'; x.beginPath(); x.arc(ox + 300, oy + 110, 2, 0, Math.PI * 2); x.fill();
+    BPOCK.forEach(p => { x.fillStyle = '#0b0b0b'; x.beginPath(); x.arc(ox + p[0], oy + Math.max(0, Math.min(BL.H, p[1])), BL.PR - 2, 0, Math.PI * 2); x.fill(); });
+    const c = s.balls[0];
+    if (blHumanTurn() && !c.in) {
+      const ang = Math.atan2(BL.aim.y - c.y, BL.aim.x - c.x), ux = Math.cos(ang), uy = Math.sin(ang);
+      let tHit = 600;
+      for (const b of s.balls) { if (b === c || b.in) continue; const px = b.x - c.x, py = b.y - c.y, along = px * ux + py * uy; if (along <= 0) continue; const perp = Math.abs(px * uy - py * ux); if (perp < 2 * R) { const t = along - Math.sqrt(4 * R * R - perp * perp); if (t < tHit) tHit = t; } }
+      x.setLineDash([5, 5]); x.strokeStyle = 'rgba(255,255,255,.7)'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(ox + c.x, oy + c.y); x.lineTo(ox + c.x + ux * tHit, oy + c.y + uy * tHit); x.stroke(); x.setLineDash([]);
+      if (tHit < 600) { x.strokeStyle = 'rgba(255,255,255,.8)'; x.beginPath(); x.arc(ox + c.x + ux * tHit, oy + c.y + uy * tHit, R, 0, Math.PI * 2); x.stroke(); }
+      const back = 14 + BL.pw * 34;
+      x.strokeStyle = '#d9b46a'; x.lineWidth = 5; x.lineCap = 'round'; x.beginPath(); x.moveTo(ox + c.x - ux * back, oy + c.y - uy * back); x.lineTo(ox + c.x - ux * (back + 150), oy + c.y - uy * (back + 150)); x.stroke();
+      x.strokeStyle = '#2b2b2b'; x.lineWidth = 5; x.beginPath(); x.moveTo(ox + c.x - ux * (back + 120), oy + c.y - uy * (back + 120)); x.lineTo(ox + c.x - ux * (back + 150), oy + c.y - uy * (back + 150)); x.stroke(); x.lineCap = 'butt';
+    }
+    for (const b of s.balls) {
+      if (b.in) continue; const X = ox + b.x, Y = oy + b.y;
+      x.fillStyle = 'rgba(0,0,0,.3)'; x.beginPath(); x.arc(X + 1.5, Y + 2, R, 0, Math.PI * 2); x.fill();
+      x.save(); x.beginPath(); x.arc(X, Y, R, 0, Math.PI * 2); x.clip();
+      x.fillStyle = isStripe(b.id) ? '#ffffff' : hexc(BCOL[b.id]); x.fillRect(X - R, Y - R, 2 * R, 2 * R);
+      if (isStripe(b.id)) { x.fillStyle = hexc(BCOL[b.id]); x.fillRect(X - R, Y - R * 0.55, 2 * R, R * 1.1); }
+      x.restore();
+      if (b.id) { x.fillStyle = '#fff'; x.beginPath(); x.arc(X, Y, R * 0.48, 0, Math.PI * 2); x.fill(); x.fillStyle = '#111'; x.font = 'bold 7px Segoe UI, Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(b.id), X, Y + 0.5); }
+      x.fillStyle = 'rgba(255,255,255,.55)'; x.beginPath(); x.arc(X - R * 0.35, Y - R * 0.35, R * 0.22, 0, Math.PI * 2); x.fill();
+    }
+    if (BL.hold || BL.pw > 0) { x.fillStyle = 'rgba(0,0,0,.45)'; x.fillRect(140, 246, 200, 8); const pg = x.createLinearGradient(140, 0, 340, 0); pg.addColorStop(0, '#7cff6b'); pg.addColorStop(0.6, '#ffd23f'); pg.addColorStop(1, '#ff3b30'); x.fillStyle = pg; x.fillRect(140, 246, 200 * BL.pw, 8); }
+    if (s.over) { x.fillStyle = 'rgba(0,0,0,.55)'; x.fillRect(ox, oy + 85, BL.W, 50); x.fillStyle = '#fff'; x.font = 'bold 20px Segoe UI, Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(s.msg.length > 48 ? s.msg.slice(0, 46) + '…' : s.msg, ox + BL.W / 2, oy + 110); }
+  }
+  function billPos(e) { const cv = $('billCv'), r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / (r.width || 480) * 480 - 20, y: (e.clientY - r.top) / (r.height || 260) * 260 - 20 }; }
+  $('billCv').addEventListener('pointermove', e => { BL.aim = billPos(e); });
+  $('billCv').addEventListener('pointerdown', e => { if (!blHumanTurn()) return; BL.aim = billPos(e); BL.hold = true; BL.h0 = elapsed; try { $('billCv').setPointerCapture(e.pointerId); } catch (er) {} });
+  $('billCv').addEventListener('pointerup', e => { if (!BL.hold) return; BL.hold = false; const s = BL.s, c = s.balls[0]; if (!blHumanTurn()) return; BL.aim = billPos(e); blShoot(Math.atan2(BL.aim.y - c.y, BL.aim.x - c.x), BL.pw); billUI(); });
+  $('billX').addEventListener('click', closeBill);
+  $('billBox').addEventListener('click', e => {
+    const b = e.target.closest('[data-bl]'); if (!b) return; const a = b.dataset.bl;
+    if (a === 'mode') { BL.mode = b.dataset.v; BL.s = blNew(); }
+    else if (a === 'lvl') BL.lvl = +b.dataset.v;
+    else if (a === 'new') BL.s = blNew();
+    billUI(); billDraw();
+  });
+  function billTick(dt) {
+    const s = BL.s; if (!s) return;
+    if (BL.hold) { const k = ((elapsed - BL.h0) / 1.1) % 2; BL.pw = 0.08 + 0.92 * (k < 1 ? k : 2 - k); }
+    if (s.moving) {
+      const n = Math.max(1, Math.ceil(dt * 360)); for (let i = 0; i < n; i++) blStep(s, dt / n);
+      if (s.balls.every(b => b.in || (b.vx === 0 && b.vy === 0))) { blResolve(s); billUI(); }
+    } else if (!s.over && BL.mode === 'cpu' && s.turn === 1) {
+      BL.think += dt; if (BL.think > 1.1) { BL.think = 0; const a = blAI(s); BL.aim = { x: s.balls[0].x + Math.cos(a.ang) * 60, y: s.balls[0].y + Math.sin(a.ang) * 60 }; blShoot(a.ang, a.pw); billUI(); }
+    }
+    if (FURN.bill) FURN.bill.forEach((m, id) => { const b = s.balls[id]; if (!b) return; m.visible = !b.in; m.position.x = (b.x / BL.W - 0.5) * 2.28; m.position.z = (b.y / BL.H - 0.5) * 1.1; });
+    if (BL.open && !$('billBox').hidden) billDraw();
+  }
+
+  // ================= 🪩 disco lights (bar dance floor) =================
+  const DISCO = { made: false, heads: [], lasers: [], spots: [], strobe: null, sparkle: null, beat: 0 };
+  const _dv = new THREE.Vector3(), _de = new THREE.Euler();
+  function addMat(c, op) { return new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }); }
+  function buildDisco() {
+    DISCO.made = true;
+    const cx = DF.x, cz = DF.z, y = 3.02, hw = DF.w / 2 + 0.35, hd = DF.d / 2 + 0.35, mT = M(0x2a2c33, { metalness: 0.6, roughness: 0.4 });
+    const nopick = o => { o.traverse(m => { m.raycast = () => {}; m.castShadow = false; }); return o; };
+    nopick(box(hw * 2, 0.07, 0.07, mT, cx, y, cz - hd)); nopick(box(hw * 2, 0.07, 0.07, mT, cx, y, cz + hd));
+    nopick(box(0.07, 0.07, hd * 2, mT, cx - hw, y, cz)); nopick(box(0.07, 0.07, hd * 2, mT, cx + hw, y, cz));
+    const cols = [0xff2fa0, 0x2fd0ff, 0xffd23f, 0x7cff6b, 0xb46bff, 0xff7a3f];
+    const pos = [[-hw * 0.7, -hd], [0, -hd], [hw * 0.7, -hd], [-hw * 0.7, hd], [0, hd], [hw * 0.7, hd]];
+    pos.forEach((p, k) => {
+      const base = new THREE.Group(); base.position.set(cx + p[0], y - 0.06, cz + p[1]); scene.add(base);
+      const yoke = new THREE.Group(); base.add(yoke);
+      const can = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.22, 12), mT); can.position.y = -0.11; yoke.add(can);
+      const lens = new THREE.Mesh(new THREE.CircleGeometry(0.1, 16), new THREE.MeshBasicMaterial({ color: cols[k], toneMapped: false })); lens.rotation.x = Math.PI / 2; lens.position.y = -0.225; yoke.add(lens);
+      const L = 3.6, beam = new THREE.Mesh(new THREE.ConeGeometry(0.55, L, 22, 1, true), addMat(cols[k], 0.16)); beam.position.y = -0.23 - L / 2; yoke.add(beam);
+      const pool = new THREE.Mesh(new THREE.CircleGeometry(0.62, 24), addMat(cols[k], 0.5)); pool.rotation.x = -Math.PI / 2; pool.position.y = 0.03; scene.add(pool);
+      nopick(base); nopick(pool);
+      DISCO.heads.push({ base: base, yoke: yoke, beam: beam, pool: pool, lens: lens, c: cols[k], ph: k * 1.05 });
+    });
+    [0, 2, 4].forEach(k => { const H = DISCO.heads[k]; const sl = new THREE.SpotLight(H.c, 2.2, 9, 0.32, 0.55, 1.4); sl.position.copy(H.base.position); sl.castShadow = false; scene.add(sl); scene.add(sl.target); H.light = sl; });
+    // lasers from a box on the back truss
+    { const lb = new THREE.Group(); lb.position.set(cx, y - 0.12, cz - hd); scene.add(lb); lb.add(new THREE.Mesh(BX(0.3, 0.14, 0.2), mT));
+      const lc = [0x30ff60, 0xff3040, 0x30ff60, 0x4080ff, 0x30ff60, 0xff3040, 0x30ff60, 0x4080ff];
+      for (let k = 0; k < 8; k++) { const piv = new THREE.Group(); lb.add(piv); const m = new THREE.Mesh(BX(0.016, 0.016, 7), addMat(lc[k], 0.85)); m.position.z = 3.5; piv.add(m); DISCO.lasers.push({ piv: piv, k: k }); }
+      nopick(lb); DISCO.laserBox = lb; }
+    // mirror-ball sparkles
+    { const n = 160, g = new THREE.BufferGeometry(), arr = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) { const u = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, r = 2.2 + Math.random() * 2.6, h = Math.sqrt(1 - u * u); arr[i * 3] = Math.cos(a) * h * r; arr[i * 3 + 1] = -Math.abs(u) * 2.4; arr[i * 3 + 2] = Math.sin(a) * h * r; }
+      g.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+      const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 0.07, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+      pts.position.set(cx, 2.75, cz); pts.raycast = () => {}; scene.add(pts); DISCO.sparkle = pts; }
+    DISCO.strobe = new THREE.PointLight(0xffffff, 0, 8, 2); DISCO.strobe.position.set(cx, 2.6, cz); scene.add(DISCO.strobe);
+  }
+  function discoTick(dt) {
+    if (!DISCO.made) buildDisco();
+    const playing = audible(), sp = playing ? 1.6 : 0.8, t = elapsed * sp, boost = elapsed < discoBoost;
+    const op = (night ? 0.2 : 0.11) * (boost ? 1.5 : 1);
+    DISCO.heads.forEach((H, k) => {
+      const tx = Math.sin(t * 0.9 + H.ph) * 0.55, tz = Math.cos(t * 0.7 + H.ph * 1.3) * 0.45 + (k < 3 ? 0.25 : -0.25);
+      H.yoke.rotation.set(tz, 0, tx);
+      const hue = ((elapsed * 0.05 + k / 6) % 1), col = new THREE.Color().setHSL(hue, 1, 0.55);
+      H.beam.material.color.copy(col); H.pool.material.color.copy(col); H.lens.material.color.copy(col);
+      H.beam.material.opacity = op; H.pool.material.opacity = Math.min(0.85, op * 3.4);
+      _dv.set(0, -1, 0).applyEuler(_de.set(tz, 0, tx)); const d = (H.base.position.y - 0.23) / Math.max(0.2, -_dv.y);
+      H.pool.position.set(H.base.position.x + _dv.x * d, 0.03, H.base.position.z + _dv.z * d);
+      if (H.light) { H.light.color.copy(col); H.light.target.position.copy(H.pool.position); H.light.intensity = (night ? 3.0 : 1.4) * (boost ? 1.6 : 1); }
+    });
+    DISCO.lasers.forEach(Lz => { const a = (Lz.k - 3.5) * 0.18 + Math.sin(t * 1.3) * 0.5; Lz.piv.rotation.set(0.32 + Math.sin(t * 0.8 + Lz.k) * 0.12, a, 0); Lz.piv.children[0].material.opacity = (night ? 0.85 : 0.45) * (0.6 + 0.4 * Math.abs(Math.sin(t * 3 + Lz.k))); });
+    if (DISCO.sparkle) { DISCO.sparkle.rotation.y = disco.rotation.y; DISCO.sparkle.material.opacity = night ? 0.95 : 0.55; }
+    const bp = (music.station ? music.station.bpm : 120) / 60;
+    if (playing) { DISCO.beat += dt * bp; if (DISCO.beat >= 2) { DISCO.beat = 0; DISCO.strobe.intensity = night ? 6 : 3; } }
+    DISCO.strobe.intensity = Math.max(0, DISCO.strobe.intensity - dt * 30);
+  }
+
+  // ================= 🪣 beer bucket =================
+  const BK = { list: new Map(), seq: 0, popup: null };
+  const mBkt = M(0xc8ccd2, { metalness: 0.6, roughness: 0.3 }), mIce = M(0xe6f6ff, { roughness: 0.2 });
+  function bucketMesh(n) {
+    const g = new THREE.Group();
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.12, 0.2, 16), mBkt); b.position.y = 0.1; g.add(b);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.012, 6, 18), mBkt); rim.rotation.x = Math.PI / 2; rim.position.y = 0.2; g.add(rim);
+    const ice = new THREE.Mesh(new THREE.CylinderGeometry(0.145, 0.145, 0.02, 14), mIce); ice.position.y = 0.19; g.add(ice);
+    [-1, 1].forEach(s => { const h = new THREE.Mesh(BX(0.03, 0.03, 0.05), mBkt); h.position.set(s * 0.17, 0.16, 0); g.add(h); });
+    g.userData.bottles = [];
+    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2, bt = new THREE.Group(); bt.position.set(Math.cos(a) * 0.08, 0.2, Math.sin(a) * 0.08); bt.rotation.z = Math.cos(a) * 0.2; bt.rotation.x = -Math.sin(a) * 0.2;
+      const body = new THREE.Mesh(BX(0.04, 0.1, 0.04), mBeerB); body.position.y = 0.02; bt.add(body); const neck = new THREE.Mesh(BX(0.02, 0.05, 0.02), mBeerB); neck.position.y = 0.09; bt.add(neck); const cap = new THREE.Mesh(BX(0.024, 0.01, 0.024), mSilv); cap.position.y = 0.12; bt.add(cap);
+      g.add(bt); g.userData.bottles.push(bt); }
+    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.userData.bucketPart = true; } });
+    setBucketN(g, n); applyStyleTo(g); return g;
+  }
+  function setBucketN(g, n) { g.userData.bottles.forEach((b, k) => { b.visible = k < n; }); }
+  function holdBucket(w, n, quiet) {
+    unholdBucket(w);
+    const prop = bucketMesh(n); prop.scale.set(0.7, 0.7, 0.7); prop.position.set(0, -0.2, 0.02); prop.traverse(o => { o.raycast = () => {}; });
+    w.v.hands[0].add(prop); w.bucket = { n: n, prop: prop };
+    if (w === me) { if (!quiet) toast('🪣 You’ve got a bucket of ' + n + ' beers. Take one any time, or set it on a table to share.'); renderBucketBar(); if (NET.on && !NET.rx) netSend({ t: 'ev', k: 'bucket', act: 'hold', n: n }); }
+  }
+  function unholdBucket(w, send) {
+    if (!w.bucket) return; const p = w.bucket.prop; if (p && p.parent) p.parent.remove(p); w.bucket = null;
+    if (w === me) { renderBucketBar(); if (send && NET.on && !NET.rx) netSend({ t: 'ev', k: 'bucket', act: 'hold', n: 0 }); }
+  }
+  function beerFromBucket() {
+    if (me.held && me.held.id === 'beer' && me.held.left > 0) { toast('🍺 Finish the beer in your hand first!'); return false; }
+    giveItem(me, 'beer', true); sfx('pssht'); floatFx(me, '🍺'); return true;
+  }
+  function takeFromMine() {
+    const B = me.bucket; if (!B || B.n <= 0) return;
+    if (!beerFromBucket()) return;
+    B.n--; setBucketN(B.prop, B.n);
+    if (B.n <= 0) { unholdBucket(me, true); toast('🪣 That was the last beer. The bucket is empty!'); }
+    else { toast('🍺 You took a beer. ' + B.n + ' left in the bucket.'); renderBucketBar(); if (NET.on) netSend({ t: 'ev', k: 'bucket', act: 'hold', n: B.n }); }
+  }
+  function tableSpots() {
+    const out = FTABLES.slice();
+    desks.forEach(d => out.push({ x: d.cx, z: d.cz, h: 0.765, w: 1.2, d: 0.55 }));
+    if (OFF.bar) { out.push({ x: 28.9 + OFF.bar[0], z: 2.7 + OFF.bar[1], h: 1.03, w: 0.6, d: 0.6 }); [4.4, 5.9, 7.4].forEach(z => out.push({ x: 22.7 + OFF.bar[0], z: z + OFF.bar[1], h: 1.11, w: 0.4, d: 1.2 })); }
+    return out;
+  }
+  function placeBucket() {
+    const B = me.bucket; if (!B) return;
+    if (WATER_IN(me.x, me.z)) { toast('💦 Not in the water!'); return; }
+    const grp = GRP(zoneAt(me.x, me.z));
+    const near = tableSpots().filter(t => GRP(zoneAt(t.x, t.z)) === grp).map(t => ({ t: t, d: Math.hypot(t.x - me.x, t.z - me.z) })).filter(o => o.d < 2.6).sort((a, b) => a.d - b.d)[0];
+    let p;
+    if (near) { const t = near.t, busy = [...BK.list.values()].filter(o => Math.hypot(o.x - t.x, o.z - t.z) < 0.6).length; p = [t.x + (busy % 2 ? 0.25 : -0.15) * Math.min(1, t.w), t.z + (busy > 1 ? 0.18 : 0) * Math.min(1, t.d), t.h]; }
+    else p = [me.x + Math.sin(me.yaw) * 0.5, me.z + Math.cos(me.yaw) * 0.5, 0];
+    const id = (NET.id || 'me') + '-' + (++BK.seq), n = B.n;
+    unholdBucket(me);
+    addPlaced(id, p[0], p[1], p[2], n, 'me');
+    if (NET.on) netSend({ t: 'ev', k: 'bucket', act: 'place', id: id, n: n, mv: r2(p[0]) + ',' + r2(p[1]) + ',' + r2(p[2]) });
+    toast(near ? '🪣 You set the bucket on the table. Anyone can grab a beer from it!' : '🪣 No table nearby, so you set it on the floor. Anyone can grab a beer!');
+    post(null, '🪣 ' + me.name + ' set down a bucket of ' + n + ' beers. Help yourselves! 🍻');
+  }
+  function addPlaced(id, x, z, y, n, by) {
+    if (BK.list.has(id)) { const o = BK.list.get(id); o.n = Math.min(o.n, n); setBucketN(o.g, o.n); return o; }
+    const g = bucketMesh(n); g.position.set(x, y, z); scene.add(g);
+    const o = { id: id, x: x, z: z, y: y, n: n, g: g, by: by }; g.traverse(m => { m.userData.bucketId = id; }); BK.list.set(id, o); return o;
+  }
+  function removePlaced(id) { const o = BK.list.get(id); if (!o) return; scene.remove(o.g); BK.list.delete(id); if (BK.popup === id) closeBucketBox(); }
+  function bucketFromHit() {
+    if (!BK.list.size) return null;
+    const meshes = []; BK.list.forEach(o => o.g.traverse(m => { if (m.isMesh) meshes.push(m); }));
+    const h = ray.intersectObjects(meshes, false)[0]; return h ? BK.list.get(h.object.userData.bucketId) || null : null;
+  }
+  const bucketBox = document.createElement('div'); bucketBox.id = 'bucketBox'; bucketBox.className = 'float card pantry'; bucketBox.hidden = true; document.body.appendChild(bucketBox);
+  function closeBucketBox() { BK.popup = null; $('bucketBox').hidden = true; }
+  function clickBucket(o) { BK.popup = o.id; closeCard(); closePantry(); closeBar(); $('bucketBox').hidden = false; renderBucketBox(); }
+  function renderBucketBox() {
+    const o = BK.list.get(BK.popup), el = $('bucketBox'); if (!o) { closeBucketBox(); return; }
+    const hands = me.bucket ? 'You’re already holding a bucket.' : me.carrying ? 'Your hands are full.' : '';
+    el.innerHTML = '<button class="x" data-bk="close" aria-label="Close">×</button><div class="ph"><span class="av" style="--c:#7a4a12">🪣</span><div><h2>Bucket of beers</h2><p>' + o.n + ' cold ' + (o.n === 1 ? 'beer' : 'beers') + ' left · anyone can grab one</p></div></div>' +
+      '<div class="pgrid"><button class="pit" data-bk="take"><span class="pe">🍺</span><b>Grab a beer</b></button><button class="pit" data-bk="pick"' + (hands ? ' disabled title="' + esc(hands) + '"' : '') + '><span class="pe">🪣</span><b>Pick up bucket</b></button></div>';
+  }
+  $('bucketBox').addEventListener('click', e => { const b = e.target.closest('[data-bk]'); if (!b) return; const a = b.dataset.bk; if (a === 'close') closeBucketBox(); else bucketAct(BK.popup, a); });
+  function bucketAct(id, act) {
+    const o = BK.list.get(id); if (!o) return;
+    if (act === 'pick' && (me.bucket || me.carrying)) { toast(me.bucket ? 'You’re already holding a bucket.' : 'Your hands are full!'); return; }
+    if (GRP(zoneAt(o.x, o.z)) !== GRP(zoneAt(me.x, me.z))) { toast('That bucket is in another room.'); return; }
+    if (Math.hypot(o.x - me.x, o.z - me.z) > 1.4) {
+      const a = Math.atan2(me.x - o.x, me.z - o.z), p = NAVG.snap(o.x + Math.sin(a) * 0.9, o.z + Math.cos(a) * 0.9);
+      sendMeTo({ area: 'free', pos: p, anchor: p.slice(), via: [], face: Math.atan2(o.x - p[0], o.z - p[1]), sit: 0, by: null });
+      me.pendBk = { id: id, act: act, t: elapsed }; closeBucketBox(); return;
+    }
+    me.tyaw = Math.atan2(o.x - me.x, o.z - me.z);
+    if (act === 'take') {
+      if (!beerFromBucket()) return;
+      o.n--; setBucketN(o.g, o.n);
+      if (NET.on) netSend({ t: 'ev', k: 'bucket', act: 'take', id: id, n: o.n });
+      if (o.n <= 0) { removePlaced(id); toast('🍺 You grabbed the last beer. The bucket is empty!'); } else { toast('🍺 You grabbed a beer. ' + o.n + ' left.'); renderBucketBox(); }
+    } else if (act === 'pick') {
+      const n = o.n; removePlaced(id); holdBucket(me, n, true); toast('🪣 You picked up the bucket (' + n + ' beers).');
+      if (NET.on) netSend({ t: 'ev', k: 'bucket', act: 'pickup', id: id, n: n });
+    }
+  }
+  const bucketBar = document.createElement('div'); bucketBar.id = 'bucketBar'; bucketBar.className = 'float carrybar'; bucketBar.hidden = true; document.body.appendChild(bucketBar);
+  function renderBucketBar() {
+    if (!me.bucket) { bucketBar.hidden = true; return; }
+    bucketBar.hidden = false;
+    bucketBar.innerHTML = '<span>🪣 Bucket: <b>' + me.bucket.n + '</b> 🍺 left</span><button data-bb="take" class="on">🍺 Take one</button><button data-bb="place">🍽️ Put on table</button>';
+  }
+  bucketBar.addEventListener('click', e => { const b = e.target.closest('[data-bb]'); if (!b) return; if (b.dataset.bb === 'take') takeFromMine(); else placeBucket(); });
+  function applyNetBucket(m, w) {
+    if (!w) return;
+    const n = Math.max(0, Math.min(6, Math.round(+m.n || 0)));
+    if (m.act === 'hold') { if (n > 0) { if (w.bucket) { w.bucket.n = n; setBucketN(w.bucket.prop, n); } else holdBucket(w, n, true); } else unholdBucket(w); }
+    else if (m.act === 'place') { const mp = String(m.mv || '').split(',').map(Number); if (mp.length === 3 && mp.every(isFinite) && n > 0) { unholdBucket(w); const o = addPlaced(String(m.id).slice(0, 40), mp[0], mp[1], Math.max(0, Math.min(1.4, mp[2])), n, w.id); if (!m.sync) post(null, '🪣 ' + w.name + ' set down a bucket of ' + n + ' beers. Help yourselves! 🍻'); } }
+    else if (m.act === 'take') { const o = BK.list.get(String(m.id)); if (o) { o.n = Math.min(o.n, n); setBucketN(o.g, o.n); if (o.n <= 0) removePlaced(o.id); else if (BK.popup === o.id) renderBucketBox(); } }
+    else if (m.act === 'pickup') { const o = BK.list.get(String(m.id)); const k = o ? o.n : n; if (o) removePlaced(o.id); if (k > 0) holdBucket(w, k, true); }
+  }
+  function bucketSyncTo() {
+    if (!NET.on) return;
+    if (me.bucket) netSend({ t: 'ev', k: 'bucket', act: 'hold', n: me.bucket.n });
+    BK.list.forEach(o => netSend({ t: 'ev', k: 'bucket', act: 'place', id: o.id, n: o.n, mv: r2(o.x) + ',' + r2(o.z) + ',' + r2(o.y), sync: true }));
+  }
+  function bucketTick(dt) {
+    if (me.pendBk && !me.path.length) { const p = me.pendBk; me.pendBk = null; const o = BK.list.get(p.id); if (o && Math.hypot(o.x - me.x, o.z - me.z) < 1.6) bucketAct(p.id, p.act); else if (!o) toast('Someone already took that bucket!'); }
+    else if (me.pendBk && elapsed - me.pendBk.t > 12) me.pendBk = null;
+    workers.forEach(w => { const B = w.bucket; if (!B) return; if (B.prop.parent !== w.v.hands[0]) w.v.hands[0].add(B.prop); const e = w.emote && w.mode !== 'walk' ? w.emote.type : null; B.prop.visible = !(e && EMOTES[e] && (EMOTES[e].inst || e === 'guitar')) && !w.carriedBy && !w.flying; });
+    BK.list.forEach(o => { const t = elapsed * 2 + o.x; o.g.userData.bottles.forEach((b, k) => { b.position.y = 0.2 + Math.sin(t + k) * 0.004; }); });
+  }
 
   // ================= falling down =================
   function knockDown(secs) {
@@ -8303,7 +8621,7 @@ function main(){
       v.addEventListener('ended', () => { if (music.now === n) skipMusic(); });
       v.addEventListener('error', () => { if (music.now === n) { n.yt = 'error'; n.err = 'This file couldn’t play here. The site may block it, or the format isn’t supported.'; renderMusic(); } });
       lh.appendChild(v); n.el = v;
-      try { const p = v.play(); if (p && p.catch) p.catch(() => { if (music.now === n) { n.yt = 'paused'; renderMusic(); toast('Click ▶ on the player to start it.'); } }); } catch (e) {}
+      try { const p = v.play(); if (p && p.catch) p.catch(() => { if (music.now === n) { n.yt = 'paused'; renderMusic(); toast('Open the 🎵 Music menu and press ▶ Play to start it.'); } }); } catch (e) {}
     } else {
       const f = document.createElement('iframe');
       f.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
@@ -8314,10 +8632,11 @@ function main(){
       f.addEventListener('load', () => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } });
       lh.appendChild(f); n.el = f;
       setTimeout(() => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } }, 4000);
+      if (!/youtube|vimeo|dailymotion|drive\.google/.test(n.embed)) setTimeout(() => { if (music.now === n) toast('🎵 If it doesn’t start, open the 🎵 Music menu → ⛶ Big screen and press play there.'); }, 2500);
     }
   }
-  function toggleTheater(on) { const m = $('ytMini'); const v = on == null ? !m.classList.contains('theater') : on; m.classList.toggle('theater', v); $('ytTh').textContent = v ? '🗗' : '⛶'; }
-  $('ytTh').addEventListener('click', () => toggleTheater());
+  function toggleTheater(on) { const m = $('ytMini'); const v = on == null ? !m.classList.contains('theater') : on; m.classList.toggle('theater', v); $('ytTh').textContent = v ? '✕ Close screen' : '⛶'; $('ytTh').title = v ? 'Close the big screen (keeps playing)' : 'Big screen'; if (typeof renderMusic === 'function') renderMusic(); }
+  $('ytTh').addEventListener('click', () => { const was = $('ytMini').classList.contains('theater'); toggleTheater(); if (was) toast('🎵 Still playing. Use the Music menu to pause or stop.'); });
 
   // ================= wing items & animation =================
   [mPart, mPartCap].forEach(m => SCENERY.add(m));
@@ -8327,7 +8646,7 @@ function main(){
   const hoopItem = regItem('hoop', hoopParts, (w, it) => { itemAnim(it, 'shake', 0.6, 0.6); bsound('clank'); }); hoopItem.court = true;
   const barItem = regItem('bar', barParts, (w, it) => { itemAnim(it, 'shake', 0.4, 0.3); sfx('clink'); if (w === me) openBar(); });
   let discoBoost = 0;
-  regItem('disco ball', [disco], (w, it) => { discoBoost = elapsed + 8; tsound('chime'); floatAt(it, '✨ Disco time! ✨'); if (w === me && !me.emote) startDance(me, 'disco'); });
+  regItem('disco ball', [disco], (w, it) => { discoBoost = elapsed + 4; tsound('chime'); floatAt(it, '✨'); });
   // ================= movie room: its own screen, first-person Watch mode =================
   const MOVIE = { url: '', title: '', t0: 0, by: null };
   const MV = { on: false, from: null, k: 0, el: null, key: '' };
@@ -8504,16 +8823,7 @@ function main(){
     waterT.offset.x = (elapsed * 0.03) % 1; waterT.offset.y = Math.sin(elapsed * 0.4) * 0.05;
     floatRing.position.y = 0.3 + Math.sin(elapsed * 1.7) * 0.03; floatRing.rotation.y += dt * 0.15;
     disco.rotation.y += dt * (elapsed < discoBoost ? 4 : 0.8);
-    partyLights.forEach((L, k) => { const a = elapsed * (0.9 + k * 0.3) + k * 2.1; L.position.set(DF.x + Math.cos(a) * 1.8, 1.6, DF.z + Math.sin(a) * 2.2); L.intensity = (night ? 1.6 : 0.9) + (elapsed < discoBoost ? 1.0 : 0); });
-    { const boost = elapsed < discoBoost, beat = audible() ? Math.pow(1 - ((elapsed * (music.station ? music.station.bpm : 110) / 60) % 1), 2) : 0.4;
-      if (DISCO.beamGroup) { DISCO.beamGroup.position.set(DF.x, 2.7, DF.z); DISCO.beamGroup.rotation.y += dt * (boost ? 2.4 : 0.55); }
-      DISCO.beams.forEach((m, k) => { m.material.opacity = (night ? 0.2 : 0.13) + beat * 0.08 + (boost ? 0.08 : 0); m.rotation.z = 0.62 + (k % 2) * 0.18 + Math.sin(elapsed * 0.7 + k) * 0.12; });
-      DISCO.spots.forEach((m, k) => { const p = DISCO.spotPh[k], a = elapsed * (0.35 + (k % 5) * 0.07) * (boost ? 2.5 : 1) + p;
-        m.position.x = DF.x + Math.cos(a) * (2.0 + (k % 4) * 1.1); m.position.z = DF.z + Math.sin(a * 1.3) * (1.6 + (k % 3) * 0.9);
-        m.material.opacity = 0.35 + beat * 0.35; const s = 0.8 + beat * 0.35; m.scale.set(s, s, s);
-        if (Math.floor(elapsed * 2 + k) % 6 === 0) m.material.color.setHSL(((elapsed * 0.1) + k / 14) % 1, 1, 0.55); });
-      if (DISCO.glints) DISCO.glints.forEach((g, k) => { g.visible = Math.sin(elapsed * 9 + k * 2.7) > 0.55; }); }
-
+    partyLights.forEach((L, k) => { const a = elapsed * (0.9 + k * 0.3) + k * 2.1; L.position.set(DF.x + Math.cos(a) * 1.8, 1.6, DF.z + Math.sin(a) * 2.2); L.intensity = (night ? 1.1 : 0.35) + (elapsed < discoBoost ? 0.8 : 0); });
     dfT -= dt;
     if (dfT <= 0) {
       dfT = audible() ? 0.35 : 0.8;
@@ -8539,7 +8849,7 @@ function main(){
       if (me.emote && me.emote.type === 'sleep') setEmote(me, null);
       toast('🤕 You wake up with a headache. Maybe some water?'); me.drunkBed = null; renderBar(); renderPantry();
     }
-    bbTick(dt); gymTick(dt); beachTick(dt); combatTick(dt); carryTick(dt); instrTick(dt); bucketTick(); matchBallTick();
+    bbTick(dt); gymTick(dt); beachTick(dt); combatTick(dt); carryTick(dt); instrTick(dt); matchBallTick(); billTick(dt); bucketTick(dt); discoTick(dt);
     workers.forEach(ballTick);
     if (Math.floor(elapsed * 2) !== Math.floor((elapsed - dt) * 2)) drawMovie();
     movieLight.intensity = night ? 0.7 : 0.25;
