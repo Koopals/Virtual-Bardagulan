@@ -270,6 +270,7 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpg button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 3px;font-size:11px;min-width:0;line-height:1.2}
 .dpg .de{font-size:19px;line-height:1.1}
 .carrybar{left:50%;bottom:86px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:14px;z-index:30;font-size:13px}.carrybar span{padding:0 4px}
+.ipg{grid-template-columns:repeat(3,1fr)}
 .dplbl{font-size:11px;font-weight:700;color:var(--color-text-secondary);margin:8px 2px 4px}
 .dpg button.cur,.dpf button.cur{background:#ec4899;border-color:#ec4899;color:#fff}
 .dpf{display:flex;gap:6px;margin-top:8px}
@@ -642,7 +643,7 @@ function main(){
   const rnd = a => a[Math.floor(Math.random() * a.length)];
   const fmtT = d => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   // band stage state (filled in when the Bar room is built)
-  const BAND = { rect: null, leds: [], lights: [], cym: [], heads: [], platters: [], spot: {}, bpm: 112, last: -1, bus: null, noise: null, standGtr: null, keyLcd: null, djScr: null, live: false, hit: 0 };
+  const BAND = { sound: false, rect: null, leds: [], lights: [], cym: [], heads: [], platters: [], spot: {}, bpm: 112, last: -1, bus: null, noise: null, standGtr: null, keyLcd: null, djScr: null, live: false, hit: 0 };
   function makeEGuitar() {
     const g = new THREE.Group(), mR = new THREE.MeshStandardMaterial({ color: 0xd6262f, metalness: 0.35, roughness: 0.3 }), mW = new THREE.MeshStandardMaterial({ color: 0xf4f1ea, roughness: 0.5 }), mN = new THREE.MeshStandardMaterial({ color: 0x5a3417, roughness: 0.6 }), mM = new THREE.MeshStandardMaterial({ color: 0xc8ccd2, metalness: 0.8, roughness: 0.25 });
     const bx = (w, h, d, m, x, yy, z, rz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, yy, z); if (rz) o.rotation.z = rz; o.castShadow = true; g.add(o); return o; };
@@ -3658,12 +3659,12 @@ function main(){
       const ei = emInfo(w.emote);
       post(null, nmOf(w) + (w === me ? ' are ' : ' is ') + emPhrase(w.emote) + ' ' + ei.emoji + (w.emote.mix ? ' (party mix)' : ''));
     }
-    w.bkey = ''; renderEmoteBar(); renderTeam(); if (w === me) renderDancePicker();
+    w.bkey = ''; renderEmoteBar(); renderTeam(); if (w === me) { renderDancePicker(); if (typeof renderInstrPicker === 'function') renderInstrPicker(); }
     if (card.dataset.id === w.id && !card.hidden && !cs.wsp && !cs.open && !cs.look) renderCard();
   }
   function renderEmoteBar() {
     const el = $('emoBar'); if (!el) return;
-    el.innerHTML = Object.keys(EMOTES).filter(k => !EMOTES[k].inst || (me.emote && me.emote.type === k)).map(k => { const on = !!(me.emote && me.emote.type === k); return '<button data-emo="' + k + '" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>'; }).join('') +
+    el.innerHTML = Object.keys(EMOTES).map(k => { const on = !!(me.emote && me.emote.type === k); return '<button data-emo="' + k + '" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>'; }).join('') +
       (function () { const sOn = typeof isSittingDown === 'function' && isSittingDown(); const on = typeof isResting === 'function' && isResting(); return '<button data-emo="sit" class="' + (sOn ? 'cur' : '') + '" aria-pressed="' + sOn + '" title="Sit down (6)">' + (sOn ? '🧍 Stand up' : '🪑 Sit') + '</button><button data-emo="lie" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '" title="Lie down (5)">🛌 ' + (on ? 'Get up' : 'Lie down') + '</button>'; })();
   }
   function floatFx(w, txt, cls) {
@@ -3702,7 +3703,7 @@ function main(){
     if (e.nx <= 0) {
       if (e.type === 'sleep') { floatFx(w, rnd(['z', 'Z', 'Zz']), 'z'); e.nx = 1.1; }
       else if (e.type === 'sing') { floatFx(w, rnd(['♪', '♫', '♬'])); e.nx = 0.55; }
-      else if (e.type === 'guitar') { floatFx(w, rnd(['♪', '♫'])); e.nx = 0.5; if (w === me) strum(); }
+      else if (e.type === 'guitar') { floatFx(w, rnd(['♪', '♫'])); e.nx = 0.5; }
       else if (INST[e.type]) { floatFx(w, rnd({ drums: ['🥁', '💥', '♪'], keys: ['♪', '♫', '🎹'], eguitar: ['🤘', '⚡', '♫'], dj: ['🔊', '🎶', '💿'] }[e.type])); e.nx = 0.7 + Math.random() * 0.5; }
       else { if (Math.random() < 0.5) floatFx(w, rnd(['✨', '♪'])); e.nx = 0.8; }
     }
@@ -3714,6 +3715,7 @@ function main(){
     if (V.micp) V.micp.visible = type === 'sing';
     if (V.sticks) V.sticks.forEach(s => { s.visible = type === 'drums'; });
     if (V.egtr) V.egtr.visible = type === 'eguitar';
+    ['drums', 'keys', 'dj'].forEach(k => { const S = BAND.spot[k], atStage = !!S && Math.hypot(w.x - S.pos[0], w.z - S.pos[1]) < 0.6; if (type === k && !atStage) { const P = portProp(w, k); P.visible = true; if (k === 'dj') P.children.forEach(c => { if (c.userData.spin) c.rotation.y += 0.12; }); } else if (V['pp_' + k]) V['pp_' + k].visible = false; });
     const blink = Math.sin(elapsed * 0.9 + w.i * 2.1) > 0.985 || (!type && stInfo(w).key === 'away' && w.mode !== 'walk') ? 0.15 : 1;
     V.eyes.forEach(m => { m.scale.y = type === 'sleep' ? 0.12 : blink; });
     if (type === 'sing') V.smile.scale.set(1.3, 1.2 + Math.abs(Math.sin(elapsed * 8)) * 1.4, 1); else V.smile.scale.set(1, 1, 1);
@@ -3910,7 +3912,7 @@ function main(){
     }
   }
   function renderDock() {
-    $('dock').innerHTML = '<input id="hbIn" maxlength="160" autocomplete="off" placeholder="Say something…" aria-label="Chat message">' + '<button data-dance="1" title="Dances" aria-label="Dances">💃</button>' + REACTS.map(r => '<button data-rx="' + r[0] + '" title="' + r[2] + '" aria-label="' + r[2] + '">' + r[1] + '</button>').join('');
+    $('dock').innerHTML = '<input id="hbIn" maxlength="160" autocomplete="off" placeholder="Say something…" aria-label="Chat message">' + '<button data-dance="1" title="Dances" aria-label="Dances">💃</button><button data-instr="1" title="Instruments" aria-label="Instruments">🎸</button>' + REACTS.map(r => '<button data-rx="' + r[0] + '" title="' + r[2] + '" aria-label="' + r[2] + '">' + r[1] + '</button>').join('');
   }
 
   // ================= first-time setup =================
@@ -5540,7 +5542,7 @@ function main(){
         '<div class="f"><select id="cPlace" aria-label="Where">' + Object.keys(PLACE_NAME).filter(k => ['free', 'pool', 'game', 'court'].indexOf(k) < 0).map(k => '<option value="' + k + '"' + (cs.place === k ? ' selected' : '') + '>' + (k === 'desk' ? 'Stay at desk' : 'Go to ' + PLACE_NAME[k].replace('Harbour ', '')) + '</option>').join('') + '</select>' +
         '<button data-act="save" class="on">Save</button></div></div>';
     }
-    if (w.id === 'me') h += '<div class="lbl">Emotes</div><div class="emo" style="margin:0 0 10px">' + Object.keys(EMOTES).filter(k => !EMOTES[k].inst || (me.emote && me.emote.type === k)).map(k => '<button data-act="emo2" data-k="' + k + '" class="' + (me.emote && me.emote.type === k ? 'cur' : '') + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>').join('') + '<button data-act="emo2" data-k="sit" class="' + (isSittingDown() ? 'cur' : '') + '">' + (isSittingDown() ? '🧍 Stand up' : '🪑 Sit') + '</button><button data-act="emo2" data-k="lie" class="' + (isResting() ? 'cur' : '') + '">🛌 ' + (isResting() ? 'Get up' : 'Lie down') + '</button></div>';
+    if (w.id === 'me') h += '<div class="lbl">Emotes</div><div class="emo" style="margin:0 0 10px">' + Object.keys(EMOTES).map(k => '<button data-act="emo2" data-k="' + k + '" class="' + (me.emote && me.emote.type === k ? 'cur' : '') + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>').join('') + '<button data-act="emo2" data-k="sit" class="' + (isSittingDown() ? 'cur' : '') + '">' + (isSittingDown() ? '🧍 Stand up' : '🪑 Sit') + '</button><button data-act="emo2" data-k="lie" class="' + (isResting() ? 'cur' : '') + '">🛌 ' + (isResting() ? 'Get up' : 'Lie down') + '</button></div>';
     else if (w.emote) h += '<div class="where">' + emInfo(w.emote).emoji + ' ' + esc(w.name) + ' is ' + esc(emPhrase(w.emote)) + '</div>';
     h += '<div class="lbl">Working on</div>' + (t ? '<div class="task"><div class="t">' + esc(t.title) + ' · ' + Math.round(t.progress) + '%</div><div class="bar"><i style="width:' + t.progress + '%"></i></div></div>' : '<div class="task">No open tasks</div>') +
       '<div class="acts">' + (w.id !== 'me' ? '<button data-act="msg">Message</button>' : '') + (otherZone(w) ? '<button data-act="goroom" class="on">🚪 Go to ' + esc(ZBY[zoneAt(w.x, w.z)].short) + '</button>' : '<button data-act="find">Find</button>') + (w.remote ? '' : '<button data-act="look">🎨 Customize</button>') + '</div>';
@@ -5583,7 +5585,7 @@ function main(){
     else if (act === 'carry') startCarry(w);
     else if (act === 'cthrow') { throwCarried(false); closeCard(); }
     else if (act === 'cdrop') { throwCarried(true); closeCard(); }
-    else if (act === 'emo2') { if (b.dataset.k === 'sit') { toggleSit(); renderCard(); } else if (b.dataset.k === 'lie') { toggleLie(); renderCard(); } else if (b.dataset.k === 'dance') danceButton(); else setEmote(me, b.dataset.k); }
+    else if (act === 'emo2') { if (b.dataset.k === 'sit') { toggleSit(); renderCard(); } else if (b.dataset.k === 'lie') { toggleLie(); renderCard(); } else if (b.dataset.k === 'dance') danceButton(); else if (INST[b.dataset.k]) menuInstr(b.dataset.k); else setEmote(me, b.dataset.k); }
     else if (act === 'dtog') danceWith(w);
     else if (act === 'look' && !w.remote) { cs.look = true; renderCard(); flyToWorker(w); }
     else if (act === 'lk') { setLookField(w.look, b.dataset.f, b.dataset.v); applyLook(w); }
@@ -5690,7 +5692,7 @@ function main(){
     if (!e.repeat && k === '5') toggleLie();
     if (!e.repeat && k === '6') toggleSit();
     if (k === 'escape' && MV.on) { exitWatch(); return; }
-    if (k === 'escape') { const dp = document.getElementById('dpick'); if (dp && !dp.hidden) dp.hidden = true; else if (walking) fly('overview'); else closeCard(); }
+    if (k === 'escape') { const dp = document.getElementById('dpick'); if (!ipick.hidden) ipick.hidden = true; else if (dp && !dp.hidden) dp.hidden = true; else if (walking) fly('overview'); else closeCard(); }
     if (walking && k.indexOf('arrow') === 0) e.preventDefault();
   });
   window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
@@ -6014,9 +6016,9 @@ function main(){
   if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
 
   renderAV(); renderMe(); renderTeam(); renderTasks(); renderCounts(); renderEmoteBar(); renderDock();
-  $('dock').addEventListener('click', e => { if (e.target.closest('[data-dance]')) { toggleDancePicker(); return; } const b = e.target.closest('[data-rx]'); if (b) react(me, b.dataset.rx); });
+  $('dock').addEventListener('click', e => { if (e.target.closest('[data-instr]')) { toggleInstrPicker(); return; } if (e.target.closest('[data-dance]')) { ipick.hidden = true; toggleDancePicker(); return; } const b = e.target.closest('[data-rx]'); if (b) react(me, b.dataset.rx); });
   { const hbIn = $('hbIn'); mpAttach(hbIn); if (hbIn) hbIn.addEventListener('keydown', e => { e.stopPropagation(); if (mpKey(e, hbIn)) return; if (e.key === 'Enter') { const t = hbIn.value.trim(); if (t) { hbIn.value = ''; mpClose(); const re = replyTo; clearReply(); sendText(t, { re: re }); } } }); }
-  $('emoBar').addEventListener('click', e => { const b = e.target.closest('[data-emo]'); if (!b) return; if (b.dataset.emo === 'lie') toggleLie(); else if (b.dataset.emo === 'sit') toggleSit(); else if (b.dataset.emo === 'dance') danceButton(); else setEmote(me, b.dataset.emo); });
+  $('emoBar').addEventListener('click', e => { const b = e.target.closest('[data-emo]'); if (!b) return; if (b.dataset.emo === 'lie') toggleLie(); else if (b.dataset.emo === 'sit') toggleSit(); else if (b.dataset.emo === 'dance') danceButton(); else if (INST[b.dataset.emo]) menuInstr(b.dataset.emo); else setEmote(me, b.dataset.emo); });
   post(null, 'Welcome to the office chat · ' + fmtT(new Date()));
   post(null, '🎄 The office is decorated for Christmas! Play 🔔 Jingle Bells in the Music tab.');
   if (ONLINE) post(null, '🌐 This is the multiplayer office. Everyone you see here is a real person who opened the same link.');
@@ -7157,10 +7159,10 @@ function main(){
     S.by = null; sendMeTo(S); me.pendInstr = { kind: kind, spot: S, t: elapsed };
   }
   function startInstr(kind) {
-    if (me.emote && me.emote.type === kind) return;
-    setEmote(me, kind);
+    if (me.emote && me.emote.type === kind) { me.emote.stage = true; return; }
+    setEmote(me, kind); if (me.emote) me.emote.stage = true;
     const n = workers.filter(x => x !== me && x.emote && INST[x.emote.type] && GRP(zoneAt(x.x, x.z)) === GRP(zoneAt(me.x, me.z))).length;
-    toast((kind === 'drums' ? '🥁 You’re on drums!' : kind === 'keys' ? '🎹 You’re on keys!' : '🎧 You’re on the decks!') + (n ? ' Jamming with ' + n + (n === 1 ? ' other' : ' others') + '.' : ' Everyone in the Bar can hear you.') + ' Walk away to stop.');
+    toast((kind === 'drums' ? '🥁 You’re on drums!' : kind === 'keys' ? '🎹 You’re on keys!' : '🎧 You’re on the decks!') + (n ? ' Jamming with ' + n + (n === 1 ? ' other' : ' others') + '.' : ' Everyone can see you play.') + ' Walk away to stop.');
   }
   function stageLift(w) { const R = BAND.rect; if (R && w.x > R[0] && w.x < R[1] && w.z > R[2] && w.z < R[3]) w.v.root.position.y += 0.1; }
   function bandBus() {
@@ -7223,12 +7225,12 @@ function main(){
       if (me.at === P.spot && !me.path.length && !me.travel && !me.travelDoor) { me.pendInstr = null; startInstr(P.kind); }
       else if ((me.at !== P.spot && !me.travel && !me.travelDoor) || elapsed - P.t > 30) me.pendInstr = null;
     }
-    if (e && BAND.spot[e.type] && (me.at !== BAND.spot[e.type] || me.path.length)) setEmote(me, null);
+    if (e && e.stage && BAND.spot[e.type] && (me.at !== BAND.spot[e.type] || me.path.length)) setEmote(me, null);
     const myG = GRP(zoneAt(me.x, me.z));
     const players = workers.filter(w => w.emote && INST[w.emote.type] && w.mode !== 'walk' && !w.path.length && !w.carriedBy && !w.flying);
     const here = players.filter(w => GRP(zoneAt(w.x, w.z)) === myG);
     BAND.live = players.some(w => zoneAt(w.x, w.z) === 'bar');
-    if (here.length && audio.speaker && !(typeof MV !== 'undefined' && MV.on)) {
+    if (BAND.sound && here.length && audio.speaker && !(typeof MV !== 'undefined' && MV.on)) {   // instruments are silent (BAND.sound is off)
       const c = actx();
       if (c && c.state === 'running' && bandBus()) {
         const stepMs = 60000 / BAND.bpm / 4, now = Date.now(), cur = Math.floor(now / stepMs), until = Math.floor((now + 130) / stepMs);
@@ -7256,6 +7258,63 @@ function main(){
     if (BAND.djScr) BAND.djScr.material.color.setHSL(dj ? (elapsed * 0.3) % 1 : 0.33, 1, dj ? 0.5 : 0.25);
     if (BAND.keyLcd) BAND.keyLcd.material.color.setHSL(keys ? 0.55 + pulse * 0.1 : 0.55, 1, keys ? 0.45 + pulse * 0.3 : 0.2);
     if (BAND.standGtr) BAND.standGtr.visible = !players.some(w => w.emote.type === 'eguitar') && !workers.some(w => w.emote && w.emote.type === 'eguitar');
+  }
+
+  // play an instrument right where you stand (from the avatar menu); the full kit is on the Bar stage
+
+  // ================= instrument picker (🎸 in the bottom emote bar) =================
+  const IPICK_LIST = [['guitar', '🎸', 'Guitar'], ['eguitar', '🤘', 'E-guitar'], ['drums', '🥁', 'Drums'], ['keys', '🎹', 'Keys'], ['dj', '🎧', 'DJ'], ['sing', '🎤', 'Sing']];
+  const ipick = document.createElement('div'); ipick.className = 'float dpick'; ipick.id = 'ipick'; ipick.hidden = true; document.body.appendChild(ipick);
+  function renderInstrPicker() {
+    if (ipick.hidden) return;
+    const cur = me.emote ? me.emote.type : null, on = IPICK_LIST.find(x => x[0] === cur);
+    ipick.innerHTML = '<div class="dph"><b>Instruments</b><span>' + (on ? 'Now: ' + on[1] + ' ' + on[2] : 'Pick one to play (no sound, just for show)') + '</span><button class="x" data-ip="close" aria-label="Close">×</button></div>' +
+      '<div class="dpg ipg">' + IPICK_LIST.map(x => '<button data-ip="go" data-v="' + x[0] + '" class="' + (cur === x[0] ? 'cur' : '') + '"><span class="de">' + x[1] + '</span>' + x[2] + '</button>').join('') + '</div>' +
+      '<div class="dpf"><button data-ip="stop"' + (on ? '' : ' disabled') + '>Stop playing</button></div>';
+  }
+  function toggleInstrPicker() { ipick.hidden = !ipick.hidden; if (!ipick.hidden) { const dp = document.getElementById('dpick'); if (dp) dp.hidden = true; renderInstrPicker(); } }
+  ipick.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-ip]'); if (!b) return; const a = b.dataset.ip;
+    if (a === 'close') ipick.hidden = true;
+    else if (a === 'stop') { if (me.emote && IPICK_LIST.some(x => x[0] === me.emote.type)) setEmote(me, null); }
+    else if (a === 'go') { const v = b.dataset.v; if (INST[v]) menuInstr(v); else setEmote(me, v); }
+    renderInstrPicker();
+  });
+  function menuInstr(kind) {
+    if (me.carrying || me.carriedBy) { toast('🤲 Your hands are busy right now!'); return; }
+    if (me.downUntil > Date.now()) { toast('💫 You’re still seeing stars…'); return; }
+    if (me.emote && me.emote.type === kind) { setEmote(me, null); return; }
+    if (WATER_IN(me.x, me.z)) { toast('🏊 Not in the water! Your ' + INST[kind].slice(3) + ' would get wet.'); return; }
+    if (me.held) dropItem(me, true);
+    if (me.path.length) { me.path = []; if (me.at) settle(me); }
+    setEmote(me, kind);
+    toast(INST[kind].slice(0, 2) + ' Playing ' + INST[kind].slice(3) + ' right here. Click it again or walk to stop. (Full band stage: Bar room.)');
+  }
+  function portProp(w, kind) {
+    const V = w.v, key = 'pp_' + kind; if (V[key]) return V[key];
+    const g = new THREE.Group();
+    const mk = (geo, mat, x, yy, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, yy, z); m.castShadow = true; g.add(m); return m; };
+    const mChr = new THREE.MeshStandardMaterial({ color: 0xc8ccd2, metalness: 0.8, roughness: 0.25 }), mBlk = new THREE.MeshStandardMaterial({ color: 0x15151a, roughness: 0.5 }),
+      mRed = new THREE.MeshStandardMaterial({ color: 0xc0182b, metalness: 0.4, roughness: 0.35 }), mHd = new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.7 }), mCy = new THREE.MeshStandardMaterial({ color: 0xd4a93a, metalness: 0.8, roughness: 0.3 });
+    const cy = (r1, r2, h, s) => new THREE.CylinderGeometry(r1, r2, h, s || 14), bx = (a, b, c) => new THREE.BoxGeometry(a, b, c);
+    if (kind === 'drums') {
+      const kd = mk(cy(0.2, 0.2, 0.22, 16), mRed, 0, 0.22, 0.62); kd.rotation.x = Math.PI / 2; const kh = mk(cy(0.18, 0.18, 0.01, 16), mHd, 0, 0.22, 0.735); kh.rotation.x = Math.PI / 2;
+      mk(cy(0.15, 0.15, 0.1), mChr, 0.17, 0.62, 0.42); mk(cy(0.145, 0.145, 0.01), mHd, 0.17, 0.675, 0.42); mk(cy(0.01, 0.01, 0.6, 6), mChr, 0.17, 0.3, 0.42);
+      const tm = mk(cy(0.11, 0.11, 0.13), mRed, -0.13, 0.7, 0.5); tm.rotation.x = -0.35; const th = mk(cy(0.105, 0.105, 0.01), mHd, -0.13, 0.765, 0.48); th.rotation.x = -0.35;
+      mk(cy(0.01, 0.01, 0.95, 6), mChr, 0.42, 0.48, 0.3); mk(cy(0.14, 0.14, 0.01, 16), mCy, 0.42, 0.95, 0.3); mk(cy(0.14, 0.14, 0.01, 16), mCy, 0.42, 0.97, 0.3);
+      mk(cy(0.01, 0.01, 1.15, 6), mChr, -0.4, 0.58, 0.45); const cr = mk(cy(0.19, 0.19, 0.01, 18), mCy, -0.4, 1.16, 0.45); cr.rotation.z = -0.25;
+    } else if (kind === 'keys') {
+      [-0.36, 0.36].forEach(x => { const a = mk(bx(0.03, 0.85, 0.03), mChr, x, 0.42, 0.45); a.rotation.x = 0.35; const b2 = mk(bx(0.03, 0.85, 0.03), mChr, x, 0.42, 0.45); b2.rotation.x = -0.35; });
+      mk(bx(0.95, 0.07, 0.28), mBlk, 0, 0.86, 0.45); mk(bx(0.86, 0.02, 0.13), new THREE.MeshStandardMaterial({ color: 0xf7f7f2, roughness: 0.4 }), 0, 0.905, 0.38);
+      for (let k = 0; k < 14; k++) { const n = k % 7; if (n === 2 || n === 6) continue; mk(bx(0.025, 0.025, 0.07), mBlk, -0.4 + (k + 0.5) * 0.86 / 14 + 0.03, 0.92, 0.41); }
+      mk(bx(0.2, 0.015, 0.05), new THREE.MeshBasicMaterial({ color: 0x3fd0ff }), 0, 0.9, 0.54);
+    } else if (kind === 'dj') {
+      mk(bx(0.95, 0.72, 0.42), mBlk, 0, 0.36, 0.48); mk(bx(0.97, 0.04, 0.44), new THREE.MeshStandardMaterial({ color: 0x2b2d33, roughness: 0.5 }), 0, 0.74, 0.48);
+      for (let k = 0; k < 4; k++) mk(bx(0.16, 0.08, 0.02), new THREE.MeshBasicMaterial({ color: [0xff3fa4, 0x3fd0ff, 0xffd23f, 0x7cff6b][k] }), -0.33 + k * 0.22, 0.4, 0.70);
+      [-0.27, 0.27].forEach(x => { const pl = mk(cy(0.14, 0.14, 0.02, 20), new THREE.MeshStandardMaterial({ color: 0x0c0c0f, roughness: 0.3 }), x, 0.77, 0.48); pl.userData.spin = true; mk(cy(0.04, 0.04, 0.025, 10), new THREE.MeshStandardMaterial({ color: 0xd6262f }), x, 0.785, 0.48); });
+      mk(bx(0.18, 0.04, 0.26), new THREE.MeshStandardMaterial({ color: 0x2a2a30 }), 0, 0.77, 0.48);
+    }
+    g.visible = false; V.root.add(g); V[key] = g; applyStyleTo(g); return g;
   }
   function sticksProp(w) {
     if (w.v.sticks) return w.v.sticks;
