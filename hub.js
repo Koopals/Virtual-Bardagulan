@@ -4,9 +4,16 @@
 // tested without a server.
 
 const STATE_KEYS = ['name', 'role', 'look', 'status', 'custom', 'mic', 'emote', 'held', 'talk', 'fx', 'desk', 'task', 'zone', 'mv'];
-const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score'];
+const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score', 'next'];
 const GAME_TABLES = ['chess', 'checkers', 'reversi', 'connect4', 'ttt'];
 const newTable = () => ({ seats: [null, null], log: [] });
+// message id and the message being replied to (who wrote it, their name and a short quote)
+function chatExtra(m) {
+  const x = {};
+  if (m.mid) x.mid = str(m.mid, 24);
+  if (m.re && typeof m.re === 'object') x.re = { mid: str(m.re.mid, 24), u: str(m.re.u, 24), n: str(m.re.n, 20), t: str(m.re.t, 90) };
+  return x;
+}
 
 const str = (v, n) => String(v == null ? '' : v).slice(0, n);
 const roomName = v => str(v, 24).toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'lobby';
@@ -113,7 +120,7 @@ function createHub(opts) {
         c.state = cleanState(m.state);
         const peers = [...room.clients.values()].map(p => ({ id: p.id, state: p.state }));
         room.clients.set(c.id, c);
-        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, games: room.games, token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
+        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, movie: room.movie || null, games: room.games, token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
         broadcast(room, { t: 'join', id: c.id, state: c.state }, c.id);
         return;
       }
@@ -131,10 +138,10 @@ function createHub(opts) {
         if (!text) return;
         if (m.to) {   // whisper: only the person it's for gets it
           const tgt = room.clients.get(String(m.to));
-          if (tgt) send(tgt, { t: 'chat', from: c.id, text: text, to: true });
+          if (tgt) send(tgt, Object.assign({ t: 'chat', from: c.id, text: text, to: true }, chatExtra(m)));
           return;
         }
-        const out = { t: 'chat', from: c.id, text: text, voice: !!m.voice, priv: !!m.priv };
+        const out = Object.assign({ t: 'chat', from: c.id, text: text, voice: !!m.voice, priv: !!m.priv }, chatExtra(m));
         if (m.priv) {   // said inside the meeting room: only people inside get the words
           broadcast(room, out, c.id, p => p.state.zone === 'room');
           broadcast(room, { t: 'muf', from: c.id }, c.id, p => p.state.zone !== 'room');
@@ -175,6 +182,7 @@ function createHub(opts) {
           return;
         }
         if (ev.k === 'music') room.music = ev.kind === 'stop' ? null : Object.assign({}, ev, { by: c.id });
+        if (ev.k === 'movie') room.movie = ev.kind === 'stop' ? null : Object.assign({}, ev, { by: c.id });
         if (ev.k === 'dance' && ev.to) {   // dance invites go to one person
           const tgt = room.clients.get(String(ev.to));
           if (tgt) send(tgt, ev);
