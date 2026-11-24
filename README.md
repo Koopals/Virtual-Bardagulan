@@ -61,7 +61,7 @@ GitHub Pages can only host files, and multiplayer needs a small server. Render c
 
 ## Song search (optional)
 
-The 🔍 search in the 🎵 Music menu (YouTube and YouTube Music tabs) always works: without a key it opens the search on YouTube or YouTube Music in a new tab, and you paste the song's link into the link box. To see results right inside the office, give the server a free YouTube Data API key:
+The 🔍 search in the 🎵 Music menu (YouTube and YouTube Music tabs) shows results right inside the office: press ▶ to play a song for everyone or ＋ to add it to the queue. On the YouTube Music tab, ▶ starts a song radio. Search needs a free YouTube Data API key on the server:
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com), create a project, open **APIs & Services → Library**, and turn on **YouTube Data API v3**.
 2. Open **APIs & Services → Credentials → Create credentials → API key**, and copy the key.

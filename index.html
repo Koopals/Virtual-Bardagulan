@@ -465,7 +465,7 @@ body.watching #bubbles,body.watching .dock,body.watching .camctl,body.watching .
 .pkt span{font-size:11px;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pk button{width:28px;height:28px;padding:0;border-radius:50%;font-size:13px;flex:none}
 .pksearch{display:flex;gap:6px;margin:0 0 8px}.pksearch input{flex:1;min-width:0}
-.pknote{font-size:11.5px;color:var(--color-text-secondary);padding:6px 4px;line-height:1.4}
+.pknote{font-size:11.5px;color:var(--color-text-secondary);padding:6px 4px;line-height:1.4}.pknote.pkerr{background:rgba(245,158,11,.12);border-radius:8px;padding:8px 10px;color:var(--color-text-primary,#222)}
 #picksBody .lbl{margin-top:8px}
 </style>
 </head>
@@ -3221,7 +3221,7 @@ function main(){
     ['37i9dQZF1DX8NTLI2TtZa6', 'Intense Studying', '📚'], ['37i9dQZF1DX4sWSpwq3LiO', 'Peaceful Piano', '🎹'], ['37i9dQZF1DXbITWG1ZJKYt', 'Jazz Classics', '🎷'], ['37i9dQZF1DWXRqgorJj26U', 'Rock Classics', '🎸'],
     ['37i9dQZF1DX5Ejj0EkURtP', 'All Out 2010s', '📀'], ['37i9dQZF1DX4o1oenSJRJd', 'All Out 2000s', '💿'], ['37i9dQZF1DX9tPFwDMOaN1', 'K-Pop ON!', '🇰🇷'], ['37i9dQZF1DX10zKzsJ2jva', 'Viva Latino', '🌶️'],
     ['37i9dQZF1DWZd79rJ6a7lp', 'Sleep', '😴'], ['37i9dQZF1DX0Yxoavh5qJV', 'Christmas Hits', '🎄']];
-  const PK = { src: 'yt', results: null, q: '', busy: false };
+  const PK = { src: 'yt', results: null, q: '', busy: false, err: '' };
   const PICKS_KEY = 'virtualOffice.picks.v1';
   function loadPicks() { try { const a = JSON.parse(localStorage.getItem(PICKS_KEY) || '[]'); return Array.isArray(a) ? a.slice(0, 40) : []; } catch (e) { return []; } }
   function savePicks(a) { try { localStorage.setItem(PICKS_KEY, JSON.stringify(a.slice(0, 40))); } catch (e) {} }
@@ -3246,11 +3246,12 @@ function main(){
     if (PK.src === 'yt' || PK.src === 'ytm') {
       const ytm = PK.src === 'ytm';
       h += '<div class="pksearch"><input id="pkQ" maxlength="80" autocomplete="off" placeholder="Search ' + (ytm ? 'YouTube Music' : 'YouTube') + ' for a song or artist…" value="' + esc(PK.q) + '"><button data-pkgo="1" title="Search">🔍</button></div>';
-      if (PK.busy) h += '<div class="pknote">Searching…</div>';
+      if (PK.busy) h += '<div class="pknote">🔍 Searching for “' + esc(PK.q) + '”…</div>';
+      if (PK.err && !PK.busy) h += '<div class="pknote pkerr">⚠️ ' + esc(PK.err) + '</div>';
       if (PK.results) h += '<div class="lbl">Results</div>' + (PK.results.length ? PK.results.map((r, k) => row('s' + k, r.thumb || thumb(r.id), '🎵', r.title, r.channel + (ytm ? ' · starts a radio' : ''))).join('') : '<div class="pknote">No songs found. Try another search.</div>');
       if (ytm) h += '<div class="pknote">🎵 YouTube Music picks start a <b>song radio</b>: the song plays, then similar songs keep coming.</div>';
       YT_GROUPS.forEach((g, gi) => { h += '<div class="lbl">' + g[0] + '</div>' + g[1].map((s, si) => row('g' + gi + '_' + si, thumb(s[0]), '🎵', s[1], s[2] + (ytm && gi ? ' · radio' : ''))).join(''); });
-      if (!SEARCH_ON) h += '<p class="wnote">🔍 Search opens ' + (ytm ? 'YouTube Music' : 'YouTube') + ' in a new tab. Copy the song’s link and paste it in the <b>Or paste any link</b> box below. To see results right here, the server owner adds a free YouTube Data API key to Render as <b>YOUTUBE_API_KEY</b>.</p>';
+      if (!SEARCH_ON && !PK.err) h += '<p class="wnote">🔍 Type a song or artist and press Enter. Results show here; press ▶ to play for everyone or ＋ to queue. (Search needs the server’s free YouTube key, <b>YOUTUBE_API_KEY</b> on Render.)</p>';
     } else if (PK.src === 'sp') {
       h += '<div class="pknote">🟢 Spotify plays in the little player for each person. Press ▶ on it to start. Full songs need you to be logged in to Spotify Premium in this browser; otherwise Spotify plays 30-second previews.</div>';
       h += SP_LISTS.map((p, k) => row('p' + k, null, p[2], p[1], 'Spotify playlist')).join('');
@@ -3277,12 +3278,21 @@ function main(){
   }
   function doSearch(q) {
     q = String(q || '').trim(); PK.q = q; if (!q) { toast('Type a song or artist first.'); return; }
-    if (!SEARCH_ON) { openYTSearch(q); return; }
-    PK.busy = true; renderPicks();
+    PK.err = '';
+    if (!ONLINE || !API_BASE) { PK.results = null; PK.err = 'Search works when the office is connected to the server. Pick from the lists below or paste a link.'; renderPicks(); return; }
+    PK.busy = true; PK.results = null; renderPicks();
     fetch(API_BASE + '/api/yt-search?q=' + encodeURIComponent(q)).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
-      PK.busy = false; PK.results = Array.isArray(d.items) ? d.items.slice(0, 10).filter(r => r && /^[\w-]{11}$/.test(String(r.id))).map(r => ({ id: String(r.id), title: String(r.title || '').slice(0, 100), channel: String(r.channel || '').slice(0, 60), thumb: /^https:\/\/i\.ytimg\.com\//.test(String(r.thumb || '')) ? String(r.thumb) : '' })) : [];
+      SEARCH_ON = true; PK.busy = false; PK.results = Array.isArray(d.items) ? d.items.slice(0, 10).filter(r => r && /^[\w-]{11}$/.test(String(r.id))).map(r => ({ id: String(r.id), title: String(r.title || '').slice(0, 100), channel: String(r.channel || '').slice(0, 60), thumb: /^https:\/\/i\.ytimg\.com\//.test(String(r.thumb || '')) ? String(r.thumb) : '' })) : [];
       renderPicks();
-    }).catch(err => { PK.busy = false; PK.results = null; renderPicks(); if (err === 429) toast('Too many searches. Wait a minute and try again.'); else { toast('Search on the server isn’t working right now, so I opened it on YouTube instead.'); openYTSearch(q); } });
+    }).catch(err => {
+      PK.busy = false; PK.results = null;
+      PK.err = err === 429 ? 'Too many searches. Wait a minute and try again.'
+        : err === 404 ? 'Song search is off on the server. The server owner adds a free YouTube key to Render as YOUTUBE_API_KEY. Until then, pick from the lists below or paste a link.'
+        : err === 502 ? 'YouTube turned down the search. The server owner can check Render → Logs for the reason (usually the key or the API setting).'
+        : typeof err === 'number' ? 'Search isn’t working right now (error ' + err + '). Try again in a minute.'
+        : 'The server is waking up. Try the search again in a minute.';
+      renderPicks();
+    });
   }
   let SEARCH_ON = !!window.VO_YTSEARCH && ONLINE;
   const API_BASE = ONLINE ? String(ONLINE_URL).replace(/^ws/i, 'http').replace(/\/ws(\?.*)?$/i, '') : '';
@@ -3293,14 +3303,8 @@ function main(){
       .catch(() => { if (n < 6) setTimeout(() => probeSearch(n + 1), 15000 * (n + 1)); }); } catch (e) {}
   }
   probeSearch(0);
-  function openYTSearch(q) {
-    q = String(q || '').trim(); if (!q) return;
-    const u = PK.src === 'ytm' ? 'https://music.youtube.com/search?q=' + encodeURIComponent(q) : 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q);
-    const w = window.open(u, '_blank', 'noopener'); 
-    toast(w === null ? 'Your browser blocked the new tab. Allow pop-ups for this page.' : '🔍 Opened ' + (PK.src === 'ytm' ? 'YouTube Music' : 'YouTube') + ' search in a new tab. Copy the song’s link and paste it in the link box below.');
-  }
   $('picks').addEventListener('click', e => {
-    const t = e.target.closest('[data-src]'); if (t) { PK.src = t.dataset.src; PK.results = null; renderPicks(); return; }
+    const t = e.target.closest('[data-src]'); if (t) { PK.src = t.dataset.src; PK.results = null; PK.err = ''; renderPicks(); return; }
     if (e.target.closest('[data-pkgo]')) { const q = document.getElementById('pkQ'); if (q) doSearch(q.value); return; }
     const b = e.target.closest('[data-act][data-pk]');
     if (b) {
