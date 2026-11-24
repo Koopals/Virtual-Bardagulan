@@ -276,7 +276,7 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpf{display:flex;gap:6px;margin-top:8px}
 .dpf button{flex:1}
 .pantry{width:330px}
-.billbox{width:min(520px,calc(100% - 28px))}#billCv{display:block;width:100%;height:auto;border-radius:8px;cursor:crosshair;touch-action:none;box-shadow:0 2px 0 rgba(0,0,0,.25)}#bucketBar{bottom:132px}
+.billbox{width:min(520px,calc(100% - 28px))}#billCv{display:block;width:100%;height:auto;border-radius:8px;cursor:crosshair;touch-action:none;box-shadow:0 2px 0 rgba(0,0,0,.25)}#bucketBar{bottom:132px}#ringBar{bottom:178px;flex-wrap:wrap;justify-content:center}#ringBar .rhp{display:inline-block;width:110px;height:10px;border-radius:5px;background:var(--color-surface-active);overflow:hidden;padding:0}#ringBar .rhp i{display:block;height:100%;transition:width .2s}
 .gamebox{left:14px;bottom:70px;width:330px;max-height:calc(100% - 100px);overflow:auto;padding:12px 12px 14px;z-index:58}
 .gbh{display:flex;align-items:center;gap:8px;margin:0 0 8px}.gbh b{flex:1;font-size:15px}
 .gbh button{border:0;background:transparent;font-size:18px;line-height:1;padding:2px 8px;color:var(--color-text-muted)}
@@ -479,6 +479,40 @@ body.watching #bubbles,body.watching .dock,body.watching .camctl,body.watching .
 .pksearch{display:flex;gap:6px;margin:0 0 8px}.pksearch input{flex:1;min-width:0}
 .pknote{font-size:11.5px;color:var(--color-text-secondary);padding:6px 4px;line-height:1.4}.pknote.pkerr{background:rgba(245,158,11,.12);border-radius:8px;padding:8px 10px;color:var(--color-text-primary,#222)}
 #picksBody .lbl{margin-top:8px}
+.ward{position:fixed;inset:0;z-index:4200;display:flex;gap:0;background:rgba(10,12,26,.55);backdrop-filter:blur(3px);font-family:var(--page-font)}
+.ward[hidden]{display:none}
+.wd-prev{flex:0 0 min(38vw,440px);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 62%,#fff7e6 0,#ffd9b8 38%,#8f6fe0 120%);border-right:3px solid #111}
+.wd-prev canvas{width:100%;height:calc(100% - 120px);display:block;image-rendering:pixelated;cursor:grab;touch-action:none}
+.wd-prev canvas:active{cursor:grabbing}
+.wd-ptop{position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.wd-ptop b{font-size:20px;font-weight:900;color:#1b1630;text-shadow:0 2px 0 rgba(255,255,255,.6)}
+.wd-pbar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:10px 12px 14px}
+.wd-pbar button,.wd-head button{border-radius:8px;font-weight:800}
+.wd-wear{font-size:12px;color:#2b2540;background:rgba(255,255,255,.75);border-radius:10px;padding:6px 10px;margin:0 14px;max-width:calc(100% - 28px);text-align:center;line-height:1.45}
+.wd-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;background:var(--color-bg-secondary);color:var(--color-text-primary)}
+.wd-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--color-border-light);flex-wrap:wrap}
+.wd-head h2{margin:0 auto 0 0;font-size:20px;font-weight:900}
+.wd-head input{width:220px;max-width:40vw}
+.wd-tabs{display:flex;gap:6px;padding:10px 16px 0;flex-wrap:wrap}
+.wd-tabs button{border-radius:10px 10px 0 0;border-bottom:none;font-weight:800;padding:8px 14px}
+.wd-groups{display:flex;gap:6px;padding:10px 16px;flex-wrap:wrap;border-top:1px solid var(--color-border-light)}
+.wd-groups button{border-radius:999px;font-size:12px;padding:5px 12px}
+.wd-grid{flex:1 1 auto;overflow:auto;padding:4px 16px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;align-content:start}
+.wd-gh{grid-column:1/-1;font-size:13px;font-weight:900;margin:10px 0 0;color:var(--color-text-secondary);letter-spacing:.02em}
+.wd-it{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px;border-radius:12px;background:var(--color-bg-primary);border:2px solid var(--color-border-light);text-align:center;font-size:12px;font-weight:700;line-height:1.2;min-height:132px}
+.wd-it:hover{border-color:var(--page-accent);transform:translateY(-1px)}
+.wd-it.on{border-color:var(--page-accent);box-shadow:0 0 0 3px rgba(255,122,107,.35)}
+.wd-it i{display:block;aspect-ratio:1/1;border-radius:9px;background:#f1ece4 center/cover no-repeat;image-rendering:pixelated}
+.wd-it i.ld{background-image:linear-gradient(90deg,#efe9df 0,#f8f4ee 50%,#efe9df 100%);background-size:200% 100%;animation:wdsh 1.1s linear infinite}
+@keyframes wdsh{to{background-position:-200% 0}}
+.wd-cols{border-top:1px solid var(--color-border-light);padding:10px 16px 12px;display:flex;flex-direction:column;gap:2px;max-height:34vh;overflow:auto}
+.wd-cols .sws{margin:0 0 6px}
+.wd-x{display:flex;flex-wrap:wrap;gap:6px}
+.wd-empty{grid-column:1/-1;padding:30px;text-align:center;color:var(--color-text-secondary)}
+body.habbo .wd-it{border:2px solid #111;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)}
+body.habbo .wd-it.on{border-color:#e8342e;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),0 0 0 3px #ffd23f}
+.su-ward{width:100%;padding:12px;font-size:15px;font-weight:900;border-radius:10px;margin:2px 0 10px}
+@media (max-width:760px){.ward{flex-direction:column}.wd-prev{flex:0 0 34vh;border-right:none;border-bottom:3px solid #111}.wd-prev canvas{height:calc(100% - 70px)}.wd-wear{display:none}.wd-head input{width:100%;max-width:none;order:9}.wd-grid{grid-template-columns:repeat(auto-fill,minmax(86px,1fr))}.wd-it{min-height:112px}}
 </style>
 </head>
 <body>
@@ -1439,6 +1473,7 @@ function main(){
   // ================= extra furniture for the bigger rooms =================
   SPOTS.xtra = [];
   const FURN_BLOCK = [], FURN_ITEMS = [], FURN = { bubbles: [], duck: null, dj: [], neon: [] };
+  const RINGB = { x0: 0, x1: -1, z0: 0, z1: -1, cx: 0, cz: 0 };
   const _mc = {}; const MC = (c, o) => { const k = c + '|' + JSON.stringify(o || 0); return _mc[k] || (_mc[k] = M(c, o || { roughness: 0.8 })); };
   const nb = (x0, x1, z0, z1) => FURN_BLOCK.push([x0, x1, z0, z1]);
   const fgrp = (x, z, rot) => { const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rot || 0; scene.add(g); return g; };
@@ -1709,7 +1744,10 @@ function main(){
       [[-2.4, -2.4], [2.4, -2.4], [-2.4, 2.4], [2.4, 2.4]].forEach(o => { cyl(0.08, 0.08, 1.4, mPost, rx + o[0], 0.7, rz + o[1], null, 8); nb(rx + o[0] - 0.08, rx + o[0] + 0.08, rz + o[1] - 0.08, rz + o[1] + 0.08); });
       [0.55, 0.9, 1.25].forEach(y => { box(4.8, 0.04, 0.04, mRope, rx, y, rz - 2.4); box(0.04, 0.04, 4.8, mRope, rx + 2.4, y, rz); box(0.04, 0.04, 4.8, mRope, rx - 2.4, y, rz); box(1.6, 0.04, 0.04, mRope, rx - 1.6, y, rz + 2.4); box(1.6, 0.04, 0.04, mRope, rx + 1.6, y, rz + 2.4); });
       gymSpot('punch', [rx - 0.8, rz], Math.PI / 2, 0, [rx - 1.2, rx - 0.4, rz - 0.4, rz + 0.4]); gymSpot('punch', [rx + 0.8, rz], -Math.PI / 2, 0, [rx + 0.4, rx + 1.2, rz - 0.4, rz + 0.4]);
-      wallSign(rx, -9.97, 2.2, '🥊 BOXING', '#14161c', '#ff4d4d'); }
+      Object.assign(RINGB, { x0: rx - 2.4, x1: rx + 2.4, z0: rz - 2.4, z1: rz + 2.4, cx: rx, cz: rz });
+      nb(rx - 2.42, rx + 2.42, rz - 2.42, rz - 2.38); nb(rx - 2.42, rx - 2.38, rz - 2.4, rz + 2.4); nb(rx + 2.38, rx + 2.42, rz - 2.4, rz + 2.4); nb(rx - 2.42, rx - 0.8, rz + 2.38, rz + 2.42); nb(rx + 0.8, rx + 2.42, rz + 2.38, rz + 2.42);
+      { const bell = add(new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.14, 0.12, 14), MC(0xe0b030, { metalness: 0.7, roughness: 0.3 })), rx + 2.4, 1.48, rz + 2.4); bell.castShadow = false; }
+      wallSign(rx, -9.97, 2.2, '🥊 BOXING · step in to fight', '#14161c', '#ff4d4d'); }
     [[g0 + 7.6, 7.8], [g0 + 9.0, 7.8], [g0 + 10.4, 7.8], [g0 + 11.8, 7.8]].forEach((p, k) => { box(0.7, 0.015, 1.7, MC([0xc9a6ff, 0x7ec8a6, 0xffb6c8, 0xffd23f][k], { roughness: 1 }), p[0], 0.02, p[1]).castShadow = false; gymSpot('yoga', [p[0], p[1]], -Math.PI / 2, 0, [p[0] - 0.35, p[0] + 0.35, p[1] - 0.85, p[1] + 0.85]); });
     for (let k = 0; k < 6; k++) { const x = g0 - 14.6, z = -9 + k * 0.62; box(0.45, 1.9, 0.58, MC(k % 2 ? 0x3d63b8 : 0x2f6fd6, { roughness: 0.5 }), x, 0.95, z); box(0.02, 0.1, 0.04, MC(0xcccccc), x + 0.24, 1.0, z + 0.15); }
     nb(g0 - 14.9, g0 - 14.35, -9.3, -5.6);
@@ -2093,18 +2131,210 @@ function main(){
   function shade(c, k) { const f = v => Math.max(0, Math.min(255, Math.round(v * k))); return (f(c >> 16 & 255) << 16) | (f(c >> 8 & 255) << 8) | f(c & 255); }
   function avColor(c) { const L = ((c >> 16 & 255) * 299 + (c >> 8 & 255) * 587 + (c & 255) * 114) / 1000; return hex(L > 205 ? 0x94a3b8 : L < 55 ? 0x64748b : c); }
   const SKINS = [0xffe2cc, 0xf5cdaa, 0xe6b38d, 0xc78c60, 0x9b6542, 0x6b4328];
-  const HAIRC = [0x1d1a1a, 0x3b2418, 0x6b4226, 0xa8703f, 0xe0b46a, 0xb8462f, 0x9aa0a8, 0x7a5cc9, 0xf2e6c8, 0xe36f9a, 0x3a8fd6, 0x2f8a6a];
-  const TOPC = [0xff7a6b, 0x8f6fe0, 0x4f9a5a, 0x3d63b8, 0x2b2d33, 0xd9a440, 0x3aa7a0, 0xe36f9a, 0xeeeeee, 0x8a5a3c, 0xffb6c8, 0xc9a6ff, 0xffe27a, 0xb8e3ff, 0xa3243f, 0x9ed9a0];
-  const PANTSC = [0x2d3340, 0x3b4f7a, 0x5b5f66, 0x6b5440, 0x1c1c22, 0xe36f9a, 0x8f6fe0, 0xeeeeee, 0x3aa7a0, 0xd6262f, 0xffb6c8, 0xd9a440];
-  const ACC = [0x8c9096, 0x2b2d33, 0xff7a6b, 0x3d63b8, 0xd9a440, 0x4f9a5a, 0xe36f9a, 0xffffff, 0x8f6fe0, 0xffd23f, 0x8a5a3c, 0xd6262f];
-  const HAIRS = [['short', 'Short'], ['messy', 'Messy'], ['curly', 'Curly'], ['bun', 'Bun'], ['long', 'Long'], ['ponytail', 'Ponytail'], ['buzz', 'Buzz'],
-    ['pigtails', 'Pigtails'], ['braid', 'Braid'], ['bob', 'Bob'], ['wavy', 'Wavy long'], ['afro', 'Afro'], ['spiky', 'Spiky'], ['mohawk', 'Mohawk']];
-  const TOPS = [['hoodie', 'Hoodie'], ['sweater', 'Sweater'], ['tee', 'T-shirt'], ['blouse', 'Blouse'], ['dress', 'Dress'], ['tank', 'Tank top'], ['cardigan', 'Cardigan'],
-    ['blazer', 'Blazer'], ['polo', 'Polo'], ['jacket', 'Jacket'], ['overalls', 'Overalls'], ['jersey', 'Jersey'], ['hawaii', 'Hawaiian shirt'], ['swim', 'Swimsuit']];
-  const BOTTOMS = [['pants', 'Pants'], ['shorts', 'Shorts'], ['skirt', 'Skirt'], ['long', 'Long skirt']];
-  const HATS = [['none', 'None'], ['beanie', '🧶 Beanie'], ['beret', '🎨 Beret'], ['bow', '🎀 Bow'], ['headband', 'Headband'], ['flowers', '🌸 Flower crown'], ['tiara', '👸 Tiara'],
-    ['crown', '👑 Crown'], ['catears', '🐱 Cat ears'], ['bunny', '🐰 Bunny ears'], ['cowboy', '🤠 Cowboy hat'], ['tophat', '🎩 Top hat'], ['hardhat', '⛑️ Hard hat'],
-    ['hijab', '🧕 Hijab'], ['party', '🥳 Party hat'], ['unicorn', '🦄 Unicorn horn'], ['sunhat', '👒 Sun hat']];
+  const HAIRC = [0x1d1a1a, 0x3b2418, 0x6b4226, 0xa8703f, 0xe0b46a, 0xb8462f, 0x9aa0a8, 0x7a5cc9, 0xf2e6c8, 0xe36f9a, 0x3a8fd6, 0x2f8a6a, 0xffffff, 0xd6262f];
+  const TOPC = [0xff7a6b, 0x8f6fe0, 0x4f9a5a, 0x3d63b8, 0x2b2d33, 0xd9a440, 0x3aa7a0, 0xe36f9a, 0xeeeeee, 0x8a5a3c, 0xffb6c8, 0xc9a6ff, 0xffe27a, 0xb8e3ff, 0xa3243f, 0x9ed9a0,
+    0x5b6b3a, 0xc8b08a, 0x24305e, 0x4a6fa5, 0x1c1c22, 0x24407a, 0x5a2f82, 0xf28c28, 0x6b4226, 0xf4f4f4];
+  const PANTSC = [0x2d3340, 0x3b4f7a, 0x5b5f66, 0x6b5440, 0x1c1c22, 0xe36f9a, 0x8f6fe0, 0xeeeeee, 0x3aa7a0, 0xd6262f, 0xffb6c8, 0xd9a440,
+    0x4a6fa5, 0x7a9cc6, 0xc8b08a, 0x5b6b3a, 0x9aa0a8, 0x2b2d33, 0xa3243f];
+  const ACC = [0x8c9096, 0x2b2d33, 0xff7a6b, 0x3d63b8, 0xd9a440, 0x4f9a5a, 0xe36f9a, 0xffffff, 0x8f6fe0, 0xffd23f, 0x8a5a3c, 0xd6262f, 0x5b6b3a, 0x24305e, 0x1c1c22, 0xc8b08a, 0xf28c28];
+  // ---- wardrobe catalog: [group, icon, [[id, name, recipe?], ...]] (no recipe = an original style) ----
+  const HAIR_GROUPS = [
+    ['Modern', '✂️', [
+      ['texcrop', 'Textured Crop', { sides: 'fade', top: 0.07, vol: 'tex', fringe: 'crop', back: 'short' }],
+      ['frenchcrop', 'French Crop', { sides: 'fade', top: 0.07, fringe: 'blunt', back: 'short' }],
+      ['edgar', 'Edgar Cut', { sides: 'skin', top: 0.08, fringe: 'blunt', back: 'none' }],
+      ['burstfade', 'Burst Fade', { sides: 'fade', top: 0.09, vol: 'tex', back: 'nape' }],
+      ['mulletfade', 'Mullet Fade', { sides: 'fade', top: 0.09, vol: 'tex', fringe: 'messy', back: 'mullet' }],
+      ['modmullet', 'Modern Mullet', { sides: 'full', top: 0.09, vol: 'messy', fringe: 'messy', back: 'mullet' }],
+      ['wolfcut', 'Wolf Cut', { sides: 'long', top: 0.1, vol: 'messy', fringe: 'curtain', back: 'wolf' }],
+      ['twoblock', 'Two-Block Cut', { sides: 'skin', top: 0.11, over: 1, fringe: 'straight', back: 'short' }],
+      ['curtainhair', 'Curtain Hair', { sides: 'full', top: 0.1, fringe: 'curtain', back: 'nape' }],
+      ['broflow', 'Bro Flow', { sides: 'low', top: 0.09, fringe: 'sweepback', back: 'flow' }],
+      ['messyfringe', 'Messy Fringe', { sides: 'fade', top: 0.09, vol: 'messy', fringe: 'messy', back: 'short' }],
+      ['angfringe', 'Angular Fringe', { sides: 'fade', top: 0.09, fringe: 'angular', back: 'short' }],
+      ['fluffy', 'Fluffy Hair', { sides: 'full', top: 0.11, vol: 'fluff', fringe: 'straight', back: 'nape', h: 0.34 }],
+      ['slickfade', 'Slick Back Fade', { sides: 'fade', top: 0.07, vol: 'slick', back: 'short', shine: 1 }],
+      ['midfade', 'Mid Fade', { sides: 'fade', top: 0.08, fringe: 'side', back: 'short' }],
+      ['lowfade', 'Low Fade', { sides: 'taper', top: 0.08, fringe: 'side', back: 'nape' }],
+      ['highfade', 'High Fade', { sides: 'high', top: 0.09, vol: 'tex', back: 'short' }],
+      ['skinfade', 'Skin Fade', { sides: 'skin', top: 0.08, fringe: 'crop', back: 'none' }],
+      ['dropfade', 'Drop Fade', { sides: 'drop', top: 0.09, vol: 'tex', back: 'short' }],
+      ['taperfade', 'Taper Fade', { sides: 'taper', top: 0.08, fringe: 'crop', back: 'short' }],
+      ['templefade', 'Temple Fade', { sides: 'temple', top: 0.08, fringe: 'crop', back: 'nape' }],
+      ['undercut', 'Undercut', { sides: 'skin', top: 0.1, over: 1, vol: 'slick', back: 'none' }],
+      ['discundercut', 'Disconnected Undercut', { sides: 'skin', top: 0.1, over: 1, vol: 'swoopbig', back: 'none' }],
+      ['fauxhawk', 'Faux Hawk Fade', { sides: 'fade', top: 0.06, vol: 'fauxhawk', back: 'short', h: 0.4, tall: 1 }],
+      ['modpomp', 'Modern Pompadour', { sides: 'fade', top: 0.06, vol: 'pomp', back: 'short', h: 0.37 }],
+      ['sidepartfade', 'Side-Part Fade', { sides: 'fade', top: 0.08, vol: 'part', fringe: 'sweepback', back: 'short' }],
+      ['topknot', 'Top Knot', { sides: 'skin', top: 0.07, back: 'none', tie: 'topknot', h: 0.4 }],
+      ['manbun', 'Man Bun', { sides: 'full', top: 0.08, back: 'nape', tie: 'manbun' }],
+      ['longlayer', 'Long Layered Hair', { sides: 'long', top: 0.09, fringe: 'side', back: 'layers' }],
+      ['shoulderwave', 'Shoulder-Length Waves', { sides: 'long', top: 0.09, fringe: 'curtain', back: 'shoulderwave' }],
+      ['dreads', 'Dreadlocks', { sides: 'none', top: 0.05, vol: 'dreadtop', back: 'dreads' }],
+      ['cornrows', 'Cornrows', { sides: 'none', top: 0, tex: 'cornrows', back: 'none' }],
+      ['boxbraids', 'Box Braids', { sides: 'none', top: 0.05, back: 'boxbraids' }],
+      ['twists', 'Twists', { sides: 'fade', top: 0.06, vol: 'twists', back: 'short', h: 0.35 }],
+      ['afrofade', 'Afro Fade', { sides: 'fade', top: 0, vol: 'afrotop', back: 'short', h: 0.44, tall: 1 }],
+      ['curlyfade', 'Curly Fade', { sides: 'fade', top: 0.06, vol: 'curls', back: 'short', h: 0.35 }]]],
+    ['Old School / Classic', '💈', [
+      ['buzz', 'Buzz Cut'],
+      ['crewcut', 'Crew Cut', { sides: 'fade', top: 0.05, vol: 'tuft', back: 'short' }],
+      ['ivyleague', 'Ivy League', { sides: 'taper', top: 0.06, vol: 'part', fringe: 'side', back: 'short' }],
+      ['flattop', 'Flat Top', { sides: 'fade', top: 0, vol: 'flat', back: 'short', h: 0.41, tall: 1 }],
+      ['hightight', 'High and Tight', { sides: 'skin', top: 0.05, back: 'none' }],
+      ['regulation', 'Regulation Cut', { sides: 'taper', top: 0.06, fringe: 'side', back: 'short' }],
+      ['caesar', 'Caesar Cut', { sides: 'fade', top: 0.07, fringe: 'crop', back: 'short' }],
+      ['classicpart', 'Classic Side Part', { sides: 'full', top: 0.08, vol: 'part', fringe: 'sweepback', back: 'nape', shine: 1 }],
+      ['combover', 'Comb Over', { sides: 'taper', top: 0.08, vol: 'swoop', back: 'nape' }],
+      ['slickback', 'Slick Back', { sides: 'full', top: 0.07, vol: 'slick', back: 'nape', shine: 1 }],
+      ['pompadour', 'Pompadour', { sides: 'full', top: 0.06, vol: 'pomp', back: 'nape', shine: 1, h: 0.37 }],
+      ['rockabilly', 'Rockabilly Pompadour', { sides: 'full', top: 0.06, vol: 'bigpomp', back: 'ducktail', shine: 1, h: 0.43, tall: 1 }],
+      ['ducktail', 'Ducktail', { sides: 'full', top: 0.07, vol: 'slick', back: 'ducktail', shine: 1 }],
+      ['greaser', 'Greaser Hair', { sides: 'full', top: 0.06, vol: 'pomp', fringe: 'curl', back: 'nape', shine: 1, h: 0.37 }],
+      ['bowlcut', 'Bowl Cut', { sides: 'low', top: 0, vol: 'bowl', fringe: 'straight', back: 'short' }],
+      ['moptop', 'Mop Top', { sides: 'long', top: 0, vol: 'mop', fringe: 'straight', back: 'nape', h: 0.32 }],
+      ['afro', 'Afro'],
+      ['jheri', 'Jheri Curl', { sides: 'long', top: 0.06, vol: 'curls', back: 'jheri', shine: 1, h: 0.35 }],
+      ['classmullet', 'Classic Mullet', { sides: 'full', top: 0.07, fringe: 'crop', back: 'mulletlong' }],
+      ['liberty', 'Liberty Spikes', { sides: 'full', top: 0.04, vol: 'spikes', back: 'nape', h: 0.58, tall: 1 }],
+      ['mohawk', 'Mohawk']]],
+    ['Longer / Feminine / Unisex', '💁', [
+      ['pixie', 'Pixie Cut', { sides: 'taper', top: 0.07, vol: 'tex', fringe: 'sidesweep', back: 'short' }],
+      ['bob', 'Bob'],
+      ['lob', 'Lob', { sides: 'none', top: 0.09, fringe: 'side', back: 'lob' }],
+      ['bluntbob', 'Blunt Bob', { sides: 'none', top: 0.09, fringe: 'blunt', back: 'blunt' }],
+      ['sidebob', 'Side-Swept Bob', { sides: 'none', top: 0.09, fringe: 'sidesweep', back: 'sidebob' }],
+      ['hime', 'Hime Cut', { sides: 'none', top: 0.09, fringe: 'blunt', back: 'hime' }],
+      ['shag', 'Shag', { sides: 'none', top: 0.1, vol: 'messy', fringe: 'curtain', back: 'shag' }],
+      ['butterfly', 'Butterfly Cut', { sides: 'none', top: 0.1, fringe: 'curtain', back: 'butterfly' }],
+      ['longstraight', 'Long Straight Hair', { sides: 'none', top: 0.09, fringe: 'side', back: 'long' }],
+      ['wavy', 'Long Wavy Hair'],
+      ['longcurly', 'Long Curly Hair', { sides: 'none', top: 0.08, vol: 'curls', back: 'curlylong', h: 0.34 }],
+      ['ponytail', 'Ponytail'],
+      ['highpony', 'High Ponytail', { sides: 'full', top: 0.09, fringe: 'side', back: 'short', tie: 'high' }],
+      ['lowpony', 'Low Ponytail', { sides: 'full', top: 0.09, fringe: 'curtain', back: 'nape', tie: 'low' }],
+      ['twintails', 'Twin Tails', { sides: 'full', top: 0.09, fringe: 'straight', back: 'nape', tie: 'twin' }],
+      ['spacebuns', 'Space Buns', { sides: 'full', top: 0.09, fringe: 'side', back: 'nape', tie: 'buns', h: 0.4 }],
+      ['frenchbraid', 'French Braid', { sides: 'full', top: 0.08, vol: 'braidtop', back: 'short', tie: 'french' }],
+      ['dutchbraids', 'Dutch Braids', { sides: 'full', top: 0.08, back: 'short', tie: 'dutch' }],
+      ['fishtail', 'Fishtail Braid', { sides: 'full', top: 0.09, fringe: 'side', back: 'nape', tie: 'fish' }],
+      ['sidebraid', 'Side Braid', { sides: 'full', top: 0.09, fringe: 'sidesweep', back: 'nape', tie: 'side' }],
+      ['braidpony', 'Braided Ponytail', { sides: 'full', top: 0.09, back: 'short', tie: 'braidpony' }]]],
+    ['Office originals', '⭐', [['short', 'Short'], ['messy', 'Messy'], ['curly', 'Curly'], ['bun', 'Bun'], ['long', 'Long'], ['pigtails', 'Pigtails'], ['braid', 'Braid'], ['spiky', 'Spiky']]]];
+  const TOP_GROUPS = [
+    ['Casual', '👕', [
+      ['tee', 'Plain T-Shirt'],
+      ['oversizedtee', 'Oversized T-Shirt', { sl: 'short', coll: 'crew', over: 1, len: 'hip' }],
+      ['graphictee', 'Graphic Tee', { sl: 'short', coll: 'crew', det: { emblem: 1 } }],
+      ['vneck', 'V-Neck Shirt', { sl: 'short', coll: 'v' }],
+      ['tank', 'Tank Top'],
+      ['sleeveless', 'Sleeveless Shirt', { sl: 'none', coll: 'crew', det: { armholes: 1 } }],
+      ['polo', 'Polo Shirt'],
+      ['longsleeve', 'Long-Sleeve Shirt', { sl: 'long', coll: 'crew' }],
+      ['henley', 'Henley', { sl: 'long', coll: 'henley' }],
+      ['croptop', 'Crop Top', { sl: 'short', coll: 'crew', len: 'crop' }],
+      ['tubetop', 'Tube Top', { sl: 'none', coll: 'tube' }],
+      ['jersey', 'Sports Jersey']]],
+    ['Streetwear', '🧥', [
+      ['hoodie', 'Pullover Hoodie'],
+      ['ziphoodie', 'Zip Hoodie', { sl: 'long', coll: 'hood', zip: 1, det: { band: 1 } }],
+      ['oversizedhoodie', 'Oversized Hoodie', { sl: 'long', coll: 'hood', over: 1, len: 'hip', det: { pouch: 1, band: 1 } }],
+      ['bomber', 'Bomber Jacket', { sl: 'long', coll: 'rib', zip: 1, det: { band: 1, armpocket: 1 }, ac: 0x5b6b3a }],
+      ['varsity', 'Varsity Jacket', { sl: 'long', coll: 'rib', arm: 0xf2f0ea, det: { band: 1, letter: 1, buttons: 1 }, ac: 0xa3243f }],
+      ['denimjacket', 'Denim Jacket', { sl: 'long', coll: 'shirt', pat: 'denim', open: 0xeeeeee, det: { pocket2: 1, buttons2: 1 }, ac: 0x4a6fa5 }],
+      ['trackjacket', 'Track Jacket', { sl: 'long', coll: 'rib', zip: 1, det: { stripes: 1 } }],
+      ['windbreaker', 'Windbreaker', { sl: 'long', coll: 'rib', zip: 1, det: { panel: 1 } }],
+      ['puffer', 'Puffer Jacket', { sl: 'long', coll: 'rib', zip: 1, puff: 1, over: 1 }],
+      ['flannel', 'Flannel Shirt', { sl: 'roll', coll: 'shirt', pat: 'plaid', open: 0x2b2d33, ac: 0xa3243f }],
+      ['utilvest', 'Utility Vest', { sl: 'short', coll: 'crew', col: 0xeeeeee, det: { vest: 'user', vopen: 1, pockets: 1 }, ac: 0x5b6b3a }]]],
+    ['Formal', '👔', [
+      ['dressshirt', 'Dress Shirt', { sl: 'long', coll: 'shirt', det: { buttons: 1 }, ac: 0xf4f4f4 }],
+      ['rolledshirt', 'Rolled-Sleeve Dress Shirt', { sl: 'roll', coll: 'shirt', det: { buttons: 1 }, ac: 0xb8e3ff }],
+      ['blazer', 'Blazer'],
+      ['suitjacket', 'Suit Jacket', { sl: 'long', coll: 'lapel', open: 0xf4f4f4, len: 'hip', det: { tie: 1, buttons2: 1 }, ac: 0x24305e }],
+      ['tuxedo', 'Tuxedo Jacket', { sl: 'long', coll: 'tux', col: 0x1c1c22, open: 0xffffff, len: 'hip', det: { bowtie: 1 } }],
+      ['waistcoat', 'Waistcoat', { sl: 'long', coll: 'shirt', col: 0xf4f4f4, det: { vest: 'user', vopen: 1, tie: 1, buttons: 1 }, ac: 0x2b2d33 }],
+      ['turtleneck', 'Turtleneck', { sl: 'long', coll: 'turtle' }],
+      ['trench', 'Trench Coat', { sl: 'long', coll: 'lapel', len: 'long', det: { belt: 1, buttons2: 1 }, ac: 0xc8b08a }],
+      ['overcoat', 'Long Overcoat', { sl: 'long', coll: 'lapel', len: 'long', open: 0x2b2d33, det: { buttons2: 1 }, ac: 0x2b2d33 }]]],
+    ['Rugged / Tactical', '🪖', [
+      ['leatherjacket', 'Leather Jacket', { sl: 'long', coll: 'lapel', col: 0x1c1c22, open: 0xeeeeee, zip: 1, shine: 1 }],
+      ['bikerjacket', 'Biker Jacket', { sl: 'long', coll: 'lapel', col: 0x26262c, zip: 1, shine: 1, det: { studs: 1, belt: 1 } }],
+      ['tacshirt', 'Tactical Shirt', { sl: 'long', coll: 'shirt', det: { pocket2: 1, velcro: 1 }, ac: 0xc8b08a }],
+      ['tacvest', 'Tactical Vest', { sl: 'short', coll: 'crew', col: 0x2b2d33, det: { vest: 'user', pouches: 1 }, ac: 0x5b6b3a }],
+      ['platecarrier', 'Plate Carrier', { sl: 'long', coll: 'crew', col: 0x7d8462, armpat: 'camo', det: { plate: 'user', pouches: 1 }, ac: 0x5b6b3a }],
+      ['combatshirt', 'Combat Shirt', { sl: 'long', coll: 'mandarin', armpat: 'camo', ac: 0xc8b08a }],
+      ['militaryjacket', 'Military Jacket', { sl: 'long', coll: 'shirt', pat: 'camo', det: { pockets: 1, buttons: 1 }, ac: 0x5b6b3a }],
+      ['fieldjacket', 'Field Jacket', { sl: 'long', coll: 'shirt', len: 'hip', det: { pockets: 1, buttons: 1 }, ac: 0x5b6b3a }],
+      ['huntingjacket', 'Hunting Jacket', { sl: 'long', coll: 'shirt', pat: 'camo', det: { vest: 0xf28c28, pockets: 1 }, ac: 0x6b4226 }],
+      ['coveralls', 'Mechanic Coveralls', { sl: 'long', coll: 'shirt', zip: 1, legs: 'top', det: { belt: 1, patch: 1, pocket: 1 }, ac: 0x24305e }],
+      ['workshirt', 'Work Shirt', { sl: 'roll', coll: 'shirt', det: { pocket2: 1, buttons: 1, patch: 1 }, ac: 0x3d63b8 }]]],
+    ['Fantasy', '🛡️', [
+      ['tunic', 'Tunic', { sl: 'long', coll: 'v', len: 'tunic', det: { belt: 1 }, ac: 0x8a5a3c }],
+      ['leatherarmor', 'Leather Armor', { sl: 'long', coll: 'crew', col: 0x6b4226, det: { plate: 0x8a5a3c, pauldron: 0x5a3418, belt: 1 } }],
+      ['chainmail', 'Chainmail', { sl: 'long', coll: 'crew', pat: 'chain', col: 0x9aa0a8, len: 'tunic', det: { belt: 1 } }],
+      ['knightarmor', 'Knight Armor', { sl: 'long', coll: 'crew', col: 0xb8bec8, shine: 1, legs: 0xa8aeb8, det: { plate: 0xd2d6dc, pauldron: 0xd2d6dc, tabard: 'user' }, ac: 0x3d63b8 }],
+      ['magerobe', 'Mage Robe', { sl: 'long', coll: 'v', len: 'robe', det: { trim: 1, sash: 'gold' }, ac: 0x24407a }],
+      ['wizardrobe', 'Wizard Robe', { sl: 'long', coll: 'v', len: 'robe', pat: 'stars', det: { obi: 'gold' }, ac: 0x5a2f82 }],
+      ['assassincoat', 'Assassin Coat', { sl: 'long', coll: 'v', len: 'coat', det: { hood: 1, belt: 1, sash: 'red' }, ac: 0xf4f4f4 }],
+      ['rangertunic', 'Ranger Tunic', { sl: 'long', coll: 'v', len: 'tunic', det: { hood: 1, belt: 1, strap: 1 }, ac: 0x4f9a5a }],
+      ['royalcoat', 'Royal Coat', { sl: 'long', coll: 'lapel', len: 'coat', open: 0xf4f4f4, det: { trim: 1, epaulet: 1, sash: 'blue' }, ac: 0xa3243f }],
+      ['samuraiarmor', 'Samurai Armor', { sl: 'long', coll: 'v', len: 'coat', col: 0x2b2d33, det: { plate: 'user', pauldron: 'user', lames: 1 }, ac: 0xa3243f }],
+      ['ninjagarb', 'Ninja Garb', { sl: 'long', coll: 'v', col: 0x1c1c22, det: { obi: 'user' }, ac: 0xa3243f }],
+      ['piratecoat', 'Pirate Coat', { sl: 'long', coll: 'lapel', len: 'coat', open: 0xf4f4f4, det: { trim: 1, sash: 'red', belt: 1 }, ac: 0xa3243f }],
+      ['monkrobe', 'Monk Robe', { sl: 'long', coll: 'v', len: 'robe', det: { obi: 'shade' }, ac: 0xf28c28 }]]],
+    ['More', '⭐', [['sweater', 'Sweater'], ['blouse', 'Blouse'], ['dress', 'Dress'], ['cardigan', 'Cardigan'], ['jacket', 'Zip Jacket'], ['overalls', 'Overall Top'], ['hawaii', 'Hawaiian Shirt'], ['swim', 'Swimsuit']]]];
+  const BOTTOM_GROUPS = [
+    ['Pants', '👖', [
+      ['jeans', 'Jeans', { k: 'pants', pat: 'denim', ac: 0x4a6fa5 }],
+      ['skinnyjeans', 'Skinny Jeans', { k: 'pants', fit: 'skinny', pat: 'denim', ac: 0x4a6fa5 }],
+      ['rippedjeans', 'Ripped Jeans', { k: 'pants', pat: 'denim', rip: 1, ac: 0x7a9cc6 }],
+      ['baggyjeans', 'Baggy Jeans', { k: 'pants', fit: 'baggy', pat: 'denim', ac: 0x4a6fa5 }],
+      ['cargopants', 'Cargo Pants', { k: 'pants', cargo: 1, ac: 0x5b6b3a }],
+      ['tacpants', 'Tactical Pants', { k: 'pants', cargo: 1, knee: 1, ac: 0x2b2d33 }],
+      ['joggers', 'Joggers', { k: 'pants', cuff: 1, ac: 0x5b5f66 }],
+      ['sweatpants', 'Sweatpants', { k: 'pants', fit: 'baggy', cuff: 1, ac: 0x9aa0a8 }],
+      ['trackpants', 'Track Pants', { k: 'pants', stripe: 1, ac: 0x1c1c22 }],
+      ['chinos', 'Chinos', { k: 'pants', ac: 0xc8b08a }],
+      ['dresspants', 'Dress Pants', { k: 'pants', crease: 1, ac: 0x2b2d33 }],
+      ['leatherpants', 'Leather Pants', { k: 'pants', fit: 'skinny', col: 0x1c1c22, shine: 1 }],
+      ['bellbottoms', 'Bell-Bottoms', { k: 'pants', fit: 'bell', pat: 'denim', ac: 0x7a9cc6 }],
+      ['combattrousers', 'Combat Trousers', { k: 'pants', cargo: 1, knee: 1, cuff: 1, ac: 0x6b5440 }],
+      ['camopants', 'Camouflage Pants', { k: 'pants', pat: 'camo', cargo: 1, ac: 0x5b6b3a }],
+      ['overallpants', 'Overalls', { k: 'pants', pat: 'denim', bib: 1, ac: 0x4a6fa5 }],
+      ['leggings', 'Leggings', { k: 'pants', fit: 'skinny', ac: 0x1c1c22 }],
+      ['tights', 'Tights', { k: 'pants', fit: 'tight', ac: 0x1c1c22 }]]],
+    ['Shorts', '🩳', [
+      ['denimshorts', 'Denim Shorts', { k: 'shorts', pat: 'denim', ac: 0x7a9cc6 }],
+      ['cargoshorts', 'Cargo Shorts', { k: 'shorts', cargo: 1, ac: 0xc8b08a }],
+      ['bballshorts', 'Basketball Shorts', { k: 'shorts', longshort: 1, stripe: 1, ac: 0xd6262f }],
+      ['athshorts', 'Athletic Shorts', { k: 'shorts', mini: 1, stripe: 1, ac: 0x2d3340 }],
+      ['boardshorts', 'Board Shorts', { k: 'shorts', longshort: 1, pat: 'board', ac: 0x3aa7a0 }]]],
+    ['Skirts & more', '👗', [
+      ['miniskirt', 'Mini Skirt', { k: 'skirt', len: 0.2 }],
+      ['pleatedskirt', 'Pleated Skirt', { k: 'skirt', len: 0.28, pat: 'pleat' }],
+      ['pencilskirt', 'Pencil Skirt', { k: 'skirt', len: 0.42, narrow: 1, ac: 0x2b2d33 }],
+      ['denimskirt', 'Denim Skirt', { k: 'skirt', len: 0.26, pat: 'denim', ac: 0x4a6fa5 }],
+      ['long', 'Long Skirt'],
+      ['kilt', 'Kilt', { k: 'skirt', len: 0.34, pat: 'plaid', ac: 0xa3243f }],
+      ['hakama', 'Hakama', { k: 'skirt', len: 0.62, wide: 1, pat: 'pleat', ac: 0x2b2d33 }]]],
+    ['Office originals', '⭐', [['pants', 'Classic Pants'], ['shorts', 'Classic Shorts'], ['skirt', 'Skirt']]]];
+  const HAT_GROUPS = [
+    ['Basics', '🚫', [['none', 'No headwear']]],
+    ['Caps & everyday', '🧢', [['bcap', 'Baseball Cap'], ['snapback', 'Snapback'], ['dadcap', 'Dad Cap'], ['trucker', 'Trucker Cap'], ['beanie', 'Beanie'], ['bucket', 'Bucket Hat'],
+      ['flatcap', 'Flat Cap'], ['newsboy', 'Newsboy Cap'], ['visor', 'Visor'], ['bandana', 'Bandana'], ['durag', 'Durag'], ['headband', 'Headband']]],
+    ['Hats', '🎩', [['fedora', 'Fedora'], ['trilby', 'Trilby'], ['cowboy', 'Cowboy Hat'], ['strawhat', 'Straw Hat'], ['beret', 'Beret'], ['sombrero', 'Sombrero'], ['tophat', 'Top Hat'],
+      ['chef', 'Chef Hat'], ['santahat', 'Santa Hat'], ['party', 'Party Hat']]],
+    ['Helmets & uniform', '⛑️', [['hardhat', 'Hard Hat'], ['conhelmet', 'Construction Helmet'], ['motohelmet', 'Motorcycle Helmet'], ['bikehelmet', 'Bicycle Helmet'], ['tachelmet', 'Tactical Helmet'],
+      ['milberet', 'Military Beret'], ['boonie', 'Boonie Hat'], ['policecap', 'Police Cap'], ['firehelmet', 'Firefighter Helmet']]],
+    ['Fantasy & fun', '👑', [['crown', 'Crown'], ['tiara', 'Tiara'], ['wizard', 'Wizard Hat'], ['witch', 'Witch Hat'], ['pirate', 'Pirate Hat'], ['viking', 'Viking Helmet'], ['kabuto', 'Samurai Kabuto'],
+      ['ninjahood', 'Ninja Hood'], ['knighthelm', 'Knight Helmet'], ['halo', 'Halo'], ['devil', 'Devil Horns'], ['catears', 'Cat Ears'], ['bunny', 'Bunny Ears']]],
+    ['More', '⭐', [['bow', 'Bow'], ['flowers', 'Flower Crown'], ['hijab', 'Hijab'], ['unicorn', 'Unicorn Horn'], ['sunhat', 'Sun Hat']]]];
+  const flatCat = G => { const out = [], seen = {}; G.forEach(g => g[2].forEach(o => { if (!seen[o[0]]) { seen[o[0]] = 1; out.push([o[0], o[1]]); } })); return out; };
+  const recCat = G => { const r = {}; G.forEach(g => g[2].forEach(o => { if (o[2]) r[o[0]] = o[2]; })); return r; };
+  const HAIRS = flatCat(HAIR_GROUPS), TOPS = flatCat(TOP_GROUPS), BOTTOMS = flatCat(BOTTOM_GROUPS), HATS = flatCat(HAT_GROUPS);
+  const HAIR_R = recCat(HAIR_GROUPS), TOP_R = recCat(TOP_GROUPS), BOT_R = recCat(BOTTOM_GROUPS);
+  const HCONE = new THREE.ConeGeometry(0.05, 0.24, 8), HTOR = new THREE.TorusGeometry(0.16, 0.018, 6, 24);
   const SUIT = {
     captain: { name: '⭐ Star Captain', t: 0x2a3f8f, t2: 0xd6262f, arm: 0x2a3f8f, leg: 0x2a3f8f, shoe: 0xb81f2a, glove: 0xb81f2a, mask: 'cowl', mc: 0x2a3f8f, star: 0xffffff, stripes: true, shield: true },
     armor: { name: '🦾 Red Armor', t: 0xb3121d, t2: 0xe0b030, arm: 0xb3121d, leg: 0xb3121d, shoe: 0xe0b030, glove: 0xb3121d, mask: 'helm', mc: 0xb3121d, face: 0xe0b030, eye: 'glow', reactor: true, pads: 0xe0b030 },
@@ -2119,8 +2349,33 @@ function main(){
     cosmic: { name: '✨ Cosmic Captain', t: 0x1f3d9e, t2: 0xd6262f, arm: 0xd6262f, leg: 0x1f3d9e, shoe: 0xd6262f, glove: 0xd6262f, star: 0xffd23f, sash: 0xffd23f }
   };
   const SUITS = [['none', 'No costume']].concat(Object.keys(SUIT).map(k => [k, SUIT[k].name]));
-  const HAT_COVER = { beanie: 1, beret: 1, cowboy: 1, tophat: 1, hardhat: 1, hijab: 1, sunhat: 1 };
-  const TALL_HAT = { tophat: 1, bunny: 1, party: 1, unicorn: 1, cowboy: 1 };
+  const HAT_COVER = { beanie: 1, beret: 1, cowboy: 1, tophat: 1, hardhat: 1, hijab: 1, sunhat: 1,
+    bcap: 1, snapback: 1, dadcap: 1, trucker: 1, bucket: 1, fedora: 1, trilby: 1, flatcap: 1, newsboy: 1, strawhat: 1, bandana: 1, milberet: 1, sombrero: 1, chef: 1, santahat: 1,
+    conhelmet: 1, bikehelmet: 1, tachelmet: 1, boonie: 1, policecap: 1, firehelmet: 1, wizard: 1, witch: 1, pirate: 1, viking: 1, kabuto: 1 };
+  const HAT_HIDE = { durag: 1, motohelmet: 1, ninjahood: 1, knighthelm: 1 };
+  const TALL_HAT = { tophat: 1, bunny: 1, party: 1, unicorn: 1, cowboy: 1, sombrero: 1, chef: 1, wizard: 1, witch: 1, pirate: 1, viking: 1, kabuto: 1, knighthelm: 1, motohelmet: 1, halo: 1, santahat: 1 };
+  const VERY_TALL = { tophat: 1, bunny: 1, wizard: 1, witch: 1, chef: 1 };
+  function mixC(a, b, t) { const ch = s => Math.round(((a >> s) & 255) * (1 - t) + ((b >> s) & 255) * t); return (ch(16) << 16) | (ch(8) << 8) | ch(0); }
+  // ---- fabric patterns (plaid, camo, denim…) as small pixel textures ----
+  const PATC = {};
+  function patTex(kind, c) {
+    const key = kind + '_' + c; if (PATC[key]) return PATC[key];
+    let seed = 7 + kind.length * 13; const rr = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const hx = v => '#' + (v & 0xffffff).toString(16).padStart(6, '0');
+    const t = canvasTex(64, 64, (x, w, h) => {
+      x.fillStyle = hx(c); x.fillRect(0, 0, w, h);
+      if (kind === 'plaid') { x.globalAlpha = 0.5; x.fillStyle = hx(shade(c, 0.5)); [4, 36].forEach(p => { x.fillRect(p, 0, 12, h); x.fillRect(0, p, w, 12); }); x.globalAlpha = 0.75; x.fillStyle = hx(shade(c, 1.7)); [26, 58].forEach(p => { x.fillRect(p, 0, 2, h); x.fillRect(0, p, w, 2); }); x.globalAlpha = 1; }
+      else if (kind === 'camo') { const cs = [shade(c, 0.62), shade(c, 1.3), 0x3a3022, shade(c, 0.85)]; for (let i = 0; i < 20; i++) { x.fillStyle = hx(cs[i % 4]); x.beginPath(); x.ellipse(rr() * 64, rr() * 64, 5 + rr() * 9, 3 + rr() * 6, rr() * 3, 0, Math.PI * 2); x.fill(); } }
+      else if (kind === 'chain') { x.strokeStyle = hx(shade(c, 0.55)); x.lineWidth = 1.5; for (let j = 0; j < 8; j++) for (let i = 0; i < 9; i++) { x.beginPath(); x.arc(i * 8 + (j % 2) * 4, j * 8 + 4, 3, 0, Math.PI * 2); x.stroke(); } }
+      else if (kind === 'denim') { x.strokeStyle = hx(shade(c, 1.25)); x.globalAlpha = 0.45; x.lineWidth = 1; for (let i = -64; i < 64; i += 4) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + 64, 64); x.stroke(); } x.globalAlpha = 1; }
+      else if (kind === 'stars') { x.fillStyle = '#ffd23f'; for (let i = 0; i < 9; i++) { const px = rr() * 58 + 3, py = rr() * 58 + 3; x.fillRect(px, py - 3, 2, 7); x.fillRect(px - 3, py, 7, 2); } }
+      else if (kind === 'pleat') { x.fillStyle = hx(shade(c, 0.68)); for (let i = 0; i < 64; i += 8) x.fillRect(i, 0, 2, h); }
+      else if (kind === 'board') { const cs = [shade(c, 0.55), 0xffffff, 0xffd23f]; for (let i = 0; i < 4; i++) { x.fillStyle = hx(cs[i % 3]); x.fillRect(0, 6 + i * 16, w, 5); } }
+    });
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 2); t.magFilter = THREE.NearestFilter;
+    PATC[key] = t; return t;
+  }
+  const patMat = (kind, c, o) => { const m = M(0xffffff, Object.assign({ roughness: 0.88, map: patTex(kind, c) }, o || {})); m.userData.pc = c; m.userData.pk = kind; return m; };
   const EXTRAS = [['santa', '🎅 Santa hat'], ['glasses', '👓 Glasses'], ['cap', '🧢 Cap'], ['headphones', '🎧 Headphones'], ['beard', '🧔 Beard'], ['shades', '🕶️ Sunglasses'], ['wheelchair', '🦽 Wheelchair']];
   const CURLS = (function () { const out = []; for (let k = 0; k < 40; k++) { const y = 1 - (k + 0.5) / 40 * 1.7, r = Math.sqrt(Math.max(0, 1 - y * y)), a = k * 2.39996; const p = [Math.cos(a) * r, y, Math.sin(a) * r]; if (p[1] < -0.55) continue; if (p[2] > 0.25 && p[1] < 0.45) continue; out.push(p); } return out; })();
   function part(geo, mat, x, y, z, par, sx, sy, sz) {
@@ -2163,41 +2418,123 @@ function main(){
     const root = new THREE.Group(); scene.add(root);
     const body = new THREE.Group(); root.add(body);
     const S = SUIT[L.suit] || null, bottom = L.bottom || 'pants', hat = S && S.mask ? 'none' : (L.hat || 'none');
-    const xm = [], mc = c => { const m = M(c, { roughness: 0.8 }); xm.push(m); return m; };
+    const xm = [], mc = c => { const m = M(c, { roughness: 0.8 }); xm.push(m); return m; }, mpat = (k, c) => { const m = patMat(k, c); xm.push(m); return m; };
     const skinC = S && S.skin ? S.skin : L.skin;
-    const mS = M(skinC, { roughness: 0.72 }), mH = M(L.hairColor, { roughness: 0.6 }), mT = M(S ? S.t : L.topColor, { roughness: 0.92 }), mT2 = M(S ? S.t2 : shade(L.topColor, 0.78), { roughness: 0.92 });
-    const mP = M(S ? S.leg : L.pants, { roughness: 0.85 }), mA = M(L.accent, { roughness: 0.45 }), mN = M(shade(skinC, 0.88), { roughness: 0.75 });
     const top = S ? 'suit' : (L.top || 'hoodie');
-    const sleeve = S ? (S.sleeve || 'long') : ({ tee: 'short', blouse: 'puff', dress: 'short', polo: 'short', overalls: 'short', tank: 'none', jersey: 'none', hawaii: 'short', swim: 'none' }[top] || 'long');
-    const mArm = S && S.arm ? mc(S.arm) : mT, mHand = S && S.glove ? mc(S.glove) : mS, mFoot = S && S.shoe ? mc(S.shoe) : L.flip ? mS : mShoe;
-    const skirtLen = S ? (S.skirt ? 0.58 : 0) : top === 'dress' ? (bottom === 'long' ? 0.58 : 0.32) : bottom === 'skirt' ? 0.28 : bottom === 'long' ? 0.58 : 0;
+    const TR = (!S && TOP_R[top]) || null, BR = (!S && BOT_R[bottom]) || null, TD = (TR && TR.det) || {};
+    const tCol = TR && TR.col != null ? TR.col : L.topColor, pCol = BR && BR.col != null ? BR.col : L.pants;
+    const lumOf = c => ((c >> 16) & 255) * 0.3 + ((c >> 8) & 255) * 0.59 + (c & 255) * 0.11;
+    const colOf = v => v === 'user' ? L.topColor : v === 'gold' ? 0xf2c230 : v === 'red' ? 0xc81e2a : v === 'blue' ? 0x3d63b8 : v === 'shade' ? shade(tCol, 0.7) : v;
+    const mS = M(skinC, { roughness: 0.72 }), mH = M(L.hairColor, { roughness: 0.6 });
+    const mT = S ? M(S.t, { roughness: 0.92 }) : TR && TR.pat ? patMat(TR.pat, tCol) : M(tCol, TR && TR.shine ? { roughness: 0.35, metalness: 0.15 } : { roughness: 0.92 });
+    const mT2 = M(S ? S.t2 : shade(tCol, 0.78), { roughness: 0.92 });
+    const mP = S ? M(S.leg, { roughness: 0.85 }) : TR && TR.legs != null ? (TR.legs === 'top' ? M(tCol, { roughness: 0.9 }) : M(TR.legs, { roughness: 0.4, metalness: 0.3 })) : BR && BR.pat ? patMat(BR.pat, pCol) : M(pCol, BR && BR.shine ? { roughness: 0.32, metalness: 0.15 } : { roughness: 0.85 });
+    const mA = M(L.accent, { roughness: 0.45 }), mN = M(shade(skinC, 0.88), { roughness: 0.75 });
+    const sleeve = S ? (S.sleeve || 'long') : TR ? TR.sl : ({ tee: 'short', blouse: 'puff', dress: 'short', polo: 'short', overalls: 'short', tank: 'none', jersey: 'none', hawaii: 'short', swim: 'none' }[top] || 'long');
+    const mArm = S && S.arm ? mc(S.arm) : TR && TR.arm != null ? mc(TR.arm) : TR && TR.armpat ? mpat(TR.armpat, tCol) : mT, mHand = S && S.glove ? mc(S.glove) : mS, mFoot = S && S.shoe ? mc(S.shoe) : L.flip ? mS : mShoe;
+    const bk = BR ? BR.k : bottom;
+    const skirtLen = S ? (S.skirt ? 0.58 : 0) : top === 'dress' ? (bottom === 'long' ? 0.58 : 0.32) : bk === 'skirt' ? (BR ? BR.len : 0.28) : bottom === 'long' ? 0.58 : 0;
     const mSkirt = S && S.skirt ? mc(S.skirt) : top === 'dress' ? mT : mP;
-    const shorts = S ? !!S.shorts : bottom === 'shorts';
-    const mLegU = S ? mP : skirtLen ? mS : mP, mLegL = S ? (S.shorts ? mS : mP) : (skirtLen || shorts) ? mS : mP;
+    const shorts = S ? !!S.shorts : bk === 'shorts';
+    const bareLeg = skirtLen && !(BR && BR.wide);
+    const mLegU = S ? mP : bareLeg ? mS : mP, mLegL = S ? (S.shorts ? mS : mP) : (bareLeg || shorts) ? mS : mP;
+    const mP2 = mc(shade(S ? 0x555555 : pCol, 0.72));
+    const fit = BR && BR.fit, thin = fit === 'skinny' || fit === 'tight', wU = thin ? 0.115 : fit === 'baggy' ? 0.15 : 0.13, wL = thin ? 0.105 : fit === 'baggy' ? 0.145 : 0.12;
+    const pantsOn = BR && !skirtLen && !shorts;
     const bx = (w, hh, d, mat, x, y, z, par) => part(BX(w, hh, d), mat, x, y, z, par);
     // legs
     const legs = [], knees = [];
     [-1, 1].forEach(s => {
       const hip = new THREE.Group(); hip.position.set(s * 0.082, HIP, 0); body.add(hip);
-      bx(0.13, 0.36, 0.15, mLegU, 0, -0.17, 0, hip);
-      if (shorts) bx(0.14, 0.12, 0.16, mP, 0, -0.06, 0, hip);
+      bx(wU, 0.36, wU + 0.02, mLegU, 0, -0.17, 0, hip);
+      if (shorts) { if (BR && BR.longshort) bx(0.15, 0.3, 0.17, mP, 0, -0.13, 0, hip); else bx(0.14, BR && BR.mini ? 0.08 : 0.12, 0.16, mP, 0, BR && BR.mini ? -0.04 : -0.06, 0, hip); }
+      if (BR && !skirtLen) {
+        const sw2 = shorts ? (BR.longshort ? 0.15 : 0.14) : wU;
+        if (BR.cargo) bx(0.03, 0.1, 0.09, mP2, s * (sw2 / 2 + 0.012), shorts ? -0.08 : -0.2, 0, hip);
+        if (BR.stripe) bx(0.012, shorts ? (BR.longshort ? 0.3 : 0.12) : 0.36, 0.03, mString, s * (sw2 / 2 + 0.004), shorts ? (BR.longshort ? -0.13 : -0.06) : -0.17, 0, hip);
+        if (BR.crease) bx(0.008, 0.34, 0.006, mP2, 0, -0.17, (wU + 0.02) / 2 + 0.003, hip);
+        if (BR.rip && !shorts) bx(0.055, 0.03, 0.006, mS, 0.01 * s, -0.12, (wU + 0.02) / 2 + 0.003, hip);
+      }
       const knee = new THREE.Group(); knee.position.y = -0.34; hip.add(knee);
-      bx(0.12, 0.3, 0.14, mLegL, 0, -0.14, 0, knee);
+      bx(wL, 0.3, wL + 0.02, mLegL, 0, -0.14, 0, knee);
+      if (pantsOn) {
+        if (fit === 'bell') bx(0.165, 0.1, 0.18, mP, 0, -0.24, 0, knee);
+        if (fit === 'baggy') bx(0.155, 0.05, 0.175, mP, 0, -0.262, 0, knee);
+        if (BR.knee) bx(0.115, 0.08, 0.03, mc(0x2b2d33), 0, -0.03, (wL + 0.02) / 2 + 0.01, knee);
+        if (BR.cuff) bx(wL + 0.008, 0.04, wL + 0.028, mP2, 0, -0.255, 0, knee);
+        if (BR.stripe) bx(0.012, 0.28, 0.03, mString, s * (wL / 2 + 0.004), -0.14, 0, knee);
+        if (BR.rip) bx(0.06, 0.04, 0.006, mS, 0, -0.04, (wL + 0.02) / 2 + 0.003, knee);
+      }
       bx(0.14, 0.07, 0.22, mFoot, 0, -0.305, 0.035, knee);
       if (!S) bx(0.146, 0.022, 0.226, L.flip ? mA : mString, 0, -0.33, 0.035, knee);
       if (L.flip && !S) bx(0.03, 0.02, 0.1, mA, 0, -0.27, 0.1, knee);
       if (S && S.pads) bx(0.135, 0.1, 0.155, mc(S.pads), 0, -0.02, 0, knee);
       legs.push(hip); knees.push(knee);
     });
-    bx(0.3, 0.12, 0.17, skirtLen ? mSkirt : mP, 0, HIP + 0.03, 0, body);
+    bx(fit === 'baggy' ? 0.33 : 0.3, 0.12, 0.17, skirtLen ? mSkirt : mP, 0, HIP + 0.03, 0, body);
     if (skirtLen) {
       const sg = new THREE.Group(); sg.position.set(0, HIP + 0.08 - skirtLen / 2, 0); sg.scale.z = 0.72; body.add(sg);
-      const sk = part(new THREE.CylinderGeometry(0.235, 0.27 + skirtLen * 0.22, skirtLen, 4, 1), mSkirt, 0, 0, 0, sg); sk.rotation.y = Math.PI / 4;
+      const sk = part(new THREE.CylinderGeometry(0.235, BR && BR.narrow ? 0.24 : BR && BR.wide ? 0.28 + skirtLen * 0.2 : 0.27 + skirtLen * 0.22, skirtLen, 4, 1), mSkirt, 0, 0, 0, sg); sk.rotation.y = Math.PI / 4;
       if (!S && bottom !== 'long' && top !== 'dress') bx(0.31, 0.03, 0.18, mT2, 0, HIP + 0.075, 0, body);
     }
     // torso
-    const torso = bx(0.34, 0.46, 0.2, top === 'overalls' ? mT : mT, 0, 0.93, 0, body);
-    const front = (w2, h2, mat, y, xx) => part(BX(w2, h2, 0.012), mat, xx || 0, y, 0.104, body);
+    const tW = TR && (TR.over || TR.puff) ? 0.37 : 0.34, tD = TR && TR.puff ? 0.235 : TR && TR.over ? 0.215 : 0.2;
+    if (TR && TR.len === 'crop') { bx(tW, 0.3, tD, mT, 0, 1.01, 0, body); bx(0.33, 0.17, 0.19, mS, 0, 0.775, 0, body); }
+    else bx(tW, 0.46, tD, mT, 0, 0.93, 0, body);
+    if (TR && TR.len === 'hip') bx(tW + 0.01, 0.12, tD + 0.01, mT, 0, 0.7, 0, body);
+    const coatLen = TR ? ({ tunic: 0.22, coat: 0.4, long: 0.52, robe: 0.68 }[TR.len] || 0) : 0;
+    if (coatLen) { const cg = new THREE.Group(); cg.position.set(0, HIP + 0.1 - coatLen / 2, 0); cg.scale.z = 0.76; body.add(cg); const ck = part(new THREE.CylinderGeometry(0.25, 0.265 + coatLen * (TR.len === 'robe' ? 0.32 : TR.len === 'tunic' ? 0.2 : 0.07), coatLen, 4, 1), mT, 0, 0, 0, cg); ck.rotation.y = Math.PI / 4; if (TR.len === 'long' || TR.len === 'coat') { const gap = part(BX(0.05, coatLen, 0.012), mP, 0, HIP + 0.1 - coatLen / 2 - 0.02, 0.135 + coatLen * 0.04, body); gap.scale.y = 0.9; } }
+    const front = (w2, h2, mat, y, xx) => part(BX(w2, h2, 0.012), mat, xx || 0, y, tD / 2 + 0.004, body);
+    if (TR) topRecipe();
+    if (BR && BR.bib && !skirtLen) { front(0.22, 0.24, mP, 0.84); [-1, 1].forEach(s => { front(0.04, 0.24, mP, 1.04, s * 0.085); front(0.025, 0.025, mA, 0.95, s * 0.085); }); bx(0.345, 0.1, 0.205, mP, 0, 0.74, 0, body); }
+    function topRecipe() {
+      const gold2 = mc(0xf2c230), silver = mc(0xc0c4ca), mU = mc(L.topColor), lum = lumOf(tCol), FZ = tD / 2 + 0.004, c = TR.coll;
+      const fz = (w2, h2, mat, y, xx, z) => part(BX(w2, h2, 0.012), mat, xx || 0, y, z, body);
+      const bc = mc(lum > 150 ? 0x8c9096 : 0xf2f0ea);
+      let oz = FZ;
+      if (TD.vest != null) {
+        const vc = colOf(TD.vest), vm = mc(vc); bx(tW + 0.016, 0.42, tD + 0.016, vm, 0, 0.95, 0, body); oz = tD / 2 + 0.012;
+        if (TD.vopen) { fz(0.09, 0.4, mT, 0.95, 0, oz); [-1, 1].forEach(s => { const lp = fz(0.035, 0.2, mc(shade(vc, 0.8)), 1.06, s * 0.055, oz + 0.002); lp.rotation.z = s * 0.3; }); }
+        if (TD.pockets) [-1, 1].forEach(s => fz(0.09, 0.07, mc(shade(vc, 0.8)), 0.84, s * 0.1, oz + 0.002));
+      }
+      if (TD.plate != null) { const pc = colOf(TD.plate), pm = mc(pc); bx(0.3, 0.3, 0.05, pm, 0, 1.0, FZ + 0.02, body); bx(0.3, 0.3, 0.04, pm, 0, 1.0, -FZ - 0.015, body); [-1, 1].forEach(s => bx(0.07, 0.035, tD + 0.08, pm, s * 0.1, 1.17, 0, body)); oz = FZ + 0.045; }
+      if (c === 'crew') fz(0.12, 0.022, mT2, 1.14, 0, FZ);
+      else if (c === 'v') { const v = fz(0.1, 0.1, mS, 1.13, 0, FZ + 0.001); v.rotation.z = 0.785; v.scale.set(0.8, 0.8, 1); }
+      else if (c === 'henley') { fz(0.12, 0.022, mT2, 1.14, 0, FZ); fz(0.03, 0.14, mT2, 1.06, 0, FZ); [1.1, 1.05, 1.0].forEach(y => fz(0.016, 0.016, bc, y, 0, FZ + 0.002)); }
+      else if (c === 'tube') { bx(tW + 0.004, 0.09, tD + 0.004, mS, 0, 1.12, 0, body); fz(tW, 0.03, mT2, 1.07, 0, FZ + 0.001); }
+      else if (c === 'hood') { bx(0.3, 0.12, 0.09, mT2, 0, 1.15, -tD / 2 - 0.02, body); [-1, 1].forEach(s => fz(0.014, 0.12, mString, 1.08, s * 0.045, FZ + 0.002)); }
+      else if (c === 'rib') bx(0.22, 0.05, 0.16, mT2, 0, 1.17, 0, body);
+      else if (c === 'shirt') [-1, 1].forEach(s => { const cc = bx(0.08, 0.04, 0.05, mT2, s * 0.05, 1.15, tD / 2 - 0.01, body); cc.rotation.z = s * 0.45; });
+      else if (c === 'lapel' || c === 'tux') { fz(0.11, 0.28, mc(TR.open != null ? TR.open : 0xf4f4f4), 1.02, 0, FZ + 0.001); [-1, 1].forEach(s => { const lp = fz(0.06, 0.24, c === 'tux' ? mc(0x0e0e12) : mT2, 1.04, s * 0.075, FZ + 0.003); lp.rotation.z = s * 0.25; }); }
+      else if (c === 'turtle') { bx(0.16, 0.13, 0.15, mT, 0, 1.22, 0, body); bx(0.17, 0.03, 0.16, mT2, 0, 1.17, 0, body); }
+      else if (c === 'mandarin') bx(0.17, 0.05, 0.15, mT2, 0, 1.18, 0, body);
+      if (TR.zip) fz(0.014, 0.44, silver, 0.93, c === 'lapel' ? 0.035 : 0, oz + 0.003);
+      if (TR.puff) [0.8, 0.93, 1.06].forEach(y => bx(tW + 0.012, 0.03, tD + 0.012, mT2, 0, y, 0, body));
+      if (TD.emblem) { fz(0.15, 0.13, mc(shade(tCol, lum > 120 ? 0.55 : 1.9)), 1.0, 0, FZ + 0.001); fz(0.07, 0.07, mA, 1.0, 0, FZ + 0.003); }
+      if (TD.band) bx(tW + 0.005, 0.045, tD + 0.005, mT2, 0, 0.72, 0, body);
+      if (TD.pouch) fz(0.22, 0.09, mT2, 0.8, 0, FZ + 0.001);
+      if (TD.letter) fz(0.07, 0.09, mc(0xf2f0ea), 1.02, -0.085, FZ + 0.002);
+      if (TD.buttons) [1.06, 0.96, 0.86, 0.76].forEach(y => fz(0.018, 0.018, bc, y, 0, oz + 0.003));
+      if (TD.buttons2) [-0.045, 0.045].forEach(xx => [0.98, 0.88].forEach(y => fz(0.02, 0.02, bc, y, xx, oz + 0.003)));
+      if (TD.pocket2) [-1, 1].forEach(s => { fz(0.08, 0.075, mT2, 1.0, s * 0.085, FZ + 0.001); fz(0.085, 0.025, mT2, 1.045, s * 0.085, FZ + 0.003); });
+      if (TD.pocket) fz(0.08, 0.075, mT2, 1.0, -0.085, FZ + 0.001);
+      if (TD.panel) fz(tW, 0.12, mc(shade(tCol, lum > 150 ? 0.7 : 1.45)), 1.06, 0, FZ + 0.001);
+      if (TD.velcro) fz(0.09, 0.05, mc(0x5b5f4a), 1.05, -0.085, oz + 0.002);
+      if (TD.patch) fz(0.07, 0.04, mc(0xf4f4f4), 1.05, 0.085, oz + 0.002);
+      if (TD.tie) { fz(0.035, 0.22, mA, 1.0, 0, oz + 0.004); fz(0.045, 0.035, mA, 1.115, 0, oz + 0.005); }
+      if (TD.bowtie) [-1, 1].forEach(s => { const b2 = fz(0.05, 0.035, mc(0x111114), 1.12, s * 0.028, FZ + 0.005); b2.rotation.z = s * 0.3; });
+      if (TD.belt) { bx(tW + 0.012, 0.045, tD + 0.012, mc(0x3a2a1c), 0, 0.74, 0, body); fz(0.05, 0.045, gold2, 0.74, 0, tD / 2 + 0.012); }
+      if (TD.trim) [-1, 1].forEach(s => fz(0.02, 0.44, gold2, 0.93, s * 0.06, oz + 0.004));
+      if (TD.sash) { const sa = fz(0.05, 0.5, mc(colOf(TD.sash)), 0.93, 0, oz + 0.006); sa.rotation.z = 0.6; }
+      if (TD.obi) bx(tW + 0.014, 0.08, tD + 0.014, mc(colOf(TD.obi)), 0, 0.77, 0, body);
+      if (TD.hood) bx(0.3, 0.12, 0.09, mT2, 0, 1.15, -tD / 2 - 0.02, body);
+      if (TD.strap) { const st = fz(0.04, 0.52, mc(0x5a3418), 0.95, 0, oz + 0.006); st.rotation.z = -0.6; }
+      if (TD.epaulet) [-1, 1].forEach(s => bx(0.12, 0.03, 0.15, gold2, s * 0.2, 1.175, 0, body));
+      if (TD.studs) [[-0.08, 1.08], [-0.1, 1.0], [0.08, 1.08], [0.1, 1.0], [-0.06, 0.9], [0.06, 0.9]].forEach(p => fz(0.016, 0.016, silver, p[1], p[0], FZ + 0.006));
+      if (TD.tabard) { fz(0.17, 0.44, mU, 0.9, 0, oz + 0.004); fz(0.06, 0.06, gold2, 1.0, 0, oz + 0.006); }
+      if (TD.lames) [0.84, 0.76].forEach(y => bx(tW + 0.02, 0.03, tD + 0.02, mU, 0, y, 0, body));
+      if (TD.pouches) { const pc = shade(colOf(TD.vest != null ? TD.vest : TD.plate != null ? TD.plate : 'user'), 0.8); [-0.1, 0, 0.1].forEach(xx => bx(0.085, 0.09, 0.04, mc(pc), xx, 0.8, oz + 0.02, body)); }
+    }
     if (top === 'hoodie') {
       bx(0.3, 0.12, 0.09, mT2, 0, 1.15, -0.12, body);
       bx(0.22, 0.09, 0.02, mT2, 0, 0.8, 0.105, body);
@@ -2287,8 +2624,12 @@ function main(){
       else if (sleeve === 'puff') { bx(0.14, 0.13, 0.15, mArm, 0, -0.04, 0, up); bx(0.145, 0.025, 0.155, mT2, 0, -0.11, 0, up); bx(0.085, 0.16, 0.1, mS, 0, -0.17, 0, up); }
       else bx(0.1, 0.28, 0.12, mArm, 0, -0.12, 0, up);
       if (S && S.pads) bx(0.13, 0.08, 0.15, mc(S.pads), 0, 0.0, 0, up);
+      if (TD.pauldron != null) bx(0.15, 0.09, 0.16, mc(colOf(TD.pauldron)), 0, 0.01, 0, up);
+      if (TD.stripes) bx(0.012, 0.28, 0.03, mString, s * 0.052, -0.12, 0, up);
       const el = new THREE.Group(); el.position.y = -0.26; up.add(el);
       bx(0.09, 0.2, 0.11, sleeve === 'long' ? mArm : mS, 0, -0.09, 0, el);
+      if (sleeve === 'roll') bx(0.1, 0.06, 0.12, mT2, 0, -0.01, 0, el);
+      if (TD.stripes && sleeve === 'long') bx(0.012, 0.2, 0.03, mString, s * 0.047, -0.09, 0, el);
       if (sleeve === 'long' && !S) bx(0.096, 0.03, 0.116, mT2, 0, -0.185, 0, el);
       if (S && S.glove && sleeve !== 'long') bx(0.095, 0.1, 0.115, mHand, 0, -0.15, 0, el);
       bx(0.085, 0.08, 0.095, mHand, 0, -0.235, 0.005, el);
@@ -2331,9 +2672,11 @@ function main(){
     const cowl = S && S.mask === 'cowl';
     // hair
     const capOn = L.cap || L.santa || !!HAT_COVER[hat] || cowl;
-    const hairOff = helm || hat === 'hijab';
+    const hairOff = helm || hat === 'hijab' || !!HAT_HIDE[hat];
     const hs = L.hair || 'short';
+    const HR = HAIR_R[hs] || null;
     if (hairOff) { /* covered */ }
+    else if (HR) hairRecipe(HR);
     else if (hs === 'buzz' || hs === 'mohawk') {
       bx(0.39, 0.035, 0.37, mH, 0, 0.222, 0, head);
       bx(0.39, 0.22, 0.03, mH, 0, 0.1, -0.175, head);
@@ -2347,7 +2690,106 @@ function main(){
       bx(0.4, 0.3, 0.07, mH, 0, 0.09, -0.16, head);
       [-1, 1].forEach(s => bx(0.03, 0.17, 0.3, mH, s * 0.2, 0.12, -0.02, head));
     }
-    if (!hairOff) {
+
+    function hairRecipe(R) {
+      const cap = capOn, fadeM = mc(mixC(L.hairColor, skinC, 0.55)), hiM = mc(shade(L.hairColor, 1.5) | 0x101010);
+      const T0 = 0.205, top = R.top || 0, topY = T0 + top;
+      const hb = (w, h, d, x, y, z, m) => bx(w, h, d, m || mH, x, y, z, head);
+      // scalp and crown
+      if (R.tex === 'cornrows') { [-0.15, -0.075, 0, 0.075, 0.15].forEach(xx => { hb(0.05, 0.03, 0.38, xx, 0.222, 0); hb(0.05, 0.24, 0.03, xx, 0.1, -0.18); }); }
+      else hb(0.39, 0.035, 0.37, 0, 0.222, 0, R.sides === 'skin' && !top ? fadeM : mH);
+      if (top && !cap) hb(R.over ? 0.43 : 0.4, top + 0.01, R.over ? 0.4 : 0.38, 0, T0 + top / 2, 0);
+      if (R.over && !cap) hb(0.43, 0.03, 0.4, 0, 0.2, 0);
+      // sides: [hair height, centre y, fade band]
+      const SIDE = { full: [0.17, 0.12, 0], low: [0.22, 0.1, 0], long: [0.3, 0.06, 0], fade: [0.08, 0.17, 0.1], high: [0, 0, 0.12], taper: [0.14, 0.13, 0.05], drop: [0.08, 0.17, 0.1], temple: [0.12, 0.15, 0.06], skin: [0, 0, 0] }[R.sides];
+      if (SIDE) [-1, 1].forEach(s => {
+        if (SIDE[0]) hb(0.03, SIDE[0], 0.3, s * 0.2, SIDE[1], -0.02);
+        if (SIDE[2]) hb(0.024, SIDE[2], 0.3, s * 0.199, (SIDE[0] ? SIDE[1] - SIDE[0] / 2 : 0.2) - SIDE[2] / 2, -0.02, fadeM);
+      });
+      const faded = SIDE && SIDE[2];
+      // back
+      const b = R.back, longB = (len, side, o) => { o = o || {};
+        hb(0.42, len, 0.09, 0, 0.24 - len / 2, -0.17);
+        [-1, 1].forEach(s => { const sl = typeof side === 'object' ? side[s < 0 ? 0 : 1] : side; hb(0.06, sl, 0.15, s * 0.215, 0.24 - sl / 2, 0.055); });
+        if (o.wave) [-1, 1].forEach(s => { [-0.1, -0.26].forEach((y, k) => hb(0.08, 0.1, 0.16, s * (0.235 + k * 0.015), y, 0.05 - k * 0.03)); hb(0.12, 0.12, 0.1, s * 0.14, 0.24 - len + 0.04, -0.17); });
+        if (o.layer) [-1, 1].forEach(s => [0, 1, 2].forEach(k => hb(0.07, 0.08, 0.13, s * (0.23 + k * 0.008), 0.08 - k * 0.12, 0.04 - k * 0.02)));
+        if (o.flip) [-1, 1].forEach(s => { const sl = typeof side === 'object' ? side[s < 0 ? 0 : 1] : side; const f = hb(0.09, 0.05, 0.14, s * 0.236, 0.255 - sl, 0.04); f.rotation.z = -s * 0.35; });
+        if (o.curls) for (let k = 0; k < 10; k++) { const a = -1.3 + k * 0.29; hb(0.1, 0.1, 0.1, Math.sin(a) * 0.23, 0.2 - len + 0.08 + (k % 3) * 0.12, -0.1 - Math.cos(a) * 0.08); }
+        if (o.blunt) hb(0.43, 0.03, 0.1, 0, 0.24 - len + 0.015, -0.17, mc(shade(L.hairColor, 0.8)));
+      };
+      if (b === 'none') { if (faded || R.sides === 'skin') hb(0.39, 0.12, 0.02, 0, 0.14, -0.182, fadeM); }
+      else if (b === 'short') { hb(0.4, 0.16, 0.05, 0, 0.14, -0.165); if (faded) hb(0.39, 0.1, 0.02, 0, 0.01, -0.18, fadeM); }
+      else if (b === 'nape') hb(0.4, 0.3, 0.07, 0, 0.09, -0.16);
+      else if (b === 'mullet' || b === 'mulletlong') { hb(0.4, 0.3, 0.07, 0, 0.09, -0.16); const ml = b === 'mullet' ? 0.22 : 0.36; hb(0.32, ml, 0.08, 0, -0.06 - ml / 2, -0.17); if (b === 'mulletlong') [-1, 1].forEach(s => { const f = hb(0.08, 0.14, 0.08, s * 0.14, -0.34, -0.16); f.rotation.z = s * 0.4; }); }
+      else if (b === 'wolf') { hb(0.4, 0.3, 0.07, 0, 0.09, -0.16); hb(0.36, 0.2, 0.08, 0, -0.12, -0.17); hb(0.28, 0.14, 0.07, 0, -0.28, -0.18); [-1, 1].forEach(s => hb(0.06, 0.2, 0.12, s * 0.215, -0.04, 0.02)); }
+      else if (b === 'flow') { hb(0.42, 0.36, 0.08, 0, 0.06, -0.17); hb(0.46, 0.06, 0.12, 0, -0.13, -0.17); [-1, 1].forEach(s => { const f = hb(0.06, 0.06, 0.14, s * 0.235, -0.06, -0.05); f.rotation.z = -s * 0.5; hb(0.05, 0.24, 0.2, s * 0.215, 0.07, -0.04); }); }
+      else if (b === 'ducktail') { hb(0.4, 0.3, 0.07, 0, 0.09, -0.16); [-1, 1].forEach(s => { const d = hb(0.2, 0.26, 0.06, s * 0.09, 0.05, -0.2); d.rotation.y = s * 0.5; }); }
+      else if (b === 'lob') longB(0.5, 0.42, { flip: 1 });
+      else if (b === 'blunt') longB(0.38, 0.36, { blunt: 1 });
+      else if (b === 'sidebob') longB(0.38, [0.46, 0.34]);
+      else if (b === 'hime') { longB(0.66, 0.3); [-1, 1].forEach(s => hb(0.07, 0.32, 0.06, s * 0.205, 0.06, 0.15)); }
+      else if (b === 'shag') longB(0.5, 0.4, { layer: 1 });
+      else if (b === 'butterfly') longB(0.6, 0.5, { layer: 1, flip: 1 });
+      else if (b === 'long') longB(0.66, 0.5);
+      else if (b === 'layers') longB(0.56, 0.48, { layer: 1 });
+      else if (b === 'shoulderwave') longB(0.54, 0.46, { wave: 1 });
+      else if (b === 'curlylong') longB(0.6, 0.46, { curls: 1 });
+      else if (b === 'jheri') longB(0.42, 0.36, { curls: 1 });
+      else if (b === 'dreads' || b === 'boxbraids') {
+        const n = b === 'dreads' ? 11 : 15, len = b === 'dreads' ? 0.5 : 0.62, th = b === 'dreads' ? 0.065 : 0.045;
+        for (let k = 0; k < n; k++) { const a = -1.75 + k * (3.5 / (n - 1)), xx = Math.sin(a) * 0.22, zz = -Math.cos(a) * 0.2 + 0.02; const d = hb(th, len, th, xx, 0.2 - len / 2, zz); d.rotation.z = Math.sin(a) * 0.12; d.rotation.x = -0.05;
+          if (b === 'boxbraids') hb(0.05, 0.03, 0.05, xx + Math.sin(a) * 0.035, 0.22 - len, zz, mA); }
+      }
+      // fringe
+      const fr = R.fringe;
+      if (fr === 'crop' && !cap) hb(0.38, 0.05, 0.05, 0, 0.2, 0.175);
+      else if (fr === 'blunt') hb(0.4, 0.1, 0.05, 0, 0.165, 0.18);
+      else if (fr === 'straight') hb(0.38, 0.08, 0.05, 0, 0.18, 0.175);
+      else if (fr === 'messy') [[-0.12, 0.17, 0.2], [0, 0.16, -0.15], [0.12, 0.175, 0.25]].forEach(p => { const m2 = hb(0.13, 0.09, 0.05, p[0], p[1], 0.18); m2.rotation.z = p[2]; });
+      else if (fr === 'curtain') [-1, 1].forEach(s => { const c2 = hb(0.17, 0.11, 0.05, s * 0.11, 0.165, 0.18); c2.rotation.z = s * 0.35; });
+      else if (fr === 'side' && !cap) hb(0.3, 0.07, 0.06, -0.045, 0.19, 0.17);
+      else if (fr === 'sidesweep') { const c2 = hb(0.34, 0.08, 0.05, -0.03, 0.175, 0.18); c2.rotation.z = -0.2; }
+      else if (fr === 'angular') { const c2 = hb(0.3, 0.09, 0.05, -0.05, 0.15, 0.185); c2.rotation.z = -0.45; }
+      else if (fr === 'sweepback' && !cap) { const c2 = hb(0.36, 0.07, 0.1, 0, topY + 0.02, 0.13); c2.rotation.x = -0.35; }
+      else if (fr === 'curl' && !cap) { hb(0.38, 0.05, 0.05, 0, 0.2, 0.175); hb(0.05, 0.09, 0.04, 0.04, 0.14, 0.195); }
+      // top volume
+      const v = R.vol;
+      if (v && !cap) {
+        if (v === 'tex') [[-0.12, 0.05], [0, 0.09], [0.12, 0.04], [-0.07, -0.08], [0.08, -0.1]].forEach(p => hb(0.12, 0.07, 0.12, p[0], topY + 0.02, p[1]));
+        else if (v === 'messy') [[-0.12, 0.06], [0, 0.1], [0.12, 0.04], [-0.06, -0.08], [0.08, -0.1]].forEach((p, k) => { const m2 = hb(0.11, 0.09, 0.11, p[0], topY + 0.03, p[1]); m2.rotation.y = k * 0.4; });
+        else if (v === 'fluff') [[-0.11, 0.06], [0.03, 0.1], [0.13, 0.02], [-0.08, -0.09], [0.08, -0.1]].forEach(p => hb(0.16, 0.12, 0.16, p[0], topY + 0.04, p[1]));
+        else if (v === 'slick') { hb(0.38, 0.05, 0.36, 0, topY + 0.02, -0.02); [-0.08, 0.08].forEach(xx => hb(0.012, 0.012, 0.3, xx, topY + 0.046, -0.02, mc(shade(L.hairColor, 0.7)))); }
+        else if (v === 'fauxhawk') [0.12, 0.03, -0.06].forEach((z, k) => { const p = part(pyrG, mH, 0, topY + 0.1 - k * 0.015, z, head); p.scale.set(0.38, 0.6, 0.38); p.rotation.y = Math.PI / 4; });
+        else if (v === 'pomp') { hb(0.36, 0.12, 0.2, 0, topY + 0.05, 0.09); hb(0.3, 0.06, 0.12, 0, topY + 0.12, 0.11); }
+        else if (v === 'bigpomp') { hb(0.38, 0.16, 0.26, 0, topY + 0.07, 0.11); hb(0.32, 0.1, 0.18, 0, topY + 0.16, 0.16); }
+        else if (v === 'part') { hb(0.014, 0.012, 0.3, -0.09, topY + 0.006, 0.02, mS); hb(0.24, 0.035, 0.36, 0.06, topY + 0.016, 0); }
+        else if (v === 'swoop') { const m2 = hb(0.4, 0.08, 0.34, 0.02, topY + 0.03, 0); m2.rotation.z = -0.12; }
+        else if (v === 'swoopbig') { const m2 = hb(0.42, 0.12, 0.36, 0.03, topY + 0.05, 0.02); m2.rotation.z = -0.18; hb(0.2, 0.08, 0.1, 0.1, topY + 0.02, 0.17); }
+        else if (v === 'dreadtop' || v === 'twists' || v === 'curls') { const sz = v === 'curls' ? 0.11 : 0.075, hh = v === 'twists' ? 0.12 : v === 'curls' ? 0.11 : 0.075; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) hb(sz, hh, sz, -0.13 + i * 0.13, topY + hh / 2 - 0.01, 0.12 - j * 0.13); }
+        else if (v === 'afrotop') hb(0.46, 0.26, 0.42, 0, topY + 0.12, -0.02);
+        else if (v === 'tuft') hb(0.14, 0.05, 0.08, 0, topY + 0.02, 0.14);
+        else if (v === 'flat') hb(0.4, 0.2, 0.38, 0, topY + 0.1, 0);
+        else if (v === 'bowl') { hb(0.44, 0.12, 0.42, 0, 0.25, 0); [-1, 1].forEach(s => hb(0.035, 0.12, 0.38, s * 0.215, 0.17, 0)); }
+        else if (v === 'mop') { hb(0.44, 0.14, 0.42, 0, 0.26, 0); [-1, 1].forEach(s => hb(0.04, 0.24, 0.36, s * 0.215, 0.1, -0.01)); }
+        else if (v === 'spikes') [[-0.13, 0.08, -0.4], [0, 0.1, 0], [0.13, 0.08, 0.4], [-0.08, -0.08, -0.3], [0.08, -0.08, 0.3], [0, -0.14, 0]].forEach(p => { const sp = part(pyrG, mH, p[0], topY + 0.16, p[1], head); sp.scale.set(0.26, 0.95, 0.26); sp.rotation.set(p[1] * -1.6, Math.PI / 4, p[2]); });
+        else if (v === 'braidtop') for (let k = 0; k < 5; k++) { const bb = hb(0.09, 0.05, 0.08, 0, topY + 0.02, 0.15 - k * 0.075); bb.rotation.z = k % 2 ? 0.3 : -0.3; }
+      }
+      if (R.shine && !cap) hb(0.12, 0.012, 0.2, 0.06, topY + 0.012, 0.02, hiM);
+      // ties, buns and braids
+      const t = R.tie, braid = (x0, y0, z0, n, sz, dz, mat) => { for (let k = 0; k < n; k++) { const bb = bx(sz - k * 0.004, 0.085, sz * 0.8, mat || mH, x0 + (k % 2 ? 0.012 : -0.012), y0 - k * 0.08, z0 + k * dz, head); bb.rotation.z = k % 2 ? 0.3 : -0.3; } };
+      if (t === 'topknot' && !cap) { hb(0.15, 0.13, 0.15, 0, topY + 0.09, -0.02); hb(0.16, 0.03, 0.16, 0, topY + 0.025, -0.02, mA); }
+      else if (t === 'manbun' && !cap) { hb(0.15, 0.13, 0.14, 0, 0.27, -0.22); hb(0.03, 0.15, 0.15, 0, 0.27, -0.22, mA); }
+      else if (t === 'high') { hb(0.07, 0.06, 0.06, 0, 0.25, -0.2, mA); const tl = hb(0.11, 0.38, 0.11, 0, 0.05, -0.27); tl.rotation.x = 0.35; }
+      else if (t === 'low') { hb(0.07, 0.07, 0.05, 0, 0.06, -0.215, mA); const tl = hb(0.11, 0.3, 0.11, 0, -0.12, -0.25); tl.rotation.x = 0.2; }
+      else if (t === 'twin') [-1, 1].forEach(s => { hb(0.06, 0.06, 0.06, s * 0.19, 0.22, -0.1, mA); const tl = hb(0.1, 0.42, 0.1, s * 0.27, 0.0, -0.1); tl.rotation.z = s * 0.25; });
+      else if (t === 'buns' && !cap) [-1, 1].forEach(s => hb(0.14, 0.13, 0.14, s * 0.13, topY + 0.08, -0.02));
+      else if (t === 'french') { braid(0, 0.2, -0.205, 7, 0.1, -0.008); hb(0.05, 0.04, 0.05, 0, -0.38, -0.26, mA); }
+      else if (t === 'dutch') [-1, 1].forEach(s => { braid(s * 0.15, 0.14, -0.17, 7, 0.08, -0.004); hb(0.04, 0.04, 0.04, s * 0.15, -0.44, -0.2, mA); });
+      else if (t === 'fish') { braid(0, 0.05, -0.215, 6, 0.12, -0.01, null); hb(0.05, 0.04, 0.05, 0, -0.44, -0.28, mA); }
+      else if (t === 'side') { braid(0.2, 0.0, 0.1, 6, 0.09, 0.006); hb(0.045, 0.04, 0.045, 0.2, -0.48, 0.13, mA); }
+      else if (t === 'braidpony') { hb(0.07, 0.06, 0.06, 0, 0.25, -0.2, mA); braid(0, 0.2, -0.27, 6, 0.1, -0.012); }
+    }
+    if (!hairOff && !HR) {
       if (hs === 'short' && !capOn) bx(0.3, 0.07, 0.06, mH, -0.045, 0.19, 0.17, head);
       if (hs === 'messy' && !capOn) [[-0.12, 0.31, 0.06], [0, 0.32, 0.1], [0.12, 0.3, 0.04], [-0.06, 0.31, -0.08], [0.08, 0.31, -0.1], [0.1, 0.19, 0.17], [-0.1, 0.2, 0.17]].forEach(p => bx(0.11, 0.09, 0.11, mH, p[0], p[1], p[2], head));
       if (hs === 'curly') [[-0.15, 0.27, 0.1], [0, 0.29, 0.12], [0.15, 0.27, 0.1], [-0.15, 0.29, -0.06], [0, 0.31, -0.05], [0.15, 0.29, -0.06], [-0.2, 0.15, -0.14], [0.2, 0.15, -0.14], [0, 0.14, -0.2], [-0.21, 0.2, 0.05], [0.21, 0.2, 0.05], [-0.1, 0.21, 0.18], [0.1, 0.21, 0.18]]
@@ -2418,7 +2860,7 @@ function main(){
       bx(0.08, 0.08, 0.08, mHatW, 0, 0.36, 0, hg);
     }
     // headwear
-    const hTop = (hs === 'afro' && !capOn) ? 0.4 : 0.29;
+    const hTop = (hs === 'afro' && !capOn) ? 0.4 : (HR && HR.h && !capOn && !hairOff) ? HR.h - 0.02 : 0.29;
     const mA2 = mc(shade(L.accent, 0.75)), gold = mc(0xf2c230), pink = mc(0xffb0c8);
     if (hat === 'beanie') { bx(0.42, 0.16, 0.4, mA, 0, 0.27, 0, head); bx(0.43, 0.05, 0.41, mA2, 0, 0.2, 0, head); bx(0.09, 0.09, 0.09, mA2, 0, 0.38, 0, head); }
     else if (hat === 'beret') { const br = bx(0.44, 0.07, 0.42, mA, 0.02, 0.29, 0, head); br.rotation.z = 0.12; bx(0.03, 0.04, 0.03, mA2, 0.02, 0.34, 0, head); }
@@ -2441,6 +2883,62 @@ function main(){
     else if (hat === 'party') { const pg = new THREE.Group(); pg.position.set(0.04, hTop - 0.02, 0); pg.rotation.z = -0.15; head.add(pg); const cn = part(pyrG, mA, 0, 0.17, 0, pg); cn.rotation.y = Math.PI / 4; cn.scale.set(0.7, 1, 0.7); bx(0.07, 0.07, 0.07, mc(0xffd23f), 0, 0.36, 0, pg); [0.08, 0.17].forEach((y, k) => bx(0.3 - y, 0.025, 0.3 - y, mc(k ? 0xffffff : 0xffd23f), 0, y, 0, pg)); }
     else if (hat === 'sunhat') { const mStw = mc(0xe8cf8e); bx(0.78, 0.03, 0.74, mStw, 0, 0.26, 0, head); bx(0.42, 0.14, 0.4, mStw, 0, 0.33, 0, head); bx(0.43, 0.04, 0.41, mA, 0, 0.29, 0, head); }
     else if (hat === 'unicorn') { const ug = new THREE.Group(); ug.position.set(0, hTop - 0.01, 0.1); ug.rotation.x = 0.25; head.add(ug); const hn = part(new THREE.ConeGeometry(0.05, 0.26, 8), gold, 0, 0.13, 0, ug); hn.castShadow = true; bx(0.4, 0.03, 0.05, mA, 0, 0, -0.08, ug); }
+    else if (hat !== 'none') hat2(hat);
+    function hat2(h) {
+      const mBk = mc(0x1c1c22), mW = mc(0xf6f6f2), steel = mc(0xb8bec8), hb = (w, hh, d, m, x, y, z) => bx(w, hh, d, m, x, y, z, head);
+      if (h === 'bcap' || h === 'snapback' || h === 'dadcap' || h === 'trucker') {
+        const hh = h === 'dadcap' ? 0.1 : 0.13;
+        hb(0.41, hh, 0.39, mA, 0, 0.2 + hh / 2, 0);
+        if (h === 'trucker') hb(0.415, hh - 0.01, 0.2, mW, 0, 0.2 + hh / 2, 0.1);
+        if (h === 'snapback') { hb(0.13, 0.06, 0.012, mW, 0, 0.27, 0.198); hb(0.12, 0.03, 0.012, mBk, 0, 0.23, -0.198); }
+        const br = hb(0.34, 0.025, 0.17, h === 'snapback' ? mA2 : mA, 0, 0.215, 0.26); if (h === 'dadcap') br.rotation.x = 0.25;
+        hb(0.04, 0.03, 0.04, mA, 0, 0.2 + hh + 0.012, 0);
+      }
+      else if (h === 'bucket' || h === 'boonie') {
+        const bm = h === 'boonie' ? mpat('camo', L.accent) : mA;
+        hb(0.42, 0.13, 0.4, bm, 0, 0.275, 0);
+        [[0.26, 0.4], [-0.26, -0.4]].forEach(p => { const b = hb(0.5, 0.025, 0.13, bm, 0, 0.2, p[0]); b.rotation.x = p[1]; });
+        [-1, 1].forEach(s => { const b = hb(0.13, 0.025, 0.56, bm, s * 0.27, 0.2, 0); b.rotation.z = -s * 0.4; });
+        if (h === 'boonie') [-1, 1].forEach(s => hb(0.012, 0.2, 0.012, mBk, s * 0.2, 0.1, 0.05));
+      }
+      else if (h === 'flatcap' || h === 'newsboy') {
+        if (h === 'newsboy') { hb(0.46, 0.1, 0.45, mA, 0, 0.265, 0.01); hb(0.04, 0.03, 0.04, mA2, 0, 0.33, 0.01); }
+        else { hb(0.42, 0.07, 0.42, mA, 0, 0.245, 0); const f = hb(0.4, 0.05, 0.16, mA, 0, 0.265, 0.13); f.rotation.x = 0.28; }
+        const br = hb(0.36, 0.022, 0.1, mA2, 0, 0.215, 0.22); br.rotation.x = 0.2;
+      }
+      else if (h === 'visor') { [[0, 0.19, 0.41, 0.02], [0, -0.19, 0.41, 0.02], [0.2, 0, 0.02, 0.39], [-0.2, 0, 0.02, 0.39]].forEach(p => hb(p[2], 0.05, p[3], mA, p[0], 0.2, p[1])); hb(0.34, 0.022, 0.17, mA, 0, 0.2, 0.27); }
+      else if (h === 'bandana') { hb(0.415, 0.09, 0.395, mA, 0, 0.245, 0); hb(0.415, 0.02, 0.395, mA2, 0, 0.2, 0); [-1, 1].forEach(s => { const t = hb(0.06, 0.13, 0.025, mA, s * 0.03, 0.12, -0.21); t.rotation.z = s * 0.35; }); [[-0.1, 0.27], [0.08, 0.25], [0, 0.28]].forEach(p => hb(0.022, 0.022, 0.01, mW, p[0], p[1], 0.2)); }
+      else if (h === 'durag') { hb(0.405, 0.15, 0.39, mA, 0, 0.255, 0); hb(0.41, 0.028, 0.02, mA2, 0, 0.18, 0.19); [-1, 1].forEach(s => hb(0.02, 0.2, 0.3, mA, s * 0.2, 0.15, -0.03)); const fl = hb(0.12, 0.34, 0.025, mA, 0, 0.0, -0.205); fl.rotation.x = -0.15; }
+      else if (h === 'fedora' || h === 'trilby') {
+        const tri = h === 'trilby', b = hb(tri ? 0.5 : 0.6, 0.025, tri ? 0.48 : 0.56, mA, 0, 0.245, 0); if (tri) b.rotation.x = 0.12;
+        hb(0.39, tri ? 0.13 : 0.16, 0.37, mA, 0, tri ? 0.32 : 0.335, 0); hb(0.395, 0.04, 0.375, mBk, 0, 0.275, 0); hb(0.18, 0.025, 0.28, mA2, 0, tri ? 0.39 : 0.418, -0.01);
+      }
+      else if (h === 'strawhat') { const mStw = mc(0xe8cf8e); hb(0.66, 0.03, 0.62, mStw, 0, 0.255, 0); hb(0.4, 0.14, 0.38, mStw, 0, 0.33, 0); hb(0.405, 0.045, 0.385, mc(0xd6262f), 0, 0.29, 0); }
+      else if (h === 'sombrero') { hb(1.0, 0.03, 0.96, mA, 0, 0.25, 0); [[0, 0.48, 1.0, 0.04], [0, -0.48, 1.0, 0.04], [0.5, 0, 0.04, 0.96], [-0.5, 0, 0.04, 0.96]].forEach(p => hb(p[2], 0.07, p[3], mA2, p[0], 0.28, p[1])); hb(0.34, 0.26, 0.32, mA, 0, 0.39, 0); hb(0.35, 0.04, 0.33, gold, 0, 0.3, 0); [-0.3, 0, 0.3].forEach(xx => hb(0.06, 0.02, 0.02, gold, xx, 0.27, 0.47)); }
+      else if (h === 'chef') { hb(0.42, 0.1, 0.4, mW, 0, 0.26, 0); hb(0.5, 0.24, 0.46, mW, 0, 0.42, 0); [-0.12, 0.12].forEach(xx => hb(0.16, 0.12, 0.4, mW, xx, 0.56, 0)); }
+      else if (h === 'santahat') { hb(0.42, 0.08, 0.4, mHatW, 0, 0.25, 0); const hg = new THREE.Group(); hg.position.set(0, 0.29, -0.01); hg.rotation.set(-0.25, 0, -0.1); head.add(hg); const cn = part(pyrG, mHatR, 0, 0.18, 0, hg); cn.rotation.y = Math.PI / 4; bx(0.08, 0.08, 0.08, mHatW, 0, 0.36, 0, hg); }
+      else if (h === 'conhelmet') { const mO = mc(0xf28c28); hb(0.43, 0.15, 0.41, mO, 0, 0.28, 0); hb(0.5, 0.025, 0.48, mO, 0, 0.21, 0); hb(0.06, 0.04, 0.42, mO, 0, 0.37, 0); hb(0.435, 0.03, 0.415, mc(0xe8eef2), 0, 0.3, 0); }
+      else if (h === 'motohelmet') { hb(0.45, 0.45, 0.43, mA, 0, 0.03, -0.005); const vm = M(0x1c2533, { roughness: 0.15, metalness: 0.6 }); xm.push(vm); hb(0.36, 0.15, 0.02, vm, 0, 0.05, 0.218); hb(0.3, 0.08, 0.03, mA2, 0, -0.13, 0.21); hb(0.455, 0.04, 0.435, mW, 0, 0.17, -0.005); }
+      else if (h === 'bikehelmet') { hb(0.42, 0.12, 0.42, mA, 0, 0.27, -0.01); [-0.1, 0, 0.1].forEach(xx => hb(0.04, 0.125, 0.3, mBk, xx, 0.275, -0.02)); hb(0.3, 0.02, 0.08, mA, 0, 0.23, 0.22); [-1, 1].forEach(s => hb(0.012, 0.22, 0.012, mBk, s * 0.2, 0.08, 0.06)); }
+      else if (h === 'tachelmet') { const mOl = mc(0x5b6b3a); hb(0.44, 0.17, 0.42, mOl, 0, 0.27, 0); hb(0.46, 0.03, 0.44, mc(0x4a5730), 0, 0.2, 0); hb(0.08, 0.06, 0.05, mBk, 0, 0.3, 0.22); [-1, 1].forEach(s => { hb(0.02, 0.06, 0.12, mBk, s * 0.225, 0.27, 0); hb(0.012, 0.22, 0.012, mBk, s * 0.2, 0.08, 0.06); }); }
+      else if (h === 'milberet') { const br = hb(0.44, 0.07, 0.42, mA, -0.02, 0.29, 0); br.rotation.z = -0.14; hb(0.42, 0.03, 0.4, mBk, 0, 0.225, 0); hb(0.05, 0.06, 0.02, gold, 0.1, 0.27, 0.205); }
+      else if (h === 'policecap') { const mNv = mc(0x24305e); hb(0.4, 0.1, 0.38, mNv, 0, 0.25, 0); hb(0.46, 0.06, 0.44, mNv, 0, 0.33, 0.01); hb(0.405, 0.04, 0.385, mBk, 0, 0.225, 0); const vz = hb(0.34, 0.022, 0.14, mBk, 0, 0.215, 0.24); vz.rotation.x = 0.25; hb(0.06, 0.06, 0.02, gold, 0, 0.29, 0.2); }
+      else if (h === 'firehelmet') { const mR = mc(0xd6262f); hb(0.44, 0.17, 0.42, mR, 0, 0.28, 0); hb(0.06, 0.04, 0.44, mR, 0, 0.375, 0); const bk2 = hb(0.48, 0.025, 0.22, mR, 0, 0.2, -0.26); bk2.rotation.x = -0.3; hb(0.4, 0.025, 0.08, mR, 0, 0.205, 0.24); hb(0.12, 0.13, 0.02, gold, 0, 0.29, 0.215); }
+      else if (h === 'wizard' || h === 'witch') {
+        const wm = h === 'witch' ? mBk : mA; hb(h === 'witch' ? 0.66 : 0.6, 0.025, h === 'witch' ? 0.62 : 0.56, wm, 0, 0.24, 0);
+        const cg = new THREE.Group(); cg.position.set(0, 0.25, 0); cg.rotation.set(-0.15, 0, h === 'witch' ? -0.25 : 0.1); head.add(cg);
+        const cn = part(pyrG, wm, 0, 0.3, 0, cg); cn.rotation.y = Math.PI / 4; cn.scale.set(1.25, 1.7, 1.2);
+        if (h === 'witch') { hb(0.4, 0.05, 0.38, mA, 0, 0.27, 0); hb(0.06, 0.06, 0.02, gold, 0, 0.27, 0.2); }
+        else [[0.06, 0.4, 0.09], [-0.03, 0.53, 0.04], [0.03, 0.27, 0.14]].forEach(p => bx(0.04, 0.04, 0.02, gold, p[0], p[1], p[2], cg));
+      }
+      else if (h === 'pirate') { hb(0.46, 0.12, 0.42, mBk, 0, 0.27, 0); [[-0.13, 0.17, 0.6], [0.13, 0.17, -0.6]].forEach(p => { const b = hb(0.34, 0.15, 0.03, mBk, p[0], 0.32, p[1]); b.rotation.y = p[2]; }); hb(0.56, 0.16, 0.03, mBk, 0, 0.32, -0.22); hb(0.47, 0.02, 0.43, gold, 0, 0.215, 0); hb(0.08, 0.08, 0.012, mW, 0, 0.33, 0.255); }
+      else if (h === 'viking') { hb(0.43, 0.15, 0.41, steel, 0, 0.27, 0); hb(0.44, 0.035, 0.42, mc(0x8a5a3c), 0, 0.21, 0); hb(0.04, 0.16, 0.03, steel, 0, 0.16, 0.2); [-1, 1].forEach(s => { const hg = new THREE.Group(); hg.position.set(s * 0.21, 0.29, 0); hg.rotation.z = -s * 0.9; head.add(hg); part(HCONE, mc(0xf2e6c8), 0, 0.12, 0, hg); }); }
+      else if (h === 'kabuto') { const mK = mc(0x2b2d33); hb(0.44, 0.17, 0.42, mK, 0, 0.27, 0); [-1, 1].forEach(s => { const f = hb(0.04, 0.16, 0.24, mK, s * 0.24, 0.13, -0.02); f.rotation.z = s * 0.35; const fk = hb(0.1, 0.1, 0.03, mA, s * 0.2, 0.25, 0.2); fk.rotation.y = s * 0.6; const cr = hb(0.035, 0.24, 0.02, gold, s * 0.08, 0.44, 0.2); cr.rotation.z = s * 0.5; }); const nk = hb(0.46, 0.15, 0.3, mK, 0, 0.12, -0.13); nk.rotation.x = -0.35; hb(0.06, 0.06, 0.03, gold, 0, 0.33, 0.215); }
+      else if (h === 'ninjahood') { hb(0.405, 0.14, 0.39, mBk, 0, 0.165, 0); hb(0.405, 0.18, 0.43, mBk, 0, -0.085, 0); hb(0.405, 0.42, 0.06, mBk, 0, 0.02, -0.17); [-1, 1].forEach(s => hb(0.05, 0.1, 0.3, mBk, s * 0.205, 0.045, -0.04)); hb(0.41, 0.035, 0.395, mA, 0, 0.13, 0); [-1, 1].forEach(s => { const t = hb(0.05, 0.16, 0.02, mA, s * 0.04, 0.06, -0.21); t.rotation.z = s * 0.4; }); }
+      else if (h === 'knighthelm') { hb(0.44, 0.47, 0.43, steel, 0, 0.03, 0); hb(0.32, 0.035, 0.02, mBk, 0, 0.06, 0.22); hb(0.03, 0.14, 0.02, mBk, 0, -0.04, 0.22); [-0.07, 0.07].forEach(xx => [-0.06, -0.11].forEach(y => hb(0.02, 0.02, 0.012, mBk, xx, y, 0.221))); hb(0.06, 0.14, 0.26, mA, 0, 0.32, -0.04); }
+      else if (h === 'halo') { const hm = new THREE.MeshBasicMaterial({ color: 0xffe066 }); xm.push(hm); const hr = part(HTOR, hm, 0, hTop + 0.2, 0, head); hr.rotation.x = Math.PI / 2; hr.castShadow = false; }
+      else if (h === 'devil') { const mDv = mc(0xd6262f); [-1, 1].forEach(s => { const hn = part(HCONE, mDv, s * 0.12, hTop + 0.06, 0.05, head); hn.scale.set(0.9, 0.55, 0.9); hn.rotation.z = -s * 0.3; }); }
+    }
     if (L.headphones && !helm) {
       const top2 = capOn ? 0.35 : (hs === 'buzz' || hs === 'mohawk' ? 0.255 : 0.3);
       bx(0.44, 0.03, 0.06, mA, 0, top2, 0, head);
@@ -2461,8 +2959,8 @@ function main(){
       ol.userData.outline = true; ol.castShadow = false; ol.visible = habbo; ol.raycast = () => {};
       m.add(ol); outlines.push(ol);
     });
-    const tall = L.santa || TALL_HAT[hat] || (hs === 'afro' && !capOn);
-    return { outlines: outlines, root: root, body: body, legs: legs, knees: knees, arms: arms, elbows: elbows, hands: hands, head: head, cup: cup, eyes: eyes, smile: smile, cape: cape, wchair: wc ? wc.g : null, wcWheels: wc ? wc.wheels : [], bubY: hat === 'tophat' || hat === 'bunny' ? 2.45 : tall ? 2.3 : BUB_Y, mats: [mS, mH, mT, mT2, mP, mA, mN].concat(xm) };
+    const tall = L.santa || TALL_HAT[hat] || (hs === 'afro' && !capOn) || (HR && HR.tall && !capOn && !hairOff);
+    return { outlines: outlines, root: root, body: body, legs: legs, knees: knees, arms: arms, elbows: elbows, hands: hands, head: head, cup: cup, eyes: eyes, smile: smile, cape: cape, wchair: wc ? wc.g : null, wcWheels: wc ? wc.wheels : [], bubY: VERY_TALL[hat] || (HR && HR.h > 0.5 && !capOn && !hairOff) ? 2.45 : tall ? 2.3 : BUB_Y, mats: [mS, mH, mT, mT2, mP, mA, mN].concat(xm) };
   }
   function rebuildLook(w) {
     const old = w.v, set = new Set();
@@ -4061,14 +4559,9 @@ function main(){
       '<label class="lbl" for="suName">Your name</label><input id="suName" maxlength="20" autocomplete="off" placeholder="e.g. Alex" value="' + esc(nm) + '">' +
       '<label class="lbl" for="suRole">Role <span class="opt">(optional)</span></label><input id="suRole" maxlength="30" autocomplete="off" placeholder="e.g. Team lead" value="' + esc(me.role === 'Team member' ? '' : (me.role || '')) + '">' +
       '<div class="suh">Your character</div>' +
+      '<button data-su="ward" class="su-ward on">👗 Open the wardrobe</button>' +
+      '<p class="sub" style="margin:0 0 10px">' + HAIRS.length + ' haircuts, ' + TOPS.length + ' tops, ' + BOTTOMS.length + ' bottoms, ' + HATS.length + ' headwear and ' + (SUITS.length - 1) + ' costumes, with a live preview.<br>Wearing: ' + wdWearing() + '</p>' +
       '<div class="lbl">Skin tone</div>' + sw('skin', SKINS) +
-      '<div class="lbl">Hair</div>' + op('hair', HAIRS) + sw('hairColor', HAIRC) +
-      '<div class="lbl">Outfit</div>' + op('top', TOPS) + sw('topColor', TOPC) +
-      '<div class="lbl">Bottoms</div>' + op('bottom', BOTTOMS) + sw('pants', PANTSC) +
-      '<div class="lbl">Headwear</div>' + op('hat', HATS) +
-      '<div class="lbl">🦸 Hero costumes</div>' + op('suit', SUITS) + (SUIT[L.suit] ? '<p class="wnote">Costume on. It covers your outfit. Pick “No costume” to go back.</p>' : '') +
-      '<div class="lbl">Extras</div><div class="lopts">' + EXTRAS.map(o => '<button data-su="lkt" data-f="' + o[0] + '" class="' + (L[o[0]] ? 'on' : '') + '" aria-pressed="' + !!L[o[0]] + '">' + o[1] + '</button>').join('') + '</div>' +
-      ((L.cap || L.headphones || ['ponytail', 'pigtails', 'braid'].indexOf(L.hair) > -1 || (L.hat && L.hat !== 'none')) ? '<div class="lbl">Headwear, headphones and hair tie color</div>' + sw('accent', ACC) : '') +
       '<div class="sufoot"><button data-su="rand">🎲 Surprise me</button>' + (setupReturn ? '<button data-su="cancel">Cancel</button>' : '') + '<button data-su="go" class="go" id="suGo"' + (nm ? '' : ' disabled') + '>' + (setupReturn ? 'Save' : 'Enter the office') + '</button></div>' +
       '<p class="suerr" id="suErr" hidden>Type your name to continue.</p>';
   }
@@ -4134,6 +4627,7 @@ function main(){
       rebuildLook(me); renderSetup(); react(me, rnd(['wave', 'party', 'flex', 'thumbs']), true);
     }
     else if (a === 'go') finishSetup();
+    else if (a === 'ward') openWardrobe();
     else if (a === 'cancel') cancelSetup();
   });
 
@@ -5030,6 +5524,7 @@ function main(){
       else if (m.k === 'shoot') { if (m.next) matchShot(w, !!m.made, +m.pts === 3 ? 3 : 2, String(m.next)); else startShot(w, !!m.made, +m.pts === 3 ? 3 : 2); }
       else if (m.k === 'bbpass') { const to = byPid(String(m.to || '')); if (to) matchPass(w, to); }
       else if (m.k === 'bbsteal') { if (!MATCH.fl) { MATCH.holder = pidOf(w); MATCH.lastEv = elapsed; } }
+      else if (m.k === 'ko') ringKoNet(m, w);
       else if (m.k === 'hit' && MELEE[m.type]) { const tgt = m.to === NET.id ? me : m.to === 'dummy' ? DUMMY : peerW(m.to); if (tgt && tgt !== w) doMelee(w, tgt, m.type); }
       else if (m.k === 'carry' && ['pick', 'throw', 'drop', 'free'].indexOf(m.act) > -1) applyNetCarry(m, w);
       else if (m.k === 'bucket' && ['hold', 'place', 'take', 'pickup'].indexOf(m.act) > -1) applyNetBucket(m, w);
@@ -5351,7 +5846,7 @@ function main(){
     meBar.innerHTML = h;
   }
   meBar.addEventListener('click', e => {
-    if (e.target.closest('[data-look]')) { openLook('me'); return; }
+    if (e.target.closest('[data-look]')) { openWardrobe(); return; }
     const b = e.target.closest('[data-st]'); if (!b) return;
     if (b.dataset.st === 'custom') { openCard('me', true); return; }
     setStatus(me, b.dataset.st, null, { say: rnd(STATUS_LINES[b.dataset.st] || ['Status updated']) });
@@ -5648,7 +6143,7 @@ function main(){
       '<div class="lbl">Headwear</div>' + op('hat', HATS) +
       '<div class="lbl">🦸 Hero costumes</div>' + op('suit', SUITS) + (SUIT[L.suit] ? '<p class="wnote">Costume on. It covers your outfit. Pick “No costume” to go back.</p>' : '') +
       '<div class="lbl">Extras</div><div class="lopts">' + EXTRAS.map(o => '<button data-act="lkt" data-f="' + o[0] + '" class="' + (L[o[0]] ? 'on' : '') + '" aria-pressed="' + !!L[o[0]] + '">' + o[1] + '</button>').join('') + '</div>' +
-      ((L.cap || L.headphones || ['ponytail', 'pigtails', 'braid'].indexOf(L.hair) > -1 || (L.hat && L.hat !== 'none')) ? '<div class="lbl">Headwear, headphones and hair tie color</div>' + sw('accent', ACC) : '') +
+      ((L.cap || L.headphones || ['ponytail', 'pigtails', 'braid'].indexOf(L.hair) > -1 || (HAIR_R[L.hair] && (HAIR_R[L.hair].tie || HAIR_R[L.hair].back === 'boxbraids')) || (L.hat && L.hat !== 'none')) ? '<div class="lbl">Headwear, headphones and hair tie color</div>' + sw('accent', ACC) : '') +
       '<div class="acts"><button data-act="lkrand">🎲 Surprise me</button><button data-act="lkdone" class="on">Done</button></div>' +
       (w === me ? '<button class="linkb" data-act="lkreset">Set up my profile again</button>' : '');
   }
@@ -5824,6 +6319,7 @@ function main(){
   }
   window.addEventListener('keydown', e => {
     const tg = e.target && e.target.tagName; if (tg === 'INPUT' || tg === 'SELECT') return;
+    if (WD.open) { if (e.key === 'Escape') closeWardrobe(); return; }
     if (setupOpen) return;
     if (gameKey(e)) return;
     const k = e.key.toLowerCase(); keys[k] = true;
@@ -6098,7 +6594,7 @@ function main(){
     bbPose(w); applySwim(w, dt); applyLie(w); gymPose(w, dt); applyAct(w); applyChair(w, dt); applySlide(w); applyHfx(w, dt);
     carryPose(w);
     if (!w.act && w._acted !== false) { if (w._acted) { V.body.rotation.y = 0; if (!w._lie) V.body.rotation.x = 0; V.arms[0].rotation.z = 0; V.arms[1].rotation.z = 0; } w._acted = false; } else if (w.act) w._acted = true;
-    if (w.flying) flightPose(w); if (w.drop) dropPose(w); flatPose(w);
+    ringPose(w); if (w.flying) flightPose(w); if (w.drop) dropPose(w); flatPose(w);
     if (V.cape) V.cape.rotation.x = w.mode === 'walk' ? 0.38 + Math.sin(elapsed * 9 + w.i) * 0.08 : w.mode === 'sit' ? 0.15 : 0.06 + Math.sin(elapsed * 1.5 + w.i) * 0.03;
   }
   function bubbleHTML(w) {
@@ -7555,7 +8051,7 @@ function main(){
       if (MV.on) exitWatch();
       toast('🤲 ' + from.name + ' picked you up! Press 🤸 Wiggle free to escape.');
     } else if (!tgt.remote) { tgt.path = []; tgt.pending = null; }
-    post(null, '🤲 ' + nmOf(from) + ' picked up ' + objOf(tgt) + '!');
+    if (!(IN_RING(from.x, from.z) && IN_RING(tgt.x, tgt.z))) post(null, '🤲 ' + nmOf(from) + ' picked up ' + objOf(tgt) + '!');
     floatFx(tgt, rnd(['Hey!', 'Put me down!', 'Whoa!', '😱']));
     renderCarryBar();
   }
@@ -7580,7 +8076,8 @@ function main(){
     if (thrown) {
       const R = from ? from.v.root.position : tgt.v.root.position, dist = Math.hypot(to[0] - R.x, to[1] - R.z);
       CARRY.flights.push({ w: tgt, from: [R.x, R.z], to: to, yaw: Math.atan2(to[0] - R.x, to[1] - R.z), t0: elapsed, dur: at ? Math.max(0.6, Math.min(1.4, 0.45 + dist * 0.09)) : 0.95, at: at || null, by: from }); tgt.flying = true;
-      if (!at) post(null, '🚀 ' + nmOf(from) + ' threw ' + objOf(tgt) + ' across the room!');
+      if (!at && !(IN_RING(R.x, R.z) && IN_RING(to[0], to[1]))) post(null, '🚀 ' + nmOf(from) + ' threw ' + objOf(tgt) + ' across the room!');
+      else if (!at) floatFx(from, rnd(['BODY SLAM!', 'SUPLEX!', 'OUTTA HERE!']));
       else floatFx(at, rnd(['Wait—', 'Uh oh…', 'NO NO NO', '😨']));
       floatFx(tgt, rnd(['AAAAH!', 'Wheee!', 'Noooo!', '😵']));
     } else place(tgt, to, false);
@@ -7590,7 +8087,8 @@ function main(){
     w.v.root.position.y = 0; w.v.body.rotation.set(0, 0, 0); w.v.body.position.set(0, 0, 0);
     if (w === me) {
       me.x = to[0]; me.z = to[1];
-      if (down && !WATER_IN(me.x, me.z)) { knockDown(5); toast('💥 You landed flat on the floor! Getting up in 5 s…'); }
+      if (down && !WATER_IN(me.x, me.z) && IN_RING(me.x, me.z) && RG.me) { knockDown(3); toast('💥 Body slam! Getting up in 3 s…'); RG.me.hp -= RDMG.throw; if (RG.me.hp <= 0) { RG.me.hp = 100; knockDown(6); post(null, '🥊 K.O.! You got slammed out!'); if (NET.on) netSend({ t: 'ev', k: 'ko', to: '' }); } renderRingBar(); }
+      else if (down && !WATER_IN(me.x, me.z)) { knockDown(5); toast('💥 You landed flat on the floor! Getting up in 5 s…'); }
       else { const s = { area: 'free', pos: to.slice(), anchor: to.slice(), via: [], face: me.yaw, sit: 0, by: null }; reserve(me, s); me.path = []; me.pending = null; me.at = s; settle(me); }
     } else if (!w.remote) {
       w.x = to[0]; w.z = to[1]; w.path = [];
@@ -8166,6 +8664,271 @@ function main(){
     BK.list.forEach(o => { const t = elapsed * 2 + o.x; o.g.userData.bottles.forEach((b, k) => { b.position.y = 0.2 + Math.sin(t + k) * 0.004; }); });
   }
 
+
+  // ================= 🥊 boxing ring: auto-fights between everyone inside =================
+  const IN_RING = (x, z) => x > RINGB.x0 + 0.15 && x < RINGB.x1 - 0.15 && z > RINGB.z0 + 0.15 && z < RINGB.z1 - 0.15;
+  const RDMG = { slap: 8, punch: 12, kick: 15, flykick: 22, throw: 25 };
+  const RG = { me: null };
+  const ringBar = document.createElement('div'); ringBar.id = 'ringBar'; ringBar.className = 'float carrybar'; ringBar.hidden = true; document.body.appendChild(ringBar);
+  function ringFoes() { return workers.filter(w => w !== me && !w.isDummy && IN_RING(w.x, w.z) && !w.flying && !w.carriedBy); }
+  function renderRingBar() {
+    const R = RG.me; if (!R) { ringBar.hidden = true; return; }
+    const foes = ringFoes(), hp = Math.max(0, R.hp), col = hp > 60 ? '#3fae4a' : hp > 30 ? '#f5b400' : '#e8342e';
+    ringBar.hidden = false;
+    ringBar.innerHTML = '<span>🥊 <b>' + (foes.length ? 'FIGHT!' : 'In the ring') + '</b></span><span class="rhp"><i style="width:' + hp + '%;background:' + col + '"></i></span><span>❤️ ' + hp + '</span>' +
+      '<span>👊 ' + R.hits + ' hits · 🏆 ' + R.kos + ' K.O.</span><span>' + (foes.length ? 'vs ' + esc(foes.slice(0, 3).map(w => w.name).join(', ')) : 'Waiting for an opponent…') + '</span><button data-rg="leave">🚪 Leave ring</button>';
+  }
+  ringBar.addEventListener('click', e => { if (e.target.closest('[data-rg]')) leaveRing(); });
+  function leaveRing() {
+    const p = NAVG.snap(RINGB.cx, RINGB.z1 + 1.1) || [RINGB.cx, RINGB.z1 + 1.1];
+    sendMeTo({ area: 'free', pos: p, anchor: p.slice(), via: [[RINGB.cx, RINGB.z1 - 0.6]], face: null, sit: 0, by: null });
+  }
+  function ringPick(R, foes) {
+    if (R.tgt && foes.indexOf(R.tgt) > -1 && Math.random() < 0.8) return R.tgt;
+    return foes.slice().sort((a, b) => Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z))[0];
+  }
+  function ringMove(R, tgt) {
+    const r = Math.random(), downTgt = (tgt.hit > 1.6) || (tgt.flatUntil > elapsed) || (tgt === me);
+    if (r < 0.16 && !downTgt && !canCarry(tgt) && Math.hypot(tgt.x - me.x, tgt.z - me.z) < 1.4) return 'throw';
+    if (r < 0.34) return 'flykick';
+    if (r < 0.62) return 'punch';
+    if (r < 0.84) return 'kick';
+    return 'slap';
+  }
+  function ringThrow(R, tgt) {
+    startCarry(tgt, true);
+    if (me.carrying !== tgt) return false;
+    R.busy = elapsed + 1.6;
+    setTimeout(() => {
+      if (me.carrying !== tgt) return;
+      const a = me.yaw + (Math.random() - 0.5) * 1.2, d = 1.6 + Math.random() * 1.2;
+      const cl = (v, a0, a1) => Math.max(a0 + 0.5, Math.min(a1 - 0.5, v));
+      const to = NAVG.snap(cl(me.x + Math.sin(a) * d, RINGB.x0, RINGB.x1), cl(me.z + Math.cos(a) * d, RINGB.z0, RINGB.z1)) || [me.x, me.z];
+      if (NET.on && tgt.remote) netSend({ t: 'ev', k: 'carry', act: 'throw', to: tgt.netId, mv: r2(to[0]) + ',' + r2(to[1]) });
+      release(me, tgt, to, true);
+      R.hits++; renderRingBar();
+    }, 850);
+    return true;
+  }
+  function ringTick(dt) {
+    const inside = IN_RING(me.x, me.z) && !me.carriedBy && !me.flying && !setupOpen;
+    if (!inside) { if (RG.me && !me.carriedBy && !me.flying && !(me.path.length && IN_RING(me.path[me.path.length - 1][0], me.path[me.path.length - 1][1]))) { RG.me = null; renderRingBar(); toast('🥊 You left the ring.'); } return; }
+    if (!RG.me) { RG.me = { hp: 100, hits: 0, kos: 0, next: elapsed + 1.2, tgt: null, busy: 0, waitT: 0 }; toast('🥊 You’re in the ring! When someone else steps in, you fight automatically. Walk out to stop.'); floatFx(me, '🥊'); renderRingBar(); }
+    const R = RG.me;
+    if (Math.floor(elapsed * 2) !== Math.floor((elapsed - dt) * 2)) renderRingBar();
+    if (me.downUntil > Date.now() || me.carrying || elapsed < R.busy || me.act || me.drop) return;
+    const foes = ringFoes();
+    if (!foes.length) return;
+    if (me.mode === 'sit') { const p = [me.x, me.z]; sendMeTo({ area: 'free', pos: p, anchor: p.slice(), via: [], face: null, sit: 0, by: null }); return; }
+    if (elapsed < R.next) return;
+    const tgt = ringPick(R, foes); if (!tgt) return; R.tgt = tgt;
+    const d = Math.hypot(tgt.x - me.x, tgt.z - me.z);
+    if (d > 1.05) {
+      if (me.path.length && elapsed - (R.walkT || 0) < 0.6) return;
+      const a = Math.atan2(me.x - tgt.x, me.z - tgt.z) + (Math.random() - 0.5) * 0.6;
+      const cl = (v, a0, a1) => Math.max(a0 + 0.45, Math.min(a1 - 0.45, v));
+      const p = NAVG.snap(cl(tgt.x + Math.sin(a) * 0.8, RINGB.x0, RINGB.x1), cl(tgt.z + Math.cos(a) * 0.8, RINGB.z0, RINGB.z1));
+      if (p) { sendMeTo({ area: 'free', pos: p, anchor: p.slice(), via: [], face: null, sit: 0, by: null }); marker.visible = false; R.walkT = elapsed; }
+      R.next = elapsed + 0.25; return;
+    }
+    if (me.path.length) return;
+    const mv = ringMove(R, tgt);
+    if (mv === 'throw') { if (!ringThrow(R, tgt)) doMelee(me, tgt, 'punch'); }
+    else { doMelee(me, tgt, mv); R.hits++; }
+    R.next = elapsed + (mv === 'flykick' ? 1.5 : 0.95) + Math.random() * 0.9;
+    renderRingBar();
+  }
+  // when I get hit inside the ring: lose health instead of the usual 3-slaps rule
+  function ringHurt(kind, from) {
+    const R = RG.me; if (!R || !IN_RING(me.x, me.z)) return false;
+    R.hp -= RDMG[kind] || 10; floatFx(me, '-' + (RDMG[kind] || 10));
+    if (R.hp <= 0) {
+      R.hp = 100; R.busy = elapsed + 7;
+      setTimeout(() => { knockDown(6); toast('💫 K.O.! You got knocked out. Back up in 6 seconds…'); }, 250);
+      post(null, '🥊 K.O.! ' + (from ? nmOf(from) : 'Someone') + ' knocked you out!');
+      if (NET.on) netSend({ t: 'ev', k: 'ko', to: from && from.remote ? from.netId : '' });
+    } else if (kind === 'flykick') setTimeout(() => { knockDown(2); }, 200);
+    renderRingBar();
+    return true;
+  }
+  function ringKoNet(m, w) {
+    if (!w) return;
+    post(null, '🥊 K.O.! ' + w.name + ' got knocked out' + (m.to && m.to === NET.id ? ' by you! 🏆' : '!'));
+    if (m.to && m.to === NET.id && RG.me) { RG.me.kos++; react(me, 'flex', true); renderRingBar(); }
+    w.flatUntil = elapsed + 5.5;
+  }
+  // boxer's guard for anyone standing in the ring
+  function ringPose(w) {
+    if (!IN_RING(w.x, w.z) || w.act || w.emote || w.mode === 'sit' || w.carrying || w.carriedBy || w.flying || w.drop || (w.flatUntil > elapsed) || w.hit > 0) return;
+    const V = w.v, t = elapsed * 7 + w.i, walk = w.mode === 'walk';
+    V.arms[0].rotation.set(-1.25 + Math.sin(t) * 0.06, 0, 0.35); V.arms[1].rotation.set(-1.25 - Math.sin(t) * 0.06, 0, -0.35);
+    V.elbows[0].rotation.x = -1.9; V.elbows[1].rotation.x = -1.9;
+    if (!walk) { V.body.position.y = Math.abs(Math.sin(t * 0.6)) * 0.04; V.knees[0].rotation.x = 0.25; V.knees[1].rotation.x = 0.25; }
+    V.head.rotation.x = 0.12;
+  }
+
+
+  // ================= 👗 full-screen wardrobe with a live 3D preview =================
+  const WD = { open: false, tab: 'hair', grp: 'all', q: '', start: null, pr: null, ps: null, pc: null, pv: null, yaw: 0.45, spin: true, drag: null, th: {}, thQ: [], tr: null, ts: null, tc: null, raf: 0, pose: 0 };
+  const WD_TABS = [['hair', '💇 Hair', HAIR_GROUPS, 'hairColor', HAIRC, 'Hair color'], ['top', '👕 Tops', TOP_GROUPS, 'topColor', TOPC, 'Top color'], ['bottom', '👖 Bottoms', BOTTOM_GROUPS, 'pants', PANTSC, 'Bottoms color'],
+    ['hat', '🧢 Headwear', HAT_GROUPS, 'accent', ACC, 'Headwear color'], ['suit', '🦸 Costumes', [['Hero costumes', '🦸', SUITS]], null, null, ''], ['extra', '✨ Extras & skin', null, null, null, '']];
+  const wardEl = document.createElement('div'); wardEl.id = 'ward'; wardEl.className = 'ward'; wardEl.hidden = true; document.body.appendChild(wardEl);
+  function wdLights(sc) { sc.add(new THREE.HemisphereLight(0xffffff, 0xb9ab95, habbo ? 0.75 : 0.85)); const d = new THREE.DirectionalLight(0xfff1dc, habbo ? 0.75 : 1.0); d.position.set(2.5, 4, 3.5); sc.add(d); const f = new THREE.DirectionalLight(0xc9d6ff, 0.35); f.position.set(-3, 2, -2); sc.add(f); }
+  function wdRenderer(cv, w, h, keep) {
+    const r = new THREE.WebGLRenderer({ canvas: cv, antialias: !habbo, alpha: true, preserveDrawingBuffer: !!keep });
+    r.outputEncoding = THREE.sRGBEncoding; r.toneMapping = habbo ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.1; r.setClearColor(0x000000, 0);
+    r.setPixelRatio(1); r.setSize(w, h, false); return r;
+  }
+  function wdFree(v) { if (!v) return; if (v.root.parent) v.root.parent.remove(v.root); (v.mats || []).forEach(m => { m.dispose(); const t = toonCache.get(m); if (t) { t.dispose(); toonCache.delete(m); } }); }
+  function wdMake(L, sc) { const v = makePerson(L); scene.remove(v.root); sc.add(v.root); applyStyleTo(v.root); v.outlines.forEach(o => o.visible = habbo); return v; }
+  // preview
+  function wdPreview() {
+    const cv = $('wdCv'); if (!cv) return;
+    const w = Math.max(160, cv.clientWidth), h = Math.max(200, cv.clientHeight), k = habbo ? 0.5 : Math.min(window.devicePixelRatio || 1, 2);
+    if (!WD.pr || WD.pr.domElement !== cv) { if (WD.pr) WD.pr.dispose(); WD.pr = wdRenderer(cv, 10, 10); WD.ps = new THREE.Scene(); wdLights(WD.ps); WD.pc = new THREE.PerspectiveCamera(24, 1, 0.1, 50);
+      const flo = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.8, 0.06, 28), M(0xffffff, { roughness: 0.9 })); flo.position.y = -0.03; flo.receiveShadow = false; WD.ps.add(flo); applyStyleTo(flo); }
+    WD.pr.setSize(Math.round(w * k), Math.round(h * k), false);
+    WD.pc.aspect = w / h; const fit = Math.max(1.25, 1.05 / WD.pc.aspect * 1.25); WD.pc.position.set(0, 1.15, 5.4 * fit); WD.pc.lookAt(0, 1.0, 0); WD.pc.updateProjectionMatrix();
+    wdFree(WD.pv); WD.pv = wdMake(me.look, WD.ps);
+  }
+  function wdFrame() {
+    if (!WD.open) { WD.raf = 0; return; }
+    WD.raf = requestAnimationFrame(wdFrame);
+    if (!WD.pv || !WD.pr) return;
+    const t = performance.now() / 1000, V = WD.pv;
+    if (WD.spin && !WD.drag) WD.yaw += 0.006;
+    V.root.rotation.y = WD.yaw; V.root.position.set(0, 0, 0);
+    const br = Math.sin(t * 2.2);
+    V.body.position.y = WD.pose ? Math.abs(Math.sin(t * 5)) * 0.08 : br * 0.008;
+    V.arms[0].rotation.set(WD.pose ? -0.3 + Math.sin(t * 5) * 0.9 : 0, 0, WD.pose ? -2.4 : -0.08 - br * 0.03); V.arms[1].rotation.set(WD.pose ? -0.3 - Math.sin(t * 5) * 0.9 : 0, 0, WD.pose ? 2.4 : 0.08 + br * 0.03);
+    V.legs[0].rotation.x = WD.pose ? Math.sin(t * 5) * 0.3 : 0; V.legs[1].rotation.x = WD.pose ? -Math.sin(t * 5) * 0.3 : 0;
+    V.head.rotation.y = Math.sin(t * 0.7) * 0.12; V.head.rotation.x = 0;
+    const bl = (t % 3.4) < 0.12; V.eyes.forEach(e => e.scale.y = bl ? 0.15 : 1);
+    if (V.cape) V.cape.rotation.x = 0.12 + Math.sin(t * 2) * 0.05;
+    WD.pr.render(WD.ps, WD.pc);
+    for (let i = 0; i < 3 && WD.thQ.length; i++) wdThumbNext();
+  }
+  // thumbnails: render each item on your current look
+  const WD_FRAME = { hair: [1.62, 0.55, 2.5], hat: [1.7, 0.62, 2.9], top: [1.02, 0.85, 3.9], bottom: [0.6, 0.8, 3.8], suit: [1.0, 1.15, 6.0] };
+  function wdThKey(f, id) { const L = me.look; return f + ':' + id + ':' + [L.skin, L.hairColor, L.topColor, L.pants, L.accent, f === 'hair' ? L.hat : L.hair, habbo ? 1 : 0].join('.'); }
+  function wdThumbNext() {
+    const job = WD.thQ.shift(); if (!job) return;
+    if (WD.th[job.key]) { wdPaintThumb(job); return; }
+    if (!WD.tr) { const c = document.createElement('canvas'); WD.tr = wdRenderer(c, 96, 96, true); WD.ts = new THREE.Scene(); wdLights(WD.ts); WD.tc = new THREE.PerspectiveCamera(22, 1, 0.1, 50); }
+    const L = Object.assign({}, me.look); wdApplyTo(L, job.f, job.id); if (job.f === 'hair') L.hat = 'none';
+    let v; try { v = wdMake(L, WD.ts); } catch (e) { return; }
+    const fr = WD_FRAME[job.f] || WD_FRAME.top, a = job.f === 'hair' ? 0.5 : 0.42;
+    v.root.rotation.y = a; WD.tc.position.set(0, fr[0] + 0.08, fr[2]); WD.tc.lookAt(0, fr[0], 0); WD.tc.updateProjectionMatrix();
+    WD.tr.render(WD.ts, WD.tc);
+    try { WD.th[job.key] = WD.tr.domElement.toDataURL(); } catch (e) { WD.th[job.key] = 'x'; }
+    wdFree(v); wdPaintThumb(job);
+  }
+  function wdPaintThumb(job) { const el = wardEl.querySelector('[data-thk="' + job.key + '"]'); const u = WD.th[job.key]; if (el && u && u !== 'x') { el.style.backgroundImage = 'url(' + u + ')'; el.classList.remove('ld'); } }
+  // applying a choice
+  function wdApplyTo(L, f, v) {
+    if (f === 'suit') { L.suit = v; return; }
+    setLookField(L, f, v);
+    if (f === 'top' || f === 'bottom') { L.suit = 'none'; const rec = f === 'top' ? TOP_R[v] : BOT_R[v]; if (rec && rec.ac != null) { if (f === 'top' && TOPC.indexOf(rec.ac) > -1) L.topColor = rec.ac; if (f === 'bottom' && PANTSC.indexOf(rec.ac) > -1) L.pants = rec.ac; } }
+    if (f === 'hat' && v !== 'none' && SUIT[L.suit] && SUIT[L.suit].mask) L.suit = 'none';
+  }
+  function wdChanged(rerender) {
+    rebuildLook(me); me.bkey = ''; renderMe(); renderTeam();
+    if (!setupOpen) saveProfile(); else renderSetup();
+    wdPreview(); if (rerender !== false) wdRender();
+  }
+  function curOf(f) { return f === 'suit' ? me.look.suit || 'none' : me.look[f]; }
+  function nameOf(f, id) { const list = f === 'hair' ? HAIRS : f === 'top' ? TOPS : f === 'bottom' ? BOTTOMS : f === 'hat' ? HATS : SUITS; const o = list.find(o2 => o2[0] === id); return o ? o[1] : id; }
+  function wdWearing() {
+    const L = me.look, S = SUIT[L.suit];
+    if (S) return '🦸 ' + esc(S.name) + (L.hat && L.hat !== 'none' && !S.mask ? ' · ' + esc(nameOf('hat', L.hat)) : '');
+    return esc(nameOf('hair', L.hair)) + ' · ' + esc(nameOf('top', L.top)) + ' · ' + esc(nameOf('bottom', L.bottom)) + (L.hat && L.hat !== 'none' ? ' · ' + esc(nameOf('hat', L.hat)) : '');
+  }
+  function wdRender() {
+    const T = WD_TABS.find(t => t[0] === WD.tab) || WD_TABS[0], L = me.look;
+    const sw = (f, list) => '<div class="sws">' + list.map(c => '<button data-wc="' + f + '" data-v="' + c + '" class="sw' + (L[f] === c ? ' sel' : '') + '" style="--s:' + hex(c) + '" aria-label="' + f + ' ' + hex(c) + '"></button>').join('') + '</div>';
+    let grid = '', groups = '', cols = '';
+    const q = WD.q.trim().toLowerCase();
+    if (T[0] === 'extra') {
+      grid = '<div class="wd-gh">Skin tone</div><div style="grid-column:1/-1">' + sw('skin', SKINS) + '</div>' +
+        '<div class="wd-gh">Extras</div><div class="wd-x" style="grid-column:1/-1">' + EXTRAS.map(o => '<button data-wt="' + o[0] + '" class="' + (L[o[0]] ? 'on' : '') + '" aria-pressed="' + !!L[o[0]] + '">' + o[1] + '</button>').join('') + '</div>' +
+        '<div class="wd-gh">Headwear, headphones and hair tie color</div><div style="grid-column:1/-1">' + sw('accent', ACC) + '</div>' +
+        '<p class="wnote" style="grid-column:1/-1">Coming next: eyewear, facial hair, masks, jewelry, back items and face details.</p>';
+    } else {
+      const G = T[2], cur = curOf(T[0]);
+      groups = '<button data-wg="all" class="' + (WD.grp === 'all' ? 'on' : '') + '">All</button>' + G.map((g, k) => '<button data-wg="' + k + '" class="' + (String(WD.grp) === String(k) ? 'on' : '') + '">' + g[1] + ' ' + esc(g[0]) + ' <span class="opt">' + g[2].length + '</span></button>').join('');
+      const seen = {}; let shown = 0;
+      G.forEach((g, k) => {
+        if (WD.grp !== 'all' && String(WD.grp) !== String(k)) return;
+        const items = g[2].filter(o => { if (q && o[1].toLowerCase().indexOf(q) < 0) return false; if (seen[o[0]]) return false; seen[o[0]] = 1; return true; });
+        if (!items.length) return;
+        grid += '<div class="wd-gh">' + g[1] + ' ' + esc(g[0]) + '</div>';
+        items.forEach(o => { shown++; const key = wdThKey(T[0], o[0]), u = WD.th[key];
+          grid += '<button class="wd-it' + (cur === o[0] ? ' on' : '') + '" data-wf="' + T[0] + '" data-wv="' + o[0] + '" title="' + esc(o[1]) + '"><i data-thk="' + key + '" class="' + (u && u !== 'x' ? '' : 'ld') + '"' + (u && u !== 'x' ? ' style="background-image:url(' + u + ')"' : '') + '></i><span>' + esc(o[1]) + '</span></button>';
+          if (!u) WD.thQ.push({ key: key, f: T[0], id: o[0] }); });
+      });
+      if (!shown) grid = '<div class="wd-empty">Nothing matches “' + esc(WD.q) + '”.</div>';
+      if (T[3]) cols = '<div class="lbl">' + T[5] + '</div>' + sw(T[3], T[4]);
+      if (T[0] === 'hair') cols += '<div class="lbl">Hair tie and bead color</div>' + sw('accent', ACC);
+      if (T[0] === 'suit' && SUIT[L.suit]) cols = '<p class="wnote">Costume on. It covers your outfit. Pick “No costume” or any top or bottoms to take it off.</p>';
+    }
+    const scrollEl = wardEl.querySelector('.wd-grid'), st = scrollEl ? scrollEl.scrollTop : 0, keepPrev = !!wardEl.querySelector('#wdCv');
+    const mainHTML = '<div class="wd-head"><h2>👗 Wardrobe</h2><input id="wdQ" type="search" placeholder="Search ' + (T[0] === 'extra' ? 'items' : T[1].replace(/^\S+\s/, '').toLowerCase()) + '…" value="' + esc(WD.q) + '" autocomplete="off"' + (T[0] === 'extra' ? ' disabled' : '') + '>' +
+      '<button data-wd="rand">🎲 Surprise me</button><button data-wd="undo"' + (WD.start ? '' : ' disabled') + '>↺ Undo changes</button><button data-wd="done" class="on">✓ Done</button></div>' +
+      '<div class="wd-tabs" role="tablist">' + WD_TABS.map(t => '<button role="tab" data-wtab="' + t[0] + '" class="' + (WD.tab === t[0] ? 'on' : '') + '" aria-selected="' + (WD.tab === t[0]) + '">' + t[1] + '</button>').join('') + '</div>' +
+      (groups ? '<div class="wd-groups">' + groups + '</div>' : '<div class="wd-groups" style="padding:4px"></div>') +
+      '<div class="wd-grid">' + grid + '</div>' + (cols ? '<div class="wd-cols">' + cols + '</div>' : '');
+    if (!keepPrev) {
+      wardEl.innerHTML = '<div class="wd-prev"><div class="wd-ptop"><b>' + esc(me.name || 'You') + '</b><span class="pill">drag to turn</span></div><canvas id="wdCv" aria-label="Live preview of your character"></canvas>' +
+        '<div class="wd-wear" id="wdWear"></div><div class="wd-pbar"><button data-wd="l">⟲</button><button data-wd="spin" class="' + (WD.spin ? 'on' : '') + '">🔄 Spin</button><button data-wd="r">⟳</button><button data-wd="pose">💃 Dance</button></div></div>' +
+        '<div class="wd-main" role="dialog" aria-modal="true" aria-label="Wardrobe">' + mainHTML + '</div>';
+      bindPrev();
+    } else wardEl.querySelector('.wd-main').innerHTML = mainHTML;
+    const g2 = wardEl.querySelector('.wd-grid'); if (g2) g2.scrollTop = st;
+    const w2 = $('wdWear'); if (w2) w2.innerHTML = 'Wearing: ' + wdWearing();
+    const sp = wardEl.querySelector('[data-wd="spin"]'); if (sp) sp.classList.toggle('on', WD.spin);
+    const qi = $('wdQ'); if (qi) { qi.addEventListener('input', () => { WD.q = qi.value; WD.thQ = []; wdRender(); const q2 = $('wdQ'); if (q2) { q2.focus(); q2.setSelectionRange(q2.value.length, q2.value.length); } }); qi.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { if (qi.value) { WD.q = ''; wdRender(); } else closeWardrobe(); } }); }
+  }
+  function bindPrev() {
+    const cv = $('wdCv'); if (!cv) return;
+    cv.addEventListener('pointerdown', e => { WD.drag = { x: e.clientX, y0: WD.yaw }; cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener('pointermove', e => { if (WD.drag) WD.yaw = WD.drag.y0 + (e.clientX - WD.drag.x) * 0.012; });
+    const up = () => { WD.drag = null; }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  }
+  wardEl.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    const d = b.dataset;
+    if (d.wtab) { WD.tab = d.wtab; WD.grp = 'all'; WD.q = ''; WD.thQ = []; wdRender(); const g = wardEl.querySelector('.wd-grid'); if (g) g.scrollTop = 0; return; }
+    if (d.wg) { WD.grp = d.wg; WD.thQ = []; wdRender(); const g = wardEl.querySelector('.wd-grid'); if (g) g.scrollTop = 0; return; }
+    if (d.wf) { wdApplyTo(me.look, d.wf, d.wv); WD.thQ = []; wdChanged(); return; }
+    if (d.wc) { me.look[d.wc] = +d.v; WD.thQ = []; wdChanged(); return; }
+    if (d.wt) { toggleLookExtra(me.look, d.wt); WD.thQ = []; wdChanged(); return; }
+    const a = d.wd;
+    if (a === 'done') closeWardrobe();
+    else if (a === 'undo' && WD.start) { me.look = Object.assign({}, WD.start); WD.thQ = []; wdChanged(); }
+    else if (a === 'rand') { Object.assign(me.look, { skin: rnd(SKINS), hair: rnd(HAIRS)[0], hairColor: rnd(HAIRC.slice(0, 9)), top: rnd(TOPS)[0], topColor: rnd(TOPC), pants: rnd(PANTSC), accent: rnd(ACC), glasses: Math.random() < 0.25, shades: false, beard: Math.random() < 0.2, cap: false, headphones: Math.random() < 0.12, santa: false, wheelchair: false },
+        { bottom: rnd(BOTTOMS)[0], hat: Math.random() < 0.45 ? rnd(HATS.slice(1))[0] : 'none', suit: Math.random() < 0.08 ? rnd(SUITS.slice(1))[0] : 'none' }); WD.thQ = []; wdChanged(); react(me, rnd(['wave', 'party', 'flex', 'thumbs']), true); }
+    else if (a === 'l') { WD.spin = false; WD.yaw -= 0.8; wdRender(); }
+    else if (a === 'r') { WD.spin = false; WD.yaw += 0.8; wdRender(); }
+    else if (a === 'spin') { WD.spin = !WD.spin; b.classList.toggle('on', WD.spin); }
+    else if (a === 'pose') { WD.pose = WD.pose ? 0 : 1; b.classList.toggle('on', !!WD.pose); }
+  });
+  function openWardrobe(tab) {
+    if (WD.open) return;
+    closeCard();
+    WD.open = true; WD.start = Object.assign({}, me.look); if (tab) WD.tab = tab; WD.q = ''; WD.thQ = [];
+    wardEl.hidden = false; document.body.classList.add('in-ward');
+    wdRender(); requestAnimationFrame(() => { wdPreview(); if (!WD.raf) WD.raf = requestAnimationFrame(wdFrame); });
+  }
+  function closeWardrobe() {
+    if (!WD.open) return;
+    WD.open = false; wardEl.hidden = true; document.body.classList.remove('in-ward'); WD.thQ = [];
+    wdFree(WD.pv); WD.pv = null; if (WD.pr) { WD.pr.dispose(); WD.pr = null; } wardEl.innerHTML = '';
+    if (setupOpen) renderSetup();
+    else if (JSON.stringify(WD.start) !== JSON.stringify(me.look)) { toast('👗 New look saved!'); react(me, 'party', true); }
+    WD.start = null;
+  }
+  window.addEventListener('resize', () => { if (WD.open) wdPreview(); });
+
   // ================= falling down =================
   function knockDown(secs) {
     if (setupOpen || WATER_IN(me.x, me.z) || me.slide) return;
@@ -8350,7 +9113,7 @@ function main(){
   PST.tiki = { spots: [[48.4, -9.45], [49.5, -9.45], [50.6, -9.45]], face: Math.PI, dur: 1.0, label: 'tiki bar' };
   const TROPIC = [0xff6b6b, 0x3aa7a0, 0x4fb3ff, 0xffb347, 0xe36f9a, 0x8f6fe0];
   function beachLook(L) {
-    const dressy = ['dress', 'blouse', 'swim'].indexOf(L.top) > -1 || ['skirt', 'long'].indexOf(L.bottom) > -1;
+    const dressy = ['dress', 'blouse', 'swim', 'croptop', 'tubetop'].indexOf(L.top) > -1 || ['skirt', 'long'].indexOf(L.bottom) > -1 || !!(BOT_R[L.bottom] && BOT_R[L.bottom].k === 'skirt' && !BOT_R[L.bottom].wide);
     const tint = TROPIC[(TOPC.indexOf(L.topColor) + 6) % TROPIC.length] || TROPIC[0];
     return Object.assign({}, L, dressy
       ? { top: 'swim', topColor: L.topColor, bottom: 'skirt', pants: tint, hat: 'sunhat', shades: true, flip: true }
@@ -8511,11 +9274,11 @@ function main(){
   }
 
   // ================= slap, punch, kick and throw =================
-  const MELEE = { slap: ['👋', 'Slap', 'slapped', ' across the face'], punch: ['👊', 'Punch', 'punched', ''], kick: ['🦶', 'Kick', 'kicked', ''] };
+  const MELEE = { slap: ['👋', 'Slap', 'slapped', ' across the face'], punch: ['👊', 'Punch', 'punched', ''], kick: ['🦶', 'Kick', 'kicked', ''], flykick: ['🦵', 'Flying kick', 'flying-kicked', ''] };
   const THROWS = { meteor: ['☄️', 'Meteor'], car: ['🚗', 'Car'], laptop: ['💻', 'Laptop'], grenade: ['💣', 'Grenade'], dino: ['🦖', 'Dinosaur'], shield: ['🛡️', 'Shield'], hammer: ['🔨', 'Hammer'], cannon: ['💥', 'Cannon'], wheelchair: ['🦽', 'Wheelchair'] };
   const BIG_HIT = { meteor: 1, car: 1, grenade: 1, dino: 1, hammer: 1, cannon: 1 };
   const BOOMERANG = { shield: 1, hammer: 1 };
-  const OUCH = { slap: 'Ow! 😵', punch: 'Oof! 😵', kick: 'Ouch! 🤕', laptop: 'Bonk! 💻', meteor: 'AAAH! ☄️', car: 'Whoa! 🚗', grenade: 'BOOM! 💥', dino: 'RAWR?! 🦖', shield: 'CLANG! 🛡️', hammer: 'BONK! ⚡', cannon: 'KABOOM! 💥', wheelchair: 'Whoa! 🦽' };
+  const OUCH = { slap: 'Ow! 😵', punch: 'Oof! 😵', kick: 'Ouch! 🤕', flykick: 'OOF! 🦵', laptop: 'Bonk! 💻', meteor: 'AAAH! ☄️', car: 'Whoa! 🚗', grenade: 'BOOM! 💥', dino: 'RAWR?! 🦖', shield: 'CLANG! 🛡️', hammer: 'BONK! ⚡', cannon: 'KABOOM! 💥', wheelchair: 'Whoa! 🦽' };
   const FLY = [];
   let lastAtk = -9;
   const tgtName = t => t.isDummy ? 'the training dummy' : objOf(t);
@@ -8537,11 +9300,12 @@ function main(){
   function doMelee(from, tgt, kind) {
     if (!MELEE[kind] || !tgt || from === tgt) return;
     from.tyaw = Math.atan2(tgt.x - from.x, tgt.z - from.z);
-    from.act = { kind: kind, t0: elapsed, dur: kind === 'kick' ? 0.7 : 0.55 };
+    from.act = { kind: kind, t0: elapsed, dur: kind === 'kick' ? 0.7 : kind === 'flykick' ? 0.85 : 0.55, d: Math.min(1.2, Math.hypot(tgt.x - from.x, tgt.z - from.z)) };
     if (from === me && NET.on && !NET.rx && (tgt.remote || tgt.isDummy)) netSend({ t: 'ev', k: 'hit', type: kind, to: tgtId(tgt) });
     const M2 = MELEE[kind];
-    post(null, M2[0] + ' ' + nmOf(from) + ' ' + M2[2] + ' ' + tgtName(tgt) + M2[3] + '!');
-    setTimeout(() => hitTarget(tgt, from, kind), kind === 'kick' ? 330 : 250);
+    if (IN_RING(from.x, from.z) && IN_RING(tgt.x, tgt.z)) floatFx(from, kind === 'flykick' ? 'HI-YAH!' : rnd(['POW!', 'BAM!', 'WHAM!', 'SMACK!']));
+    else post(null, M2[0] + ' ' + nmOf(from) + ' ' + M2[2] + ' ' + tgtName(tgt) + M2[3] + '!');
+    setTimeout(() => hitTarget(tgt, from, kind), kind === 'kick' ? 330 : kind === 'flykick' ? 480 : 250);
   }
   function doThrow(from, tgt, kind) {
     if (!THROWS[kind] || !tgt || from === tgt) return;
@@ -8721,6 +9485,7 @@ function main(){
     pow(screenPos(tgt));
     if (tgt === me) {
       me.speech = { text: OUCH[kind] || 'Ow!', until: Date.now() + 2500 };
+      if (MELEE[kind] && ringHurt(kind, from)) return;
       if (big) { setTimeout(() => { knockDown(5); toast(THROWS[kind][0] + ' ' + (from ? nmOf(from) : 'Someone') + ' got you! You’re knocked down.'); }, HFX_KNOCK[kind] || 150); return; }
       const n = Date.now(); me.slaps = (me.slaps || []).filter(t => n - t < 12000); me.slaps.push(n);
       if (me.slaps.length >= 3 && !(me.downUntil > n)) { me.slaps = []; setTimeout(() => { knockDown(7); toast('💫 That was one hit too many! You fell down.'); post(null, '💫 ' + me.name + ' took one hit too many and fell over'); }, 350); }
@@ -8751,6 +9516,13 @@ function main(){
       const s = k < 0.4 ? 0 : Math.min(1, (k - 0.4) / 0.15);
       A[1].rotation.x = -0.5 - s * 1.1; A[1].rotation.z = 0; E[1].rotation.x = -1.7 + s * 1.7;
       A[0].rotation.x = -1.0; E[0].rotation.x = -1.8; V.body.rotation.y = (0.25 - s * 0.5) * e;
+    } else if (a.kind === 'flykick') {
+      const j = Math.sin(Math.min(1, k / 0.8) * Math.PI), ext = k < 0.25 ? k / 0.25 : k < 0.7 ? 1 : Math.max(0, 1 - (k - 0.7) / 0.3);
+      V.root.position.y = Math.max(V.root.position.y, j * 0.75);
+      V.body.position.z = Math.sin(Math.min(1, k / 0.75) * Math.PI) * (a.d || 0.8) * 0.55;
+      V.body.rotation.x = -0.45 * ext;
+      Lg[1].rotation.x = -1.55 * ext; K[1].rotation.x = 0.15 * (1 - ext); Lg[0].rotation.x = 0.6 * ext; K[0].rotation.x = 1.4 * ext;
+      A[0].rotation.set(-0.4, 0, -1.2 * ext); A[1].rotation.set(-0.4, 0, 1.2 * ext); E[0].rotation.x = -0.3; E[1].rotation.x = -0.3;
     } else if (a.kind === 'kick') {
       const s = k < 0.4 ? -k / 0.4 * 0.4 : Math.min(1, (k - 0.4) / 0.2);
       Lg[1].rotation.x = s < 0 ? -s : -1.5 * s; K[1].rotation.x = s < 0 ? 0.8 : 0.9 * (1 - s); V.body.rotation.x = 0.18 * e;
@@ -9093,7 +9865,7 @@ function main(){
       if (me.emote && me.emote.type === 'sleep') setEmote(me, null);
       toast('🤕 You wake up with a headache. Maybe some water?'); me.drunkBed = null; renderBar(); renderPantry();
     }
-    bbTick(dt); gymTick(dt); beachTick(dt); combatTick(dt); carryTick(dt); instrTick(dt); matchBallTick(); billTick(dt); bucketTick(dt); discoTick(dt);
+    bbTick(dt); gymTick(dt); beachTick(dt); combatTick(dt); carryTick(dt); instrTick(dt); matchBallTick(); billTick(dt); bucketTick(dt); discoTick(dt); ringTick(dt);
     workers.forEach(ballTick);
     if (Math.floor(elapsed * 2) !== Math.floor((elapsed - dt) * 2)) drawMovie();
     movieLight.intensity = night ? 0.7 : 0.25;
