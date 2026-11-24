@@ -641,6 +641,18 @@ function main(){
   const hex = n => '#' + n.toString(16).padStart(6, '0');
   const rnd = a => a[Math.floor(Math.random() * a.length)];
   const fmtT = d => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // band stage state (filled in when the Bar room is built)
+  const BAND = { rect: null, leds: [], lights: [], cym: [], heads: [], platters: [], spot: {}, bpm: 112, last: -1, bus: null, noise: null, standGtr: null, keyLcd: null, djScr: null, live: false, hit: 0 };
+  function makeEGuitar() {
+    const g = new THREE.Group(), mR = new THREE.MeshStandardMaterial({ color: 0xd6262f, metalness: 0.35, roughness: 0.3 }), mW = new THREE.MeshStandardMaterial({ color: 0xf4f1ea, roughness: 0.5 }), mN = new THREE.MeshStandardMaterial({ color: 0x5a3417, roughness: 0.6 }), mM = new THREE.MeshStandardMaterial({ color: 0xc8ccd2, metalness: 0.8, roughness: 0.25 });
+    const bx = (w, h, d, m, x, yy, z, rz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, yy, z); if (rz) o.rotation.z = rz; o.castShadow = true; g.add(o); return o; };
+    bx(0.24, 0.2, 0.045, mR, 0, 0, 0); bx(0.2, 0.12, 0.045, mR, 0.005, 0.13, 0); bx(0.06, 0.1, 0.045, mR, -0.085, 0.2, 0, 0.3); bx(0.06, 0.07, 0.045, mR, 0.085, 0.2, 0, -0.3);
+    bx(0.13, 0.17, 0.05, mW, -0.03, 0.03, 0.002); bx(0.035, 0.42, 0.03, mN, 0, 0.42, 0.005); bx(0.065, 0.11, 0.03, mN, 0.01, 0.68, 0.005, -0.1);
+    [-0.03, 0.06].forEach(yy => bx(0.1, 0.02, 0.012, mM, 0, yy, 0.03)); bx(0.06, 0.02, 0.014, mM, 0, -0.07, 0.03);
+    [0.05, 0.08].forEach(xx => { const k = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.02, 8), mM); k.rotation.x = Math.PI / 2; k.position.set(xx, -0.06, 0.03); g.add(k); });
+    return g;
+  }
+
 
   // ================= renderer / scene =================
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -1570,6 +1582,72 @@ function main(){
     { const g = fgrp(b0 + 10, 7, 0); fp(g, 4.2, 0.08, 3.0, MC(0x2b0b3a, { roughness: 0.6 }), 0, 0.04, 0); fc(g, 0.025, 0.025, 1.4, mDark, 0, 0.75, 0, 6); add(new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), MC(0x333333)), 0, 1.48, 0, g);
       for (let k = 0; k < 7; k++) { const m = fp(g, 0.25, 0.04, 0.12, new THREE.MeshBasicMaterial({ color: 0xffd23f }), -1.8 + k * 0.6, 0.1, 1.45); FURN.neon.push(m); }
       FURN_ITEMS.push(['karaoke mic', [g], (w, it) => { if (w === me) { setEmote(me, 'sing'); toast('🎤 Karaoke time!'); } }]); }
+    // ---------- 🎸 band stage: drum kit, keyboard, electric guitar, DJ set ----------
+    {
+      const sx0 = b0 - 13.6, sx1 = b0 - 4.0, sz0 = 6.4, sz1 = 9.85, SW = sx1 - sx0, SD = sz1 - sz0;
+      BAND.rect = [sx0, sx1, sz0, sz1];
+      const stg = fgrp((sx0 + sx1) / 2, (sz0 + sz1) / 2, 0);
+      fp(stg, SW, 0.1, SD, MC(0x1b1b22, { roughness: 0.6 }), 0, 0.05, 0);
+      for (let k = 0; k < 16; k++) BAND.leds.push(fp(stg, SW / 16 - 0.05, 0.04, 0.05, new THREE.MeshBasicMaterial({ color: 0xff3fa4 }), -SW / 2 + (k + 0.5) * SW / 16, 0.09, -SD / 2 + 0.03));
+      fp(stg, SW - 0.6, 0.08, 0.08, MC(0x8a8f98, { metalness: 0.7, roughness: 0.3 }), 0, 3.0, -0.4);
+      [-1, 1].forEach(s => fp(stg, 0.08, 2.9, 0.08, MC(0x8a8f98, { metalness: 0.7, roughness: 0.3 }), s * (SW / 2 - 0.3), 1.55, -0.4));
+      for (let k = 0; k < 6; k++) { const xx = -SW / 2 + 0.9 + k * (SW - 1.8) / 5; fc(stg, 0.09, 0.13, 0.22, MC(0x1d1d24), xx, 2.86, -0.4, 10); BAND.lights.push(fc(stg, 0.12, 0.12, 0.02, new THREE.MeshBasicMaterial({ color: 0xffffff }), xx, 2.74, -0.4, 12)); }
+      { const s = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 0.8), new THREE.MeshBasicMaterial({ map: textTex('🎸 BARDAGULAN LIVE 🥁', '#14061f', '#ffd23f', 768, 128), toneMapped: false })); s.position.set((sx0 + sx1) / 2, 2.45, 9.95); s.rotation.y = Math.PI; scene.add(s); }
+      // speakers
+      [sx0 + 0.45, sx1 - 0.45].forEach(xx => { const g = fgrp(xx, 9.3, Math.PI); fp(g, 0.7, 1.6, 0.6, MC(0x111114), 0, 0.9, 0);
+        [0.55, 1.2].forEach(yy => { fc(g, 0.22, 0.22, 0.04, MC(0x2a2a30), 0, yy + 0.1, 0.31, 16).rotation.x = Math.PI / 2; fc(g, 0.08, 0.08, 0.05, MC(0x555560), 0, yy + 0.1, 0.33, 12).rotation.x = Math.PI / 2; });
+        nb(xx - 0.35, xx + 0.35, 9.0, 9.6); });
+      const mShell = MC(0xc0182b, { metalness: 0.4, roughness: 0.35 }), mHead = MC(0xf2efe6, { roughness: 0.7 }), mChrome = MC(0xc8ccd2, { metalness: 0.8, roughness: 0.25 }), mCym = MC(0xd4a93a, { metalness: 0.8, roughness: 0.3 });
+      // 🥁 drum kit (the drummer sits behind it, facing the room)
+      { const gx = b0 - 9.6, gz = 7.95, g = fgrp(gx, gz, Math.PI);
+        const bd = fc(g, 0.3, 0.3, 0.34, mShell, 0, 0.4, 0.1, 20); bd.rotation.x = Math.PI / 2;
+        const fh = fc(g, 0.27, 0.27, 0.02, mHead, 0, 0.4, 0.28, 20); fh.rotation.x = Math.PI / 2;
+        const lg = fc(g, 0.1, 0.1, 0.022, MC(0xffd23f, { emissive: 0x332200 }), 0, 0.4, 0.292, 16); lg.rotation.x = Math.PI / 2;
+        [-0.17, 0.17].forEach(xx => { const tm = fc(g, 0.13, 0.13, 0.16, mShell, xx, 0.84, 0.02, 16); tm.rotation.x = -0.35; const th = fc(g, 0.125, 0.125, 0.01, mHead, xx, 0.92, -0.01, 16); th.rotation.x = -0.35; BAND.heads.push(th); });
+        const sn = fc(g, 0.17, 0.17, 0.12, mChrome, 0.34, 0.64, -0.32, 16); BAND.heads.push(fc(g, 0.165, 0.165, 0.01, mHead, 0.34, 0.705, -0.32, 16)); fc(g, 0.012, 0.012, 0.55, mChrome, 0.34, 0.33, -0.32, 6);
+        const ft = fc(g, 0.18, 0.18, 0.32, mShell, -0.4, 0.42, -0.25, 16); BAND.heads.push(fc(g, 0.175, 0.175, 0.01, mHead, -0.4, 0.585, -0.25, 16));
+        [[-0.52, -0.12], [-0.28, -0.12], [-0.4, -0.4]].forEach(p => fc(g, 0.01, 0.01, 0.28, mChrome, p[0], 0.16, p[1], 6));
+        const hh = new THREE.Group(); hh.position.set(0.62, 0, -0.22); g.add(hh); fc(hh, 0.012, 0.012, 0.95, mChrome, 0, 0.52, 0, 6); fc(hh, 0.17, 0.17, 0.012, mCym, 0, 0.98, 0, 18); BAND.cym.push(fc(hh, 0.17, 0.17, 0.012, mCym, 0, 1.0, 0, 18));
+        const cr = new THREE.Group(); cr.position.set(0.48, 0, 0.18); g.add(cr); fc(cr, 0.012, 0.012, 1.3, mChrome, 0, 0.7, 0, 6); const c1 = fc(cr, 0.23, 0.23, 0.012, mCym, 0, 1.36, 0, 20); c1.rotation.z = 0.3; BAND.cym.push(c1);
+        const rd = new THREE.Group(); rd.position.set(-0.55, 0, 0.05); g.add(rd); fc(rd, 0.012, 0.012, 1.15, mChrome, 0, 0.62, 0, 6); const c2 = fc(rd, 0.25, 0.25, 0.012, mCym, 0, 1.21, 0, 20); c2.rotation.z = -0.25; BAND.cym.push(c2);
+        fc(g, 0.17, 0.17, 0.08, MC(0x1d1d24, { roughness: 0.9 }), 0, 0.56, -0.75, 16); fc(g, 0.03, 0.05, 0.42, mChrome, 0, 0.3, -0.75, 8);
+        nb(gx - 0.8, gx + 0.7, gz - 0.45, gz + 0.45);
+        BAND.spot.drums = { area: 'band', pos: [gx, gz + 0.75], anchor: [gx, gz + 1.3], via: [], face: Math.PI, sit: 0.32, by: null, inst: 'drums' };
+        FURN_ITEMS.push(['drum kit', [g], (w, it) => instrTouch(w, 'drums')]); }
+      // 🎹 keyboard
+      { const gx = b0 - 12.4, gz = 7.35, g = fgrp(gx, gz, Math.PI), mBlk = MC(0x15151a, { roughness: 0.5 });
+        [-0.45, 0.45].forEach(xx => { fp(g, 0.05, 0.76, 0.05, mChrome, xx, 0.48, -0.08); fp(g, 0.05, 0.76, 0.05, mChrome, xx, 0.48, 0.08); fp(g, 0.06, 0.04, 0.34, mChrome, xx, 0.12, 0); });
+        fp(g, 1.3, 0.1, 0.38, mBlk, 0, 0.9, 0);
+        fp(g, 1.18, 0.025, 0.17, MC(0xf7f7f2, { roughness: 0.4 }), 0, 0.96, -0.09);
+        for (let k = 0; k < 20; k++) { const n = k % 7; if (n === 2 || n === 6) continue; fp(g, 0.028, 0.03, 0.09, mBlk, -0.565 + (k + 0.5) * 1.13 / 20 + 0.028, 0.98, -0.05); }
+        const lcd = fp(g, 0.3, 0.02, 0.07, new THREE.MeshBasicMaterial({ color: 0x3fd0ff }), 0, 0.96, 0.1); BAND.keyLcd = lcd;
+        [-0.45, -0.38, 0.38, 0.45].forEach(xx => fc(g, 0.02, 0.02, 0.03, MC(0xd6262f), xx, 0.965, 0.1, 8));
+        nb(gx - 0.65, gx + 0.65, gz - 0.25, gz + 0.25);
+        BAND.spot.keys = { area: 'band', pos: [gx, gz + 0.62], anchor: [gx, gz + 1.25], via: [], face: Math.PI, sit: 0, by: null, inst: 'keys' };
+        FURN_ITEMS.push(['keyboard', [g], (w, it) => instrTouch(w, 'keys')]); }
+      // 🎸 electric guitar on a stand, with an amp
+      { const gx = b0 - 7.35, gz = 7.15, g = fgrp(gx, gz, Math.PI);
+        [-1, 1].forEach(s => { const l = fp(g, 0.03, 0.5, 0.03, MC(0x1d1d24), s * 0.13, 0.33, 0.06); l.rotation.z = s * 0.25; });
+        fp(g, 0.03, 0.62, 0.03, MC(0x1d1d24), 0, 0.42, -0.08).rotation.x = -0.15;
+        const eg = makeEGuitar(); eg.position.set(0, 0.36, 0.0); eg.rotation.x = -0.12; eg.scale.set(1.35, 1.35, 1.35); g.add(eg); BAND.standGtr = eg;
+        nb(gx - 0.22, gx + 0.22, gz - 0.2, gz + 0.2);
+        const amp = fgrp(b0 - 6.75, 9.2, Math.PI); fp(amp, 0.72, 0.62, 0.4, MC(0x1d1d24, { roughness: 0.8 }), 0, 0.41, 0); fp(amp, 0.62, 0.38, 0.02, MC(0x3a3a40, { roughness: 1 }), 0, 0.36, 0.205); fp(amp, 0.6, 0.06, 0.02, MC(0xd9b46a, { metalness: 0.5 }), 0, 0.64, 0.205);
+        [-0.2, -0.1, 0, 0.1, 0.2].forEach(xx => fc(amp, 0.018, 0.018, 0.03, MC(0xe8e8e8), xx, 0.64, 0.22, 8).rotation.x = Math.PI / 2);
+        nb(b0 - 7.12, b0 - 6.38, 8.98, 9.42);
+        FURN_ITEMS.push(['electric guitar', [g], (w, it) => instrTouch(w, 'eguitar')]); FURN_ITEMS.push(['guitar amp', [amp], (w, it) => instrTouch(w, 'eguitar')]); }
+      // 🎧 DJ set
+      { const gx = b0 - 5.3, gz = 7.45, g = fgrp(gx, gz, Math.PI);
+        fp(g, 1.7, 0.78, 0.7, MC(0x15151a, { roughness: 0.6 }), 0, 0.49, 0);
+        for (let k = 0; k < 6; k++) { const m = fp(g, 0.22, 0.12, 0.02, new THREE.MeshBasicMaterial({ color: 0x3fd0ff }), -0.65 + k * 0.26, 0.5, 0.36); FURN.dj.push(m); }
+        fp(g, 1.72, 0.04, 0.72, MC(0x2b2d33, { roughness: 0.5 }), 0, 0.9, 0);
+        [-0.5, 0.5].forEach(xx => { fp(g, 0.5, 0.05, 0.46, MC(0x222228), xx, 0.945, -0.04); const pl = fc(g, 0.19, 0.19, 0.02, MC(0x0c0c0f, { roughness: 0.3 }), xx, 0.98, -0.04, 22); fc(pl, 0.06, 0.06, 0.024, MC(0xd6262f), 0, 0.002, 0, 12); fp(pl, 0.02, 0.026, 0.12, MC(0xeeeeee), 0, 0.004, 0.1); BAND.platters.push(pl); fp(g, 0.02, 0.03, 0.2, mChrome, xx + 0.17, 1.0, -0.06).rotation.y = 0.4; });
+        fp(g, 0.34, 0.06, 0.4, MC(0x2a2a30), 0, 0.95, -0.04); [-0.1, 0, 0.1].forEach(xx => fp(g, 0.025, 0.03, 0.12, MC(0xbfc3ca), xx, 0.99, -0.1));
+        const lid = fp(g, 0.34, 0.22, 0.015, new THREE.MeshBasicMaterial({ color: 0x7cff6b }), 0, 1.07, 0.18); lid.rotation.x = -0.25; BAND.djScr = lid;
+        nb(gx - 0.85, gx + 0.85, gz - 0.35, gz + 0.35);
+        BAND.spot.dj = { area: 'band', pos: [gx, gz + 0.68], anchor: [gx, gz + 1.25], via: [], face: Math.PI, sit: 0, by: null, inst: 'dj' };
+        FURN_ITEMS.push(['DJ set', [g], (w, it) => instrTouch(w, 'dj')]); }
+    }
+
     [[b0 - 10, -6], [b0 - 10, -2.4]].forEach(p => { cyl(0.45, 0.45, 0.05, mDark, p[0], 1.0, p[1]); cyl(0.04, 0.04, 1.0, MC(0xc8ccd2, { metalness: 0.6, roughness: 0.3 }), p[0], 0.5, p[1], null, 8); nb(p[0] - 0.3, p[0] + 0.3, p[1] - 0.3, p[1] + 0.3);
       [-0.75, 0.75].forEach(o => { stool(p[0] + o, p[1]); xseat('party', p[0] + o, p[1], o < 0 ? Math.PI / 2 : -Math.PI / 2, 0.45, { anchor: [p[0] + o, p[1] + 0.95] }); }); });
     frug(b0 - 1, 6, 6, 4, '#3a1840', '#ff7ad9');
@@ -2398,7 +2476,10 @@ function main(){
     else if (sit) el = [-0.75, -0.75];
     if (V.cup.visible) el[1] = -1.6;
     if (e === 'sing') el = [-0.5, -1.9];
-    else if (e === 'guitar') el = [-1.1, -1.0];
+    else if (e === 'guitar' || e === 'eguitar') el = [-1.1, -1.0];
+    else if (e === 'drums') el = [-0.95, -0.95];
+    else if (e === 'keys') el = [-0.85, -0.85];
+    else if (e === 'dj') el = [-1.0, -2.2];
     else if (e === 'dance') el = [-0.6, -0.6];
     else if (e === 'sleep') el = sit ? [-1.7, -1.7] : [-0.2, -0.2];
     if (still && k === 'help') el[1] = -0.2 - Math.max(0, Math.sin(t * 7)) * 0.35;
@@ -3335,6 +3416,10 @@ function main(){
     dance: { label: 'Dancing', emoji: '💃', color: '#ec4899', short: 'Dance' },
     sing: { label: 'Singing', emoji: '🎤', color: '#8b5cf6', short: 'Sing' },
     guitar: { label: 'Playing guitar', emoji: '🎸', color: '#f97316', short: 'Guitar' },
+    drums: { label: 'Playing the drums', emoji: '🥁', color: '#ef4444', short: 'Drums', inst: true },
+    keys: { label: 'Playing the keyboard', emoji: '🎹', color: '#0ea5e9', short: 'Keys', inst: true },
+    eguitar: { label: 'Shredding the electric guitar', emoji: '🤘', color: '#dc2626', short: 'E-guitar', inst: true },
+    dj: { label: 'Spinning tracks', emoji: '🎧', color: '#a855f7', short: 'DJ', inst: true },
     sleep: { label: 'Sleeping', emoji: '😴', color: '#3b82f6', short: 'Sleep' }
   };
 
@@ -3568,6 +3653,8 @@ function main(){
       }
       if (type === 'guitar') guitarProp(w);
       if (type === 'sing') micProp(w);
+      if (type === 'drums') sticksProp(w);
+      if (type === 'eguitar') egtrProp(w);
       const ei = emInfo(w.emote);
       post(null, nmOf(w) + (w === me ? ' are ' : ' is ') + emPhrase(w.emote) + ' ' + ei.emoji + (w.emote.mix ? ' (party mix)' : ''));
     }
@@ -3576,7 +3663,7 @@ function main(){
   }
   function renderEmoteBar() {
     const el = $('emoBar'); if (!el) return;
-    el.innerHTML = Object.keys(EMOTES).map(k => { const on = !!(me.emote && me.emote.type === k); return '<button data-emo="' + k + '" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>'; }).join('') +
+    el.innerHTML = Object.keys(EMOTES).filter(k => !EMOTES[k].inst || (me.emote && me.emote.type === k)).map(k => { const on = !!(me.emote && me.emote.type === k); return '<button data-emo="' + k + '" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>'; }).join('') +
       (function () { const sOn = typeof isSittingDown === 'function' && isSittingDown(); const on = typeof isResting === 'function' && isResting(); return '<button data-emo="sit" class="' + (sOn ? 'cur' : '') + '" aria-pressed="' + sOn + '" title="Sit down (6)">' + (sOn ? '🧍 Stand up' : '🪑 Sit') + '</button><button data-emo="lie" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '" title="Lie down (5)">🛌 ' + (on ? 'Get up' : 'Lie down') + '</button>'; })();
   }
   function floatFx(w, txt, cls) {
@@ -3616,6 +3703,7 @@ function main(){
       if (e.type === 'sleep') { floatFx(w, rnd(['z', 'Z', 'Zz']), 'z'); e.nx = 1.1; }
       else if (e.type === 'sing') { floatFx(w, rnd(['♪', '♫', '♬'])); e.nx = 0.55; }
       else if (e.type === 'guitar') { floatFx(w, rnd(['♪', '♫'])); e.nx = 0.5; if (w === me) strum(); }
+      else if (INST[e.type]) { floatFx(w, rnd({ drums: ['🥁', '💥', '♪'], keys: ['♪', '♫', '🎹'], eguitar: ['🤘', '⚡', '♫'], dj: ['🔊', '🎶', '💿'] }[e.type])); e.nx = 0.7 + Math.random() * 0.5; }
       else { if (Math.random() < 0.5) floatFx(w, rnd(['✨', '♪'])); e.nx = 0.8; }
     }
   }
@@ -3624,6 +3712,8 @@ function main(){
     const type = e && w.mode !== 'walk' ? e.type : null;
     if (V.gtr) V.gtr.visible = type === 'guitar';
     if (V.micp) V.micp.visible = type === 'sing';
+    if (V.sticks) V.sticks.forEach(s => { s.visible = type === 'drums'; });
+    if (V.egtr) V.egtr.visible = type === 'eguitar';
     const blink = Math.sin(elapsed * 0.9 + w.i * 2.1) > 0.985 || (!type && stInfo(w).key === 'away' && w.mode !== 'walk') ? 0.15 : 1;
     V.eyes.forEach(m => { m.scale.y = type === 'sleep' ? 0.12 : blink; });
     if (type === 'sing') V.smile.scale.set(1.3, 1.2 + Math.abs(Math.sin(elapsed * 8)) * 1.4, 1); else V.smile.scale.set(1, 1, 1);
@@ -3646,6 +3736,28 @@ function main(){
       V.arms[0].rotation.x = -1.1; V.arms[0].rotation.z = 0.75;
       V.arms[1].rotation.x = -0.75 + Math.sin(t * 14) * 0.28; V.arms[1].rotation.z = 0.35;
       V.head.rotation.set(0.25, 0.1, Math.sin(t * Math.PI * bp * 0.5) * 0.12);
+    } else if (type === 'drums') {
+      const bt = Date.now() / (60000 / BAND.bpm / 2), hr = Math.pow(Math.abs(Math.sin(bt * Math.PI)), 3), hl = Math.pow(Math.abs(Math.sin(bt * Math.PI / 2 + 0.8)), 3);
+      V.arms[0].rotation.x = -0.6 - hr * 0.55; V.arms[0].rotation.z = 0.25; V.arms[1].rotation.x = -0.6 - hl * 0.55; V.arms[1].rotation.z = -0.25;
+      V.head.rotation.set(0.15 + hr * 0.12, Math.sin(t * 1.3) * 0.15, 0);
+      if (V.sticks) V.sticks.forEach(s => { s.visible = true; });
+    } else if (type === 'keys') {
+      const bt = Date.now() / (60000 / BAND.bpm);
+      V.arms[0].rotation.x = -0.95 + Math.abs(Math.sin(bt * Math.PI)) * 0.08; V.arms[0].rotation.z = 0.2 + Math.sin(t * 1.7) * 0.12;
+      V.arms[1].rotation.x = -0.95 + Math.abs(Math.sin(bt * Math.PI + 1)) * 0.08; V.arms[1].rotation.z = -0.2 + Math.sin(t * 1.3 + 1) * 0.12;
+      V.head.rotation.set(0.32 + Math.abs(Math.sin(bt * Math.PI)) * 0.1, Math.sin(t * 0.8) * 0.2, Math.sin(t * 1.6) * 0.08);
+      V.body.rotation.y = Math.sin(t * 0.9) * 0.08;
+    } else if (type === 'eguitar') {
+      const bt = Date.now() / (60000 / BAND.bpm), bang = Math.abs(Math.sin(bt * Math.PI));
+      V.arms[0].rotation.x = -1.15; V.arms[0].rotation.z = 0.8;
+      V.arms[1].rotation.x = -0.75 + Math.sin(t * 18) * 0.32; V.arms[1].rotation.z = 0.35;
+      V.head.rotation.set(0.1 + bang * 0.4, 0.1, 0); V.body.rotation.z = Math.sin(t * 1.1) * 0.08;
+      if (!sitting) V.body.position.y = (Math.floor(bt / 8) % 4 === 3 ? Math.max(0, Math.sin((bt % 1) * Math.PI)) * 0.12 : bang * 0.02);
+    } else if (type === 'dj') {
+      const bt = Date.now() / (60000 / BAND.bpm), bob = Math.abs(Math.sin(bt * Math.PI));
+      V.arms[1].rotation.x = -0.25; V.arms[1].rotation.z = -2.35;
+      V.arms[0].rotation.x = -0.95 + Math.sin(t * 9) * 0.12; V.arms[0].rotation.z = 0.15 + Math.sin(t * 9) * 0.25;
+      V.head.rotation.set(0.2 + bob * 0.3, 0, -0.15); if (!sitting) V.body.position.y = bob * 0.03;
     } else if (type === 'sleep') {
       V.head.rotation.set(0.5, 0, 0.25);
       V.arms[0].rotation.x = sitting ? -0.9 : 0; V.arms[1].rotation.x = sitting ? -0.9 : 0;
@@ -4147,7 +4259,7 @@ function main(){
     }
     const H = w.held; if (!H || !H.prop) return;
     const e = w.emote && w.mode !== 'walk' ? w.emote.type : null;
-    H.prop.visible = !(e === 'guitar' || e === 'sing');
+    H.prop.visible = !(e === 'guitar' || e === 'sing' || (e && EMOTES[e] && EMOTES[e].inst));
     if (e || w.hit > 0 || w.react) { H.prop.rotation.x = -(V.arms[1].rotation.x + V.elbows[1].rotation.x); return; }
     if (H.sip > 0) H.sip -= dt;
     else { H.nx -= dt; if (H.nx <= 0 && H.left > 0 && !w.fetch) { H.sip = 0.9; H.nx = 2.6 + Math.random() * 1.8; if (!w.remote) { consumeOne(w); if (!w.held) return; } } }
@@ -4697,6 +4809,8 @@ function main(){
     w.emote = { type: e.type, until: 0, nx: 0, t0: elapsed, style: st, mix: !!e.mix };
     if (e.type === 'guitar') guitarProp(w);
     if (e.type === 'sing') micProp(w);
+    if (e.type === 'drums') sticksProp(w);
+    if (e.type === 'eguitar') egtrProp(w);
     w.bkey = '';
   }
   function applyMove(w, mv) {
@@ -5426,7 +5540,7 @@ function main(){
         '<div class="f"><select id="cPlace" aria-label="Where">' + Object.keys(PLACE_NAME).filter(k => ['free', 'pool', 'game', 'court'].indexOf(k) < 0).map(k => '<option value="' + k + '"' + (cs.place === k ? ' selected' : '') + '>' + (k === 'desk' ? 'Stay at desk' : 'Go to ' + PLACE_NAME[k].replace('Harbour ', '')) + '</option>').join('') + '</select>' +
         '<button data-act="save" class="on">Save</button></div></div>';
     }
-    if (w.id === 'me') h += '<div class="lbl">Emotes</div><div class="emo" style="margin:0 0 10px">' + Object.keys(EMOTES).map(k => '<button data-act="emo2" data-k="' + k + '" class="' + (me.emote && me.emote.type === k ? 'cur' : '') + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>').join('') + '<button data-act="emo2" data-k="sit" class="' + (isSittingDown() ? 'cur' : '') + '">' + (isSittingDown() ? '🧍 Stand up' : '🪑 Sit') + '</button><button data-act="emo2" data-k="lie" class="' + (isResting() ? 'cur' : '') + '">🛌 ' + (isResting() ? 'Get up' : 'Lie down') + '</button></div>';
+    if (w.id === 'me') h += '<div class="lbl">Emotes</div><div class="emo" style="margin:0 0 10px">' + Object.keys(EMOTES).filter(k => !EMOTES[k].inst || (me.emote && me.emote.type === k)).map(k => '<button data-act="emo2" data-k="' + k + '" class="' + (me.emote && me.emote.type === k ? 'cur' : '') + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>').join('') + '<button data-act="emo2" data-k="sit" class="' + (isSittingDown() ? 'cur' : '') + '">' + (isSittingDown() ? '🧍 Stand up' : '🪑 Sit') + '</button><button data-act="emo2" data-k="lie" class="' + (isResting() ? 'cur' : '') + '">🛌 ' + (isResting() ? 'Get up' : 'Lie down') + '</button></div>';
     else if (w.emote) h += '<div class="where">' + emInfo(w.emote).emoji + ' ' + esc(w.name) + ' is ' + esc(emPhrase(w.emote)) + '</div>';
     h += '<div class="lbl">Working on</div>' + (t ? '<div class="task"><div class="t">' + esc(t.title) + ' · ' + Math.round(t.progress) + '%</div><div class="bar"><i style="width:' + t.progress + '%"></i></div></div>' : '<div class="task">No open tasks</div>') +
       '<div class="acts">' + (w.id !== 'me' ? '<button data-act="msg">Message</button>' : '') + (otherZone(w) ? '<button data-act="goroom" class="on">🚪 Go to ' + esc(ZBY[zoneAt(w.x, w.z)].short) + '</button>' : '<button data-act="find">Find</button>') + (w.remote ? '' : '<button data-act="look">🎨 Customize</button>') + '</div>';
@@ -5834,7 +5948,7 @@ function main(){
     bendLimbs(w, t);
     applyHeld(w, dt); applyReach(w);
     applyReact(w, dt);
-    if (!w.carriedBy && !w.flying) drunkPose(w, dt);
+    if (!w.carriedBy && !w.flying) { stageLift(w); drunkPose(w, dt); }
     bbPose(w); applySwim(w, dt); applyLie(w); gymPose(w, dt); applyAct(w); applyChair(w, dt); applySlide(w); applyHfx(w, dt);
     carryPose(w);
     if (!w.act && w._acted !== false) { if (w._acted) { V.body.rotation.y = 0; if (!w._lie) V.body.rotation.x = 0; V.arms[0].rotation.z = 0; V.arms[1].rotation.z = 0; } w._acted = false; } else if (w.act) w._acted = true;
@@ -7021,6 +7135,139 @@ function main(){
   }
 
 
+
+  // ================= band stage: playing the instruments =================
+  const INST = { drums: '🥁 drums', keys: '🎹 keyboard', eguitar: '🎸 electric guitar', dj: '🎧 DJ set' };
+  const BAND_CH = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], BAND_ROOT = [45, 41, 48, 43];
+  function instrTouch(w, kind) {
+    if (w !== me) return;
+    if (me.carrying || me.carriedBy) { toast('🤲 Your hands are busy right now!'); return; }
+    if (me.downUntil > Date.now()) { toast('💫 You’re still seeing stars…'); return; }
+    if (kind === 'eguitar') {
+      if (me.emote && me.emote.type === 'eguitar') { setEmote(me, null); return; }
+      if (me.held) dropItem(me, true);
+      setEmote(me, 'eguitar'); toast('🎸 You grabbed the electric guitar. Rock on! Walk away (or click the stand again) to put it back.'); return;
+    }
+    const S = BAND.spot[kind]; if (!S) return;
+    const other = workers.find(x => x !== me && x.emote && x.emote.type === kind && Math.hypot(x.x - S.pos[0], x.z - S.pos[1]) < 0.9);
+    if (other) { toast(INST[kind] + ': ' + other.name + ' is already playing. Grab another instrument and jam together!'); return; }
+    if (me.emote && me.emote.type === kind && me.at === S) { setEmote(me, null); return; }
+    if (me.held) dropItem(me, true);
+    if (me.at === S && !me.path.length) { startInstr(kind); return; }
+    S.by = null; sendMeTo(S); me.pendInstr = { kind: kind, spot: S, t: elapsed };
+  }
+  function startInstr(kind) {
+    if (me.emote && me.emote.type === kind) return;
+    setEmote(me, kind);
+    const n = workers.filter(x => x !== me && x.emote && INST[x.emote.type] && GRP(zoneAt(x.x, x.z)) === GRP(zoneAt(me.x, me.z))).length;
+    toast((kind === 'drums' ? '🥁 You’re on drums!' : kind === 'keys' ? '🎹 You’re on keys!' : '🎧 You’re on the decks!') + (n ? ' Jamming with ' + n + (n === 1 ? ' other' : ' others') + '.' : ' Everyone in the Bar can hear you.') + ' Walk away to stop.');
+  }
+  function stageLift(w) { const R = BAND.rect; if (R && w.x > R[0] && w.x < R[1] && w.z > R[2] && w.z < R[3]) w.v.root.position.y += 0.1; }
+  function bandBus() {
+    const c = actx(); if (!c) return null;
+    if (!BAND.bus) {
+      BAND.bus = c.createGain(); BAND.bus.gain.value = 0.85;
+      const comp = c.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 5; BAND.bus.connect(comp); comp.connect(audio.gain);
+      const len = c.sampleRate, b = c.createBuffer(1, len, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; BAND.noise = b;
+      const cv = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; cv[i] = Math.tanh(x * 7); } BAND.curve = cv;
+    }
+    return BAND.bus;
+  }
+  function bOsc(c, out, t, f, dur, type, vol, cut, f2) {
+    const o = c.createOscillator(), g = c.createGain(), lp = c.createBiquadFilter();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    lp.type = 'lowpass'; lp.frequency.value = cut || 4000;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(lp); lp.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.03);
+  }
+  function bNoise(c, out, t, type, freq, vol, dur, f2) {
+    const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = BAND.noise; f.type = type; f.frequency.setValueAtTime(freq, t); if (f2) f.frequency.exponentialRampToValueAtTime(f2, t + dur); f.Q.value = type === 'bandpass' ? 4 : 0.7;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(out); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
+  }
+  function bKick(c, out, t, vol) { const o = c.createOscillator(), g = c.createGain(); o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.18); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.32); o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.34); }
+  function playStep(kind, c, out, t, st, isMe) {
+    const pos = st % 16, bar = Math.floor(st / 16) % 4, ch = BAND_CH[bar], root = BAND_ROOT[bar], sp = 60 / BAND.bpm / 4;
+    if (kind === 'drums') {
+      if (pos === 0 || pos === 8 || pos === 10) { bKick(c, out, t, 0.95); if (isMe) BAND.hit = elapsed; }
+      if (pos === 4 || pos === 12) { bNoise(c, out, t, 'bandpass', 1900, 0.7, 0.18); bOsc(c, out, t, 210, 0.09, 'triangle', 0.25, 2000); }
+      if (bar === 3 && pos >= 12) { bOsc(c, out, t, [220, 180, 150, 120][pos - 12], 0.22, 'sine', 0.5, 1500, [160, 130, 105, 85][pos - 12]); }
+      else if (pos % 2 === 0) bNoise(c, out, t, 'highpass', 7500, pos === 14 ? 0.2 : 0.1, pos === 14 ? 0.25 : 0.05);
+      if (bar === 0 && pos === 0) bNoise(c, out, t, 'highpass', 5000, 0.35, 1.4);
+    } else if (kind === 'keys') {
+      if (pos === 0 || pos === 6 || pos === 8 || pos === 14) ch.concat([ch[0] + 12]).forEach((m, k) => { bOsc(c, out, t + k * 0.008, mtof(m), pos === 0 ? 1.6 : 0.5, 'triangle', 0.11, 3200); bOsc(c, out, t + k * 0.008, mtof(m + 12), pos === 0 ? 0.9 : 0.3, 'sine', 0.04, 5000); });
+      if (pos === 2 || pos === 10 || pos === 12) bOsc(c, out, t, mtof(ch[(pos / 2) % 3] + 24), 0.35, 'sine', 0.07, 6000);
+      if (pos === 0) bOsc(c, out, t, mtof(root), 1.6, 'triangle', 0.12, 900);
+    } else if (kind === 'eguitar') {
+      if (pos % 2 === 0) {
+        const r = root + 12, long = pos === 0 || pos === 8, dur = long ? sp * 3.8 : sp * 0.9;
+        const ws = c.createWaveShaper(), lp = c.createBiquadFilter(), g = c.createGain(); ws.curve = BAND.curve; lp.type = 'lowpass'; lp.frequency.value = long ? 3000 : 1600; g.gain.value = 0.16;
+        ws.connect(lp); lp.connect(g); g.connect(out);
+        [r, r + 7, r + 12].forEach((m, k) => bOsc(c, ws, t + k * 0.006, mtof(m), dur, 'sawtooth', 0.5, 6000));
+        setTimeout(() => { try { g.disconnect(); } catch (e) {} }, (dur + 0.5) * 1000 + Math.max(0, (t - c.currentTime) * 1000));
+      }
+      if (bar === 3 && pos >= 12 && pos % 1 === 0) bOsc(c, out, t, mtof(root + 24 + [0, 3, 5, 7][pos - 12]), sp * 0.95, 'square', 0.05, 2600);
+    } else if (kind === 'dj') {
+      if (pos % 4 === 0) bKick(c, out, t, 0.8);
+      if (pos === 4 || pos === 12) bNoise(c, out, t, 'bandpass', 1200, 0.5, 0.12);
+      if (pos % 4 === 2) { bOsc(c, out, t, mtof(root - 12), sp * 1.8, 'sawtooth', 0.22, 420); bNoise(c, out, t, 'highpass', 9000, 0.12, 0.06); }
+      if ((bar === 1 || bar === 3) && (pos === 12 || pos === 13 || pos === 14)) bNoise(c, out, t, 'bandpass', pos === 13 ? 2600 : 900, 0.35, sp * 0.9, pos === 13 ? 700 : 2800);
+      if (bar === 3 && pos === 0) bOsc(c, out, t, 200, sp * 14, 'sawtooth', 0.05, 2500, 1600);
+    }
+  }
+  function instrTick(dt) {
+    const e = me.emote;
+    if (me.pendInstr) {
+      const P = me.pendInstr;
+      if (me.at === P.spot && !me.path.length && !me.travel && !me.travelDoor) { me.pendInstr = null; startInstr(P.kind); }
+      else if ((me.at !== P.spot && !me.travel && !me.travelDoor) || elapsed - P.t > 30) me.pendInstr = null;
+    }
+    if (e && BAND.spot[e.type] && (me.at !== BAND.spot[e.type] || me.path.length)) setEmote(me, null);
+    const myG = GRP(zoneAt(me.x, me.z));
+    const players = workers.filter(w => w.emote && INST[w.emote.type] && w.mode !== 'walk' && !w.path.length && !w.carriedBy && !w.flying);
+    const here = players.filter(w => GRP(zoneAt(w.x, w.z)) === myG);
+    BAND.live = players.some(w => zoneAt(w.x, w.z) === 'bar');
+    if (here.length && audio.speaker && !(typeof MV !== 'undefined' && MV.on)) {
+      const c = actx();
+      if (c && c.state === 'running' && bandBus()) {
+        const stepMs = 60000 / BAND.bpm / 4, now = Date.now(), cur = Math.floor(now / stepMs), until = Math.floor((now + 130) / stepMs);
+        if (BAND.last < cur - 1 || BAND.last > until + 2) BAND.last = cur - 1;
+        while (BAND.last < until) {
+          BAND.last++;
+          const st = BAND.last, t = c.currentTime + Math.max(0.005, (st * stepMs - now) / 1000);
+          here.forEach(w => {
+            const d = Math.hypot(w.x - me.x, w.z - me.z), vol = w === me ? 1 : Math.max(0.15, Math.min(1, 1.15 - d / 16));
+            const g = c.createGain(); g.gain.value = vol; g.connect(BAND.bus);
+            try { playStep(w.emote.type, c, g, t, st, w === me || w.emote.type === 'drums'); } catch (er) {}
+            setTimeout(() => { try { g.disconnect(); } catch (er) {} }, 2600);
+          });
+        }
+      }
+    } else BAND.last = -1;
+    // stage lights and gear
+    const beat = (Date.now() / (60000 / BAND.bpm)) % 1, pulse = BAND.live ? Math.pow(1 - beat, 3) : 0;
+    BAND.lights.forEach((l, k) => l.material.color.setHSL(BAND.live ? (elapsed * 0.15 + k / 6) % 1 : 0.12, BAND.live ? 1 : 0.2, BAND.live ? 0.45 + pulse * 0.3 : 0.25));
+    BAND.leds.forEach((l, k) => l.material.color.setHSL(BAND.live ? ((k / 16) + elapsed * 0.4) % 1 : 0.9, 1, BAND.live ? 0.35 + (Math.floor(elapsed * 8 + k) % 4 === 0 ? 0.3 : 0) : 0.15));
+    const drum = players.find(w => w.emote.type === 'drums'), dj = players.find(w => w.emote.type === 'dj'), keys = players.find(w => w.emote.type === 'keys');
+    BAND.cym.forEach((m, k) => { m.rotation.x = drum ? Math.sin(elapsed * 22 + k) * 0.08 * pulse * 2 : 0; });
+    BAND.heads.forEach((m, k) => { m.scale.y = drum ? 1 + pulse * 2 : 1; });
+    BAND.platters.forEach((p, k) => { if (dj) p.rotation.y += dt * (3.5 + (k ? Math.sin(elapsed * 3) * 2 : 0)); });
+    if (BAND.djScr) BAND.djScr.material.color.setHSL(dj ? (elapsed * 0.3) % 1 : 0.33, 1, dj ? 0.5 : 0.25);
+    if (BAND.keyLcd) BAND.keyLcd.material.color.setHSL(keys ? 0.55 + pulse * 0.1 : 0.55, 1, keys ? 0.45 + pulse * 0.3 : 0.2);
+    if (BAND.standGtr) BAND.standGtr.visible = !players.some(w => w.emote.type === 'eguitar') && !workers.some(w => w.emote && w.emote.type === 'eguitar');
+  }
+  function sticksProp(w) {
+    if (w.v.sticks) return w.v.sticks;
+    const m = new THREE.MeshStandardMaterial({ color: 0xe8c690, roughness: 0.6 }), out = [];
+    w.v.hands.forEach(h => { const s = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.016, 0.36, 6), m); s.position.set(0, -0.04, 0.12); s.rotation.x = Math.PI / 2 - 0.5; s.castShadow = true; h.add(s); out.push(s); applyStyleTo(s); });
+    w.v.sticks = out; return out;
+  }
+  function egtrProp(w) {
+    if (w.v.egtr) return w.v.egtr;
+    const g = makeEGuitar(); g.position.set(0.02, 0.84, 0.2); g.rotation.set(0, 0, 1.1); g.scale.set(1.25, 1.25, 1.25); w.v.body.add(g); w.v.egtr = g; applyStyleTo(g); return g;
+  }
+
   // ================= drunk walking (3+ beers) =================
   // 3 beers = drunk for 3 minutes: slow, weaving walk, stumbles, and sometimes you fall flat.
   const DRUNK_MS = 180000;
@@ -8122,7 +8369,7 @@ function main(){
       if (me.emote && me.emote.type === 'sleep') setEmote(me, null);
       toast('🤕 You wake up with a headache. Maybe some water?'); me.drunkBed = null; renderBar(); renderPantry();
     }
-    bbTick(dt); gymTick(dt); beachTick(dt); combatTick(dt); carryTick(dt); matchBallTick();
+    bbTick(dt); gymTick(dt); beachTick(dt); combatTick(dt); carryTick(dt); instrTick(dt); matchBallTick();
     workers.forEach(ballTick);
     if (Math.floor(elapsed * 2) !== Math.floor((elapsed - dt) * 2)) drawMovie();
     movieLight.intensity = night ? 0.7 : 0.25;
