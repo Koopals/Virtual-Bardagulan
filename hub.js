@@ -4,16 +4,7 @@
 // tested without a server.
 
 const STATE_KEYS = ['name', 'role', 'look', 'status', 'custom', 'mic', 'emote', 'held', 'talk', 'fx', 'desk', 'task', 'zone', 'mv'];
-const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score', 'next'];
-const GAME_TABLES = ['chess', 'checkers', 'reversi', 'connect4', 'ttt'];
-const newTable = () => ({ seats: [null, null], log: [] });
-// message id and the message being replied to (who wrote it, their name and a short quote)
-function chatExtra(m) {
-  const x = {};
-  if (m.mid) x.mid = str(m.mid, 24);
-  if (m.re && typeof m.re === 'object') x.re = { mid: str(m.re.mid, 24), u: str(m.re.u, 24), n: str(m.re.n, 20), t: str(m.re.t, 90) };
-  return x;
-}
+const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room'];
 
 const str = (v, n) => String(v == null ? '' : v).slice(0, n);
 const roomName = v => str(v, 24).toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'lobby';
@@ -44,7 +35,7 @@ function createHub(opts) {
 
   const roomOf = name => {
     let r = rooms.get(name);
-    if (!r) { r = { clients: new Map(), music: null, games: {} }; GAME_TABLES.forEach(g => { r.games[g] = newTable(); }); rooms.set(name, r); }
+    if (!r) { r = { clients: new Map(), music: null }; rooms.set(name, r); }
     return r;
   };
   const send = (c, obj) => { try { c.sock.send(JSON.stringify(obj)); } catch (e) {} };
@@ -120,7 +111,7 @@ function createHub(opts) {
         c.state = cleanState(m.state);
         const peers = [...room.clients.values()].map(p => ({ id: p.id, state: p.state }));
         room.clients.set(c.id, c);
-        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, movie: room.movie || null, games: room.games, token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
+        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
         broadcast(room, { t: 'join', id: c.id, state: c.state }, c.id);
         return;
       }
@@ -138,10 +129,10 @@ function createHub(opts) {
         if (!text) return;
         if (m.to) {   // whisper: only the person it's for gets it
           const tgt = room.clients.get(String(m.to));
-          if (tgt) send(tgt, Object.assign({ t: 'chat', from: c.id, text: text, to: true }, chatExtra(m)));
+          if (tgt) send(tgt, { t: 'chat', from: c.id, text: text, to: true });
           return;
         }
-        const out = Object.assign({ t: 'chat', from: c.id, text: text, voice: !!m.voice, priv: !!m.priv }, chatExtra(m));
+        const out = { t: 'chat', from: c.id, text: text, voice: !!m.voice, priv: !!m.priv };
         if (m.priv) {   // said inside the meeting room: only people inside get the words
           broadcast(room, out, c.id, p => p.state.zone === 'room');
           broadcast(room, { t: 'muf', from: c.id }, c.id, p => p.state.zone !== 'room');
@@ -158,31 +149,9 @@ function createHub(opts) {
         for (const k of EV_KEYS) {
           if (!(k in m)) continue;
           const v = m[k];
-          ev[k] = (typeof v === 'number' && isFinite(v)) || typeof v === 'boolean' ? v : str(v, k === 'url' ? 1000 : 120);
-        }
-        if (ev.k === 'game') {   // board games: the hub keeps seats and the move list so late joiners see the same board
-          const tb = room.games[ev.table];
-          if (!tb) return;
-          if (ev.act === 'seat') {
-            const i = ev.seat === 1 ? 1 : 0;
-            if (tb.seats[i] && tb.seats[i] !== c.id) { send(c, { t: 'ev', from: c.id, k: 'game', table: ev.table, act: 'seatno' }); return; }
-            tb.seats = tb.seats.map(x => x === c.id ? null : x); tb.seats[i] = c.id;
-            if (!tb.seats[1 - i]) tb.log = [];
-          } else if (ev.act === 'unseat') tb.seats = tb.seats.map(x => x === c.id ? null : x);
-          else if (ev.act === 'reset' || ev.act === 'move') {
-            if (tb.seats.indexOf(c.id) < 0) return;
-            if (ev.act === 'reset') tb.log = [];
-            else {
-              const n = tb.log.length;   // moves alternate, so the seat whose turn it is follows from the count
-              if (ev.n !== n || tb.seats[n % 2] !== c.id || !tb.seats[1 - n % 2] || n >= 800) return;
-              tb.log.push({ act: 'move', mv: str(ev.mv, 16) });
-            }
-          } else return;
-          broadcast(room, ev);
-          return;
+          ev[k] = (typeof v === 'number' && isFinite(v)) || typeof v === 'boolean' ? v : str(v, 120);
         }
         if (ev.k === 'music') room.music = ev.kind === 'stop' ? null : Object.assign({}, ev, { by: c.id });
-        if (ev.k === 'movie') room.movie = ev.kind === 'stop' ? null : Object.assign({}, ev, { by: c.id });
         if (ev.k === 'dance' && ev.to) {   // dance invites go to one person
           const tgt = room.clients.get(String(ev.to));
           if (tgt) send(tgt, ev);
@@ -200,7 +169,6 @@ function createHub(opts) {
       const room = rooms.get(name);
       if (!room) return;
       room.clients.delete(c.id);
-      for (const g of GAME_TABLES) { const tb = room.games[g]; if (tb && tb.seats.indexOf(c.id) > -1) { tb.seats = tb.seats.map(x => x === c.id ? null : x); if (!tb.seats[0] && !tb.seats[1]) tb.log = []; } }
       broadcast(room, { t: 'leave', id: c.id });
       if (!room.clients.size) rooms.delete(name);
     }
