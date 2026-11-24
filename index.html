@@ -269,7 +269,7 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpg{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .dpg button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 3px;font-size:11px;min-width:0;line-height:1.2}
 .dpg .de{font-size:19px;line-height:1.1}
-.carrybar{left:50%;bottom:86px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:14px;z-index:30;font-size:13px}.carrybar span{padding:0 4px}
+.carrybar{left:50%;bottom:86px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:14px;z-index:30;font-size:13px}.carrybar span{padding:0 4px}.carrybar{flex-wrap:wrap;justify-content:center;max-width:min(560px,calc(100% - 28px))}.cyaim{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding-top:6px;border-top:1px solid var(--color-border-light)}.cyaim .cyh{font-size:11.5px;color:var(--color-text-secondary)}.cyaim button small{color:var(--color-text-muted)}
 .ipg{grid-template-columns:repeat(3,1fr)}
 .dplbl{font-size:11px;font-weight:700;color:var(--color-text-secondary);margin:8px 2px 4px}
 .dpg button.cur,.dpf button.cur{background:#ec4899;border-color:#ec4899;color:#fff}
@@ -289,6 +289,7 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpad{display:grid;grid-template-columns:repeat(3,44px);gap:4px;justify-content:center;margin:8px 0}.dpad button{height:38px;padding:0;font-size:15px}
 .meter{height:8px;border-radius:4px;background:var(--color-surface-active);overflow:hidden;margin:0 0 4px}.meter i{display:block;height:100%;background:linear-gradient(90deg,#f5c542,#f08a24,#d6262f)}
 #lkHost{display:none;width:100%;height:100%}#lkHost iframe,#lkHost video{display:block;width:100%;height:100%;border:0;background:#000}
+.ytmini:not(.theater){position:fixed!important;left:-10000px!important;top:0!important;right:auto!important;width:320px!important;opacity:0;pointer-events:none}
 .ytmini.theater{top:50%;left:calc((100% - var(--panel-w)) / 2);right:auto;transform:translate(-50%,-50%);width:min(960px,calc(100% - var(--panel-w) - 40px));z-index:70}
 .ytmini.theater .ytframe{height:auto;aspect-ratio:16/9;max-height:calc(100vh - 120px)}
 .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 10px}
@@ -3267,8 +3268,8 @@ function main(){
     if (!n) s = '<div class="npe">Nothing playing. Pick a station, or play a song from your computer.</div>';
     else {
       const by = byId[n.by] || me;
-      s = '<div class="npc"><div class="eq' + (audible() ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 On the player · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
-        (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">⛶ Big screen</button><button data-m="save">⭐ Save</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
+      s = '<div class="npc"><div class="eq' + (audible() ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 Playing for the room · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
+        (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">' + (($('ytMini') && $('ytMini').classList.contains('theater')) ? '🗗 Close big screen' : '⛶ Big screen') + '</button><button data-m="save">⭐ Save</button>' : '') + (n.kind === 'link' && n.mode === 'video' && n.el && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
         (n.kind === 'yt' && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') +
         (n.kind === 'yt' && !(n.yt === 'playing' || n.yt === 'paused' || n.yt === 'loading') ? '<a class="btn yt" href="' + esc(n.url) + '" target="_blank" rel="noopener">' + (n.yt === 'search' ? 'Search on ' : 'Open on ') + esc(n.src) + '</a>' : '') +
         (n.kind !== 'yt' && n.kind !== 'link' || ytPlayable(n) ? '<div class="lvl"><i id="npLvl"></i></div>' : '') + '<button data-m="skip">' + (music.queue.some(q => q.kind === 'file' || q.kind === 'link' || ytPlayable(q)) ? 'Next song' : n.kind === 'radio' ? 'Next station' : 'Skip') + '</button><button data-m="stop">Stop</button></div>';
@@ -3283,6 +3284,7 @@ function main(){
     if (d.radio) { if (music.key === d.radio) stopMusic(); else playRadio(d.radio, 'me'); }
     else if (d.m === 'stop') stopMusic();
     else if (d.m === 'test') testSound();
+    else if (d.m === 'pp' && music.now && music.now.kind === 'link' && music.now.el && music.now.el.play) { try { if (music.now.yt === 'playing') music.now.el.pause(); else { const pr = music.now.el.play(); if (pr && pr.catch) pr.catch(() => {}); } } catch (e) {} }
     else if (d.m === 'pp' && yt.player && yt.ready) { try { if (music.now.yt === 'playing') yt.player.pauseVideo(); else yt.player.playVideo(); } catch (e) {} }
     else if (d.m === 'skip') skipMusic();
     else if (d.m === 'th') toggleTheater();
@@ -3424,11 +3426,12 @@ function main(){
     sleep: { label: 'Sleeping', emoji: '😴', color: '#3b82f6', short: 'Sleep' }
   };
 
-  // ================= 30 dances (20 classics + 4 Pinoy TikTok + 6 TikTok viral) =================
+  // ================= 33 dances (23 classics + 4 Pinoy TikTok + 6 TikTok viral) =================
   const DANCES = [['groove', 'Groove', '🕺'], ['disco', 'Disco point', '✨'], ['robot', 'Robot', '🤖'], ['floss', 'Floss', '🧵'], ['dab', 'Dab', '😎'],
     ['twist', 'Twist', '🌀'], ['runman', 'Running man', '🏃'], ['sprinkler', 'Sprinkler', '💦'], ['cart', 'Shopping cart', '🛒'], ['roof', 'Raise the roof', '🙌'],
     ['chicken', 'Chicken dance', '🐔'], ['hula', 'Hula', '🌺'], ['spin', 'Spin', '💫'], ['jacks', 'Jumping jacks', '⭐'], ['headbang', 'Headbang', '🤘'],
     ['wave', 'Arm wave', '🌊'], ['cabbage', 'Cabbage patch', '🥬'], ['cancan', 'Can-can', '🦵'], ['salsa', 'Salsa', '💃'], ['moonwalk', 'Moonwalk', '🌙'],
+    ['hiphop', 'Hip-hop', '🧢'], ['shuffle', 'Shuffle', '👟'], ['toprock', 'Breakdance', '🔥'],
     // Pinoy TikTok dances (simple takes on the moves, made for the office characters)
     ['ikembot', 'Ikembot Mo', '🏄', 'ph'], ['ale', 'Ale fit check', '👗', 'ph'], ['budots', 'Budots', '🔊', 'ph'], ['drbeat', 'Dr. Beat', '🩺', 'ph'],
     // global TikTok viral dances
@@ -3558,6 +3561,17 @@ function main(){
         if (k3 % 2 === 0) { legs(-0.45 * kick, 0); kn = [0.2 * kick, 0.08]; } else { legs(0, -0.45 * kick); kn = [0.08, 0.2 * kick]; }
         arm(0, -0.25 - kick * 0.15, -0.2); arm(1, -0.25 - kick * 0.15, 0.2); el = [-1.4, -1.4];
         B.rotation.y = k3 < 2 ? 0.2 : -0.2; Hd.rotation.set(0.05, 0, k3 < 2 ? 0.12 : -0.12); up(kick * 0.03); break; }
+      case 'hiphop':
+        kn = [0.35 + as * 0.4, 0.35 + as * 0.4]; up(-as * 0.05); legs(-0.12 - as * 0.15, -0.12 - as * 0.15); legz(-0.12, 0.12);
+        B.rotation.x = 0.12 + as * 0.08; B.rotation.y = Math.sin(b / 2) * 0.35;
+        arm(0, -0.5 - P * 0.7, -0.3 - P * 0.45); arm(1, -0.5 - N * 0.7, 0.3 + N * 0.45); el = [-1.25, -1.25];
+        Hd.rotation.x = as * 0.28; Hd.rotation.y = -Math.sin(b / 2) * 0.2; break;
+      case 'shuffle':
+        legz(-P * 0.55, N * 0.55); legs(-P * 0.3, -N * 0.3); kn = [0.1 + P * 0.7, 0.1 + N * 0.7]; up(as * 0.05); side(Math.sin(b / 2) * 0.05);
+        arm(0, -0.6 + s * 0.35, -0.2); arm(1, -0.6 - s * 0.35, 0.2); el = [-1.45, -1.45]; Hd.rotation.x = as * 0.12; break;
+      case 'toprock':
+        legs(-P * 0.7, -N * 0.7); kn = [0.3 + P * 0.8, 0.3 + N * 0.8]; B.rotation.x = 0.22; B.rotation.y = s * 0.4; up(-0.02 + as * 0.04);
+        arm(0, -1.1, -0.2 - c * 0.8); arm(1, -1.1, 0.2 + c * 0.8); el = [-1.0, -1.0]; Hd.rotation.y = -s * 0.25; Hd.rotation.x = 0.1; break;
       case 'moonwalk':
         legs(s * 0.3, -s * 0.3); kn = [N * 0.9 + 0.05, P * 0.9 + 0.05]; if (!sit) B.position.z = -0.22 * (0.5 - 0.5 * Math.cos(b / 4));
         arm(0, -0.2 * s, -0.15); arm(1, 0.2 * s, 0.15); el = [-0.5, -0.5]; Hd.rotation.x = 0.1; B.rotation.x = 0.05; up(as * 0.02); break;
@@ -5811,6 +5825,7 @@ function main(){
       const w = pickAt(e.clientX, e.clientY);
       if (w === JUKE) { showTab('music'); closeCard(); itemAnim(jukeItem, 'bounce', 0.6, 0.7); tsound('boop'); }
       else if (w && w.pantry) { openPantry(); if (w.pantry === 'coffee') fetchItem('coffee'); }
+      else if (w && me.carrying && w !== me && w !== me.carrying && !w.isDummy) throwAt(w);
       else if (w) openCard(w.id);
       else if (me.downUntil > Date.now()) toast('💫 You’re still seeing stars… give it a few seconds.');
       else { closeCard(); if (!walking) { const fp = floorPoint(), ih = itemFromHit(); if (ih && ih.it && ih.it.slide) { goSlide(); } else if (ih && ih.it && ih.it.door) { useDoor(ih.it.door); } else if (ih && ih.it && ih.it.game) { goGame(ih.it.game); } else if (ih && ih.it === barItem) { openBar(); } else if (ih && ih.it === dummyItem) { openAtk(); } else if (fp && POOL_IN(fp[0], fp[1]) && !(ih && ih.it)) { swimClick({ x: fp[0], z: fp[1] }); } else if (ih && (ih.it || ih.laptop)) startTouch(me, ih); else { const seat = seatFromHit(); if (seat) sitAt(seat); else if (ih && ih.gen) startTouch(me, ih); else { const p = floorPoint(); if (p) walkMeTo(p[0], p[1]); } } } }
@@ -7428,13 +7443,14 @@ function main(){
     if (NET.on && tgt.remote) netSend({ t: 'ev', k: 'carry', act: drop ? 'drop' : 'throw', to: tgt.netId, mv: r2(to[0]) + ',' + r2(to[1]) });
     release(me, tgt, to, !drop);
   }
-  function release(from, tgt, to, thrown) {
+  function release(from, tgt, to, thrown, at) {
     if (from) { from.carrying = null; if (thrown) from.act = { kind: 'throw', t0: elapsed, dur: 0.6 }; }
     tgt.carriedBy = null;
     if (thrown) {
-      const R = from ? from.v.root.position : tgt.v.root.position;
-      CARRY.flights.push({ w: tgt, from: [R.x, R.z], to: to, t0: elapsed, dur: 0.95 }); tgt.flying = true;
-      post(null, '🚀 ' + nmOf(from) + ' threw ' + objOf(tgt) + ' across the room!');
+      const R = from ? from.v.root.position : tgt.v.root.position, dist = Math.hypot(to[0] - R.x, to[1] - R.z);
+      CARRY.flights.push({ w: tgt, from: [R.x, R.z], to: to, t0: elapsed, dur: at ? Math.max(0.6, Math.min(1.4, 0.45 + dist * 0.09)) : 0.95, at: at || null, by: from }); tgt.flying = true;
+      if (!at) post(null, '🚀 ' + nmOf(from) + ' threw ' + objOf(tgt) + ' across the room!');
+      else floatFx(at, rnd(['Wait—', 'Uh oh…', 'NO NO NO', '😨']));
       floatFx(tgt, rnd(['AAAAH!', 'Wheee!', 'Noooo!', '😵']));
     } else place(tgt, to, false);
     renderCarryBar();
@@ -7461,11 +7477,11 @@ function main(){
     post(null, '🤸 You wiggled free from ' + c.name + '!'); renderCarryBar();
   }
   function applyNetCarry(m, w) {
-    const tgt = m.act === 'free' ? w : cByNet(String(m.to || '')), from = m.act === 'free' ? cByNet(String(m.to || '')) : w;
+    const tgt = m.act === 'free' ? w : (m.to ? cByNet(String(m.to)) : w && w.carrying), from = m.act === 'free' ? cByNet(String(m.to || '')) : w;
     if (!tgt || !from || tgt === from) return;
     const mp = String(m.mv == null ? '' : m.mv).split(',').map(Number), to = mp.length === 2 && isFinite(mp[0]) && isFinite(mp[1]) && m.mv !== '' ? NAVG.snap(mp[0], mp[1]) || [from.x, from.z] : [from.x, from.z];
     if (m.act === 'pick') { if (from.carrying) from.carrying.carriedBy = null; if (tgt.carriedBy && tgt.carriedBy !== from) tgt.carriedBy.carrying = null; grab(from, tgt); }
-    else if (m.act === 'throw' || m.act === 'drop') { if (tgt.carriedBy === from || from.carrying === tgt) release(from, tgt, to, m.act === 'throw'); }
+    else if (m.act === 'throw' || m.act === 'drop') { if (tgt.carriedBy === from || from.carrying === tgt) { const at = m.act === 'throw' && m.key ? cByNet(String(m.key)) : null; release(from, tgt, to, m.act === 'throw', at && at !== tgt && at !== from ? at : null); } }
     else if (m.act === 'free') { if (from.carrying === tgt) from.carrying = null; tgt.carriedBy = null; if (tgt !== me) place(tgt, to, false); post(null, '🤸 ' + tgt.name + ' wiggled free from ' + objOf(from) + '!'); renderCarryBar(); }
   }
   function carryPose(w) {
@@ -7496,6 +7512,7 @@ function main(){
       if (!workers.includes(c)) { me.carriedBy = null; place(me, NAVG.snap(me.x, me.z) || [me.x, me.z], false); renderCarryBar(); }
       else { me.x = c.x; me.z = c.z; }
     }
+    if (me.carrying && Math.floor(elapsed) !== Math.floor(elapsed - dt)) renderCarryBar();
     if (me.carrying) {
       const tg = me.carrying;
       if (!workers.includes(tg) || tg.carriedBy !== me) { me.carrying = null; renderCarryBar(); }
@@ -7513,16 +7530,47 @@ function main(){
         const wet = WATER_IN(F.to[0], F.to[1]);
         fxSound(wet ? 'thud' : 'crash'); pow(screenPos(F.w)); floatFx(F.w, wet ? '💦 SPLASH!' : '💥');
         place(F.w, F.to, !wet);
+        if (F.at) hitByThrow(F.at, F.w, F.by);
       }
     }
   }
   const carryBar = document.createElement('div'); carryBar.id = 'carryBar'; carryBar.className = 'float carrybar'; carryBar.hidden = true; document.body.appendChild(carryBar);
   function renderCarryBar() {
-    if (me.carrying) { carryBar.hidden = false; carryBar.innerHTML = '<span>🤲 Carrying <b>' + esc(me.carrying.name) + '</b></span><button data-cy="throw" class="on">🚀 Throw</button><button data-cy="drop">⬇ Put down</button>'; }
+    if (me.carrying) { const tt = throwTargets(); carryBar.hidden = false; carryBar.innerHTML = '<span>🤲 Carrying <b>' + esc(me.carrying.name) + '</b></span><button data-cy="throw" class="on">🚀 Throw</button>' + (tt.length ? '<button data-cy="aim"' + (carryBar._aim ? ' class="on"' : '') + '>🎯 Throw at…</button>' : '') + '<button data-cy="drop">⬇ Put down</button>' +
+      (carryBar._aim && tt.length ? '<div class="cyaim"><span class="cyh">Throw ' + esc(me.carrying.name) + ' at:</span>' + tt.map(w => '<button data-cy="at" data-id="' + esc(w.id) + '">' + esc(w.name) + ' <small>' + Math.round(Math.hypot(w.x - me.x, w.z - me.z)) + 'm</small></button>').join('') + '<span class="cyh">or click someone in the office</span></div>' : ''); }
+    else carryBar._aim = false;
+    if (me.carrying) return;
     else if (me.carriedBy) { carryBar.hidden = false; carryBar.innerHTML = '<span>😱 <b>' + esc(me.carriedBy.name) + '</b> is carrying you!</span><button data-cy="wiggle" class="on">🤸 Wiggle free</button>'; }
     else carryBar.hidden = true;
   }
-  carryBar.addEventListener('click', e => { const b = e.target.closest('[data-cy]'); if (!b) return; const a = b.dataset.cy; if (a === 'throw') throwCarried(false); else if (a === 'drop') throwCarried(true); else if (a === 'wiggle') wiggleFree(); });
+  carryBar.addEventListener('click', e => { const b = e.target.closest('[data-cy]'); if (!b) return; const a = b.dataset.cy; if (a === 'throw') { carryBar._aim = false; throwCarried(false); } else if (a === 'aim') { carryBar._aim = !carryBar._aim; renderCarryBar(); } else if (a === 'at') { carryBar._aim = false; throwAt(byId[b.dataset.id]); } else if (a === 'drop') { carryBar._aim = false; throwCarried(true); } else if (a === 'wiggle') wiggleFree(); });
+
+  // ---- throw the person you carry at someone else ----
+  function throwTargets() {
+    if (!me.carrying) return [];
+    const g = GRP(zoneAt(me.x, me.z));
+    return workers.filter(w => w !== me && w !== me.carrying && !w.isDummy && !w.carriedBy && !w.flying && GRP(zoneAt(w.x, w.z)) === g && Math.hypot(w.x - me.x, w.z - me.z) < 12)
+      .sort((a, b) => Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z)).slice(0, 6);
+  }
+  function throwAt(tgtW) {
+    const tg = me.carrying; if (!tg || !tgtW || tgtW === tg || tgtW === me) return;
+    if (GRP(zoneAt(tgtW.x, tgtW.z)) !== GRP(zoneAt(me.x, me.z))) { toast(tgtW.name + ' is in another room.'); return; }
+    const d = Math.hypot(tgtW.x - me.x, tgtW.z - me.z);
+    if (d > 12) { toast(tgtW.name + ' is too far away to hit. Get closer!'); return; }
+    me.tyaw = me.yaw = Math.atan2(tgtW.x - me.x, tgtW.z - me.z);
+    const back = Math.min(0.5, d * 0.3), to = NAVG.snap(tgtW.x - Math.sin(me.yaw) * back, tgtW.z - Math.cos(me.yaw) * back) || [tgtW.x, tgtW.z];
+    if (NET.on) netSend({ t: 'ev', k: 'carry', act: 'throw', to: tg === me ? '' : (tg.remote ? tg.netId : ''), mv: r2(to[0]) + ',' + r2(to[1]), key: cIdOf(tgtW) || '' });
+    release(me, tg, to, true, tgtW);
+  }
+  function hitByThrow(victim, missile, thrower) {
+    if (!victim || victim.flying || victim.carriedBy) return;
+    if (WATER_IN(victim.x, victim.z)) { floatFx(victim, '💦'); return; }
+    pow(screenPos(victim)); floatFx(victim, rnd(['OOF!', 'BONK!', 'STRIKE! 🎳', '😵']));
+    if (victim === me) { knockDown(5); toast('🎳 ' + (missile === me ? 'You' : missile.name) + ' got thrown into you! Down for 5 s…'); }
+    else victim.hit = 2.2;
+    post(null, '🎳 Strike! ' + nmOf(thrower) + ' threw ' + objOf(missile) + ' right into ' + (victim === me ? 'you' : victim.name) + '!');
+  }
+
 
   // ================= falling down =================
   function knockDown(secs) {
@@ -8201,7 +8249,7 @@ function main(){
       v.addEventListener('ended', () => { if (music.now === n) skipMusic(); });
       v.addEventListener('error', () => { if (music.now === n) { n.yt = 'error'; n.err = 'This file couldn’t play here. The site may block it, or the format isn’t supported.'; renderMusic(); } });
       lh.appendChild(v); n.el = v;
-      try { const p = v.play(); if (p && p.catch) p.catch(() => { if (music.now === n) { n.yt = 'paused'; renderMusic(); toast('Click ▶ on the player to start it.'); } }); } catch (e) {}
+      try { const p = v.play(); if (p && p.catch) p.catch(() => { if (music.now === n) { n.yt = 'paused'; renderMusic(); toast('Open the 🎵 Music menu and press ▶ Play to start it.'); } }); } catch (e) {}
     } else {
       const f = document.createElement('iframe');
       f.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
@@ -8212,10 +8260,11 @@ function main(){
       f.addEventListener('load', () => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } });
       lh.appendChild(f); n.el = f;
       setTimeout(() => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } }, 4000);
+      if (!/youtube|vimeo|dailymotion|drive\.google/.test(n.embed)) setTimeout(() => { if (music.now === n) toast('🎵 If it doesn’t start, open the 🎵 Music menu → ⛶ Big screen and press play there.'); }, 2500);
     }
   }
-  function toggleTheater(on) { const m = $('ytMini'); const v = on == null ? !m.classList.contains('theater') : on; m.classList.toggle('theater', v); $('ytTh').textContent = v ? '🗗' : '⛶'; }
-  $('ytTh').addEventListener('click', () => toggleTheater());
+  function toggleTheater(on) { const m = $('ytMini'); const v = on == null ? !m.classList.contains('theater') : on; m.classList.toggle('theater', v); $('ytTh').textContent = v ? '✕ Close screen' : '⛶'; $('ytTh').title = v ? 'Close the big screen (keeps playing)' : 'Big screen'; if (typeof renderMusic === 'function') renderMusic(); }
+  $('ytTh').addEventListener('click', () => { const was = $('ytMini').classList.contains('theater'); toggleTheater(); if (was) toast('🎵 Still playing. Use the Music menu to pause or stop.'); });
 
   // ================= wing items & animation =================
   [mPart, mPartCap].forEach(m => SCENERY.add(m));
