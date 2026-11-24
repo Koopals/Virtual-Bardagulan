@@ -477,6 +477,7 @@ body.watching #bubbles,body.watching .dock,body.watching .camctl,body.watching .
 .pkt span{font-size:11px;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pk button{width:28px;height:28px;padding:0;border-radius:50%;font-size:13px;flex:none}
 .pksearch{display:flex;gap:6px;margin:0 0 8px}.pksearch input{flex:1;min-width:0}
+.mvolsec{margin-top:-2px;padding-top:8px}.mvolsec .lbl{display:flex;justify-content:space-between;align-items:center}.mvolsec #mvolPct{font-weight:800;color:var(--color-text)}.mvrow{display:flex;gap:8px;align-items:center}.mvrow input{flex:1;min-width:0}.mvrow button{flex:none;padding:4px 10px}
 .pknote{font-size:11.5px;color:var(--color-text-secondary);padding:6px 4px;line-height:1.4}.pknote.pkerr{background:rgba(245,158,11,.12);border-radius:8px;padding:8px 10px;color:var(--color-text-primary,#222)}
 #picksBody .lbl{margin-top:8px}
 .ward{position:fixed;inset:0;z-index:4200;display:flex;gap:0;background:rgba(10,12,26,.55);backdrop-filter:blur(3px);font-family:var(--page-font)}
@@ -634,6 +635,7 @@ body.habbo .wd-it.on{border-color:#e8342e;box-shadow:inset 0 0 0 2px rgba(255,25
   <div class="float dd" id="ddMusic" hidden><div class="ddh">🎵 Music</div>
   <div class="pane" id="pMusic">
     <div class="np" id="np"></div>
+    <div class="msec mvolsec"><div class="lbl">🔊 Music volume <span id="mvolPct">85%</span></div><div class="mvrow"><input type="range" id="mvol" min="0" max="100" value="85" aria-label="Music volume"><button data-m="test" title="Test sound">🔔</button></div></div>
     <div class="msec" id="picks">
       <div class="srctabs" id="srcTabs"><button data-src="yt" class="on">▶️ YouTube</button><button data-src="ytm">🎵 YT Music</button><button data-src="sp">🟢 Spotify</button><button data-src="my">⭐ My picks</button></div>
       <div id="picksBody"></div>
@@ -658,7 +660,6 @@ body.habbo .wd-it.on{border-color:#e8342e;box-shadow:inset 0 0 0 2px rgba(255,25
       <p class="wnote">Paste a link and it plays for everyone in the room. Click ⛶ on the player for the big screen, great for movie night. Direct video files (.mp4, .webm) stay in sync for late joiners. Some sites (like Netflix) don’t allow playing inside other pages. This works in the Chrome/Edge version of the office. This preview blocks outside players.</p>
     </div>
     <div class="msec"><div class="lbl">Up next · plays automatically when the song ends</div><div id="queue"></div></div>
-    <div class="msec"><div class="lbl">Music volume</div><input type="range" id="mvol" min="0" max="100" value="85" aria-label="Music volume"><div class="row2"><button data-m="test">🔔 Test sound</button></div></div>
   </div>
   </div>
 </aside>
@@ -4069,7 +4070,7 @@ function main(){
   $('ytPlay').addEventListener('click', () => addYT(true));
   $('ytQueue').addEventListener('click', () => addYT(false));
   $('ytIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addYT(!music.now); } });
-  $('mvol').addEventListener('input', e => { setTimeout(() => quietTick(true), 0); music.vol = (+e.target.value || 0) / 100; if (music.gain) music.gain.gain.value = music.vol * 1.6; if (yt.player && yt.ready) { try { yt.player.setVolume(Math.round(music.vol * 100)); } catch (_) {} } });
+  $('mvol').addEventListener('input', e => { { const pc = document.getElementById('mvolPct'); if (pc) pc.textContent = (+e.target.value || 0) + '%'; } setTimeout(() => quietTick(true), 0); music.vol = (+e.target.value || 0) / 100; if (music.gain) music.gain.gain.value = music.vol * 1.6; if (yt.player && yt.ready) { try { yt.player.setVolume(Math.round(music.vol * 100)); } catch (_) {} } });
   $('ytMiniX').addEventListener('click', stopMusic);
   renderMusic();
 
@@ -7242,11 +7243,33 @@ function main(){
 
 
   // ================= a different cartoon effect for each throwable =================
-  const HFX_KIND = { laptop: 'squash', car: 'flat', meteor: 'burnt', grenade: 'scatter', dino: 'eaten', shield: 'spin', hammer: 'zap', cannon: 'launch', wheelchair: 'chair' };
-  const HFX_DUR = { squash: 1.2, flat: 2.2, burnt: 3.0, eaten: 2.6, spin: 1.4, zap: 1.6, launch: 2.0, chair: 2.4 };
-  const HFX_TXT = { laptop: '💻 BONK! Error 404', car: '🚗 FLATTENED!', meteor: '🔥 Extra crispy!', dino: '🦖 CHOMP!', shield: '🛡️ CLANG!', hammer: '⚡ ZZZAP!', cannon: '💥 To the moon!', wheelchair: '🦽 Wheee?!' };
-  const HFX_KNOCK = { car: 2300, cannon: 2100, dino: 2700, grenade: 2700, hammer: 1700 };
-  const HFX_MAT = { soot: M(0x2a2a30, { roughness: 1 }), slime: M(0x7cd34a, { roughness: 0.25, emissive: 0x1a4a10 }), zap: new THREE.MeshBasicMaterial({ color: 0xbff8ff }) };
+  const HFX_KIND = { laptop: 'squash', car: 'flat', meteor: 'burnt', grenade: 'scatter', undies: 'headwear', shield: 'spin', hammer: 'zap', cannon: 'launch', wheelchair: 'chair', pie: 'pie', balloon: 'soaked', banana: 'slip', snowball: 'frozen', tp: 'mummy', chicken: 'squeak', confetti: 'party' };
+  const HFX_DUR = { squash: 1.2, flat: 2.2, burnt: 3.0, eaten: 2.6, spin: 1.4, zap: 1.6, launch: 2.0, chair: 2.4, headwear: 6, pie: 4, soaked: 3, slip: 1.6, frozen: 3.5, mummy: 3.5, squeak: 1.6, party: 1.8 };
+  const HFX_TXT = { laptop: '💻 BONK! Error 404', car: '🚗 FLATTENED!', meteor: '🔥 Extra crispy!', undies: '🩲 Nice new hat!', pie: '🥧 SPLAT!', balloon: '💦 SOAKED!', banana: '🍌 Slipped!', snowball: '🥶 FROZEN!', tp: '🧻 Mummified!', chicken: '🐔 BAWK BAWK!', confetti: '🎉 SURPRISE!', shield: '🛡️ CLANG!', hammer: '⚡ ZZZAP!', cannon: '💥 To the moon!', wheelchair: '🦽 Wheee?!' };
+  const HFX_KNOCK = { car: 2300, cannon: 2100, grenade: 2700, hammer: 1700, banana: 600 };
+  const HFX_MAT = { soot: M(0x2a2a30, { roughness: 1 }), slime: M(0x7cd34a, { roughness: 0.25, emissive: 0x1a4a10 }), zap: new THREE.MeshBasicMaterial({ color: 0xbff8ff }), water: M(0x5aa9ff, { roughness: 0.15, metalness: 0.1 }), ice: M(0xcfeeff, { roughness: 0.1, metalness: 0.2 }), tp: M(0xf6f3ec, { roughness: 1 }), cream: M(0xfffaf0, { roughness: 0.55 }), cherry: M(0xd6262f, { roughness: 0.3 }), cube: new THREE.MeshBasicMaterial({ color: 0xbfe8ff, transparent: true, opacity: 0.35, depthWrite: false }) };
+  function hAttach(t, H, obj, onHead, plain) {
+    const root = hRoot(t); if (!root) return;
+    let par = root;
+    if (onHead) { if (t.v && t.v.head && !t.isDummy) par = t.v.head; else obj.position.y += 1.45; }
+    par.add(obj);
+    const c0 = root.children.find(c => c.layers); setMask(obj, c0 ? c0.layers.mask : 1);
+    obj.traverse(o => { o.raycast = () => {}; o.castShadow = false; });
+    if (!plain) applyStyleTo(obj);
+    H.att = obj;
+  }
+  function spawnConfetti(x, y, z) {
+    const cols = [0xff3fa4, 0x3fd0ff, 0xffd23f, 0x7cff6b, 0xb46bff, 0xff7a3f], parts = [], vel = [], msk = (ZBY[zoneAt(x, z)] || ZBY.office).bit;
+    for (let k = 0; k < 34; k++) {
+      const m = new THREE.Mesh(BX(0.06, 0.012, 0.04), new THREE.MeshBasicMaterial({ color: cols[k % cols.length], side: THREE.DoubleSide }));
+      m.position.set(x, y, z); m.raycast = () => {}; setMask(m, msk); scene.add(m); parts.push(m);
+      const a = Math.random() * Math.PI * 2, sp = 1.2 + Math.random() * 2.2; vel.push([Math.cos(a) * sp, 2.5 + Math.random() * 3, Math.sin(a) * sp, 4 + Math.random() * 10]);
+    }
+    FLY.push({ kind: 'conf', phase: 'conf', parts: parts, vel: vel, t0: elapsed });
+  }
+  const SOFT_SND = { undies: () => tsound('boing'), pie: () => tsound('flop'), balloon: () => splash(), banana: () => tsound('boing'), snowball: () => tsound('pop'), tp: () => tsound('page'), chicken: () => tsound('squeak'), confetti: () => { tsound('pop'); setTimeout(() => tsound('jingle'), 120); } };
+  const THROW_A = { undies: 'a pair of underwear', pie: 'a cream pie', balloon: 'a water balloon', banana: 'a banana peel', snowball: 'a snowball', tp: 'a roll of toilet paper', chicken: 'a rubber chicken', confetti: 'a confetti bomb' };
+
   const hRoot = t => t.isDummy ? t.g : t.v && t.v.root;
   function tintT(t, mat) {
     const root = hRoot(t); if (!root) return;
@@ -7260,6 +7283,7 @@ function main(){
     if (t._hfx) endHfx(t);
     if (k === 'scatter') { if (!t.isDummy) { scatter(t); t._hfx = { k: 'burnt', t0: elapsed + 2.6, dur: 1.6 }; } else { t._hfx = { k: 'burnt', t0: elapsed, dur: 2.2 }; floatFx(t, '💣 KABOOM!'); } return; }
     t._hfx = { k: k, t0: elapsed, dur: HFX_DUR[k] };
+    if (k === 'slip' && (t === me || t.remote)) t._hfx.dur = 0.6;
     if (HFX_TXT[kind]) floatFx(t, HFX_TXT[kind]);
   }
   function endHfx(t) {
@@ -7268,6 +7292,7 @@ function main(){
     if (!root || !H) return;
     root.scale.set(1, 1, 1); root.rotation.x = 0; root.rotation.z = 0; if (!t._scat) root.visible = true;
     if (H.chair) { root.remove(H.chair); H.chair = null; }
+    if (H.att && H.att.parent) { H.att.parent.remove(H.att); H.att = null; }
     if (t.isDummy && H.base) { root.position.copy(H.base); root.rotation.y = 0; }
   }
   function applyHfx(t, dt) {
@@ -7313,6 +7338,59 @@ function main(){
         const air = 1.4;
         if (tt < air) { const k = tt / air; root.position.y += 7 * 4 * k * (1 - k); root.rotation.z = tt * 13; root.rotation.x = tt * 5; H.tr = (H.tr || 0) - dt; if (H.tr <= 0) { H.tr = 0.12; floatFx(t, '💨'); } }
         else { if (!H.landed) { H.landed = true; fxSound('thud'); if (worker) pow(screenPos(t)); floatFx(t, '💫 ouch'); } const k = (tt - air) / (H.dur - air), s = 1 - 0.4 * Math.sin(k * Math.PI) * (1 - k); root.scale.set(2 - s, s, 2 - s); }
+        break;
+      }
+      case 'headwear': {
+        if (!H.att) { const u = throwMesh('undies'); u.scale.setScalar(0.85); u.position.set(0, 0.3, -0.02); u.rotation.set(0.15, 0, 0.12); hAttach(t, H, u, true); }
+        H.att.rotation.z = 0.12 + Math.sin(tt * 3) * 0.06;
+        H.bl = (H.bl || 0) - dt; if (H.bl <= 0) { H.bl = 1.4; floatFx(t, rnd(['😳', '🩲', '*blush*'])); }
+        break;
+      }
+      case 'pie': {
+        if (!H.att) {
+          const g2 = new THREE.Group(), cr = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), HFX_MAT.cream); cr.scale.set(0.22, 0.2, 0.07); g2.add(cr);
+          for (let k = 0; k < 5; k++) { const d = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), HFX_MAT.cream); d.position.set(-0.14 + k * 0.07, -0.17 - (k % 2) * 0.05, 0.01); g2.add(d); }
+          const ch = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), HFX_MAT.cherry); ch.position.set(0.04, 0.06, 0.07); g2.add(ch);
+          g2.position.set(0, 0.03, 0.2); hAttach(t, H, g2, true);
+        }
+        if (worker && V) V.head.rotation.y += Math.sin(tt * 9) * 0.25 * Math.max(0, 1 - tt / 1.2);
+        H.dr = (H.dr || 0) - dt; if (H.dr <= 0) { H.dr = 0.7; floatFx(t, rnd(['🥧', '*lick*', 'mmph!'])); }
+        break;
+      }
+      case 'soaked': {
+        if (!H.tinted) { H.tinted = true; tintT(t, HFX_MAT.water); }
+        H.dp = (H.dp || 0) - dt; if (H.dp <= 0) { H.dp = 0.28; floatFx(t, '💧'); }
+        root.position.x += Math.sin(tt * 40) * 0.012 * Math.max(0, 1 - tt / H.dur);
+        break;
+      }
+      case 'slip': {
+        const u = Math.min(1, tt / 0.3), e = u * u * (3 - 2 * u);
+        root.rotation.x = -Math.PI / 2 * e; root.position.y += Math.sin(Math.min(1, tt / 0.45) * Math.PI) * 0.6 + e * 0.25;
+        if (tt > H.dur - 0.25) root.rotation.x *= 1 - (tt - (H.dur - 0.25)) / 0.25;
+        break;
+      }
+      case 'frozen': {
+        if (!H.tinted) { H.tinted = true; tintT(t, HFX_MAT.ice); const cube = new THREE.Mesh(new THREE.BoxGeometry(0.9, t.isDummy ? 1.9 : 1.75, 0.8), HFX_MAT.cube); cube.position.y = 0.88; hAttach(t, H, cube, false, true); }
+        root.position.x += (Math.random() - 0.5) * 0.02;
+        H.fz = (H.fz || 0) - dt; if (H.fz <= 0) { H.fz = 0.9; floatFx(t, rnd(['🥶', '❄️', 'brrr'])); }
+        if (!H.cr && tt > H.dur - 0.3) { H.cr = true; floatFx(t, '❄️ *crack*'); if (hearsW(t.isDummy ? null : t)) tsound('pop'); }
+        break;
+      }
+      case 'mummy': {
+        if (!H.tinted) { H.tinted = true; tintT(t, HFX_MAT.tp); }
+        const k = Math.min(1, tt / 0.9), e = 1 - Math.pow(1 - k, 3); root.rotation.y += e * Math.PI * 2 * 3;
+        if (worker && V && k >= 1) { V.arms[0].rotation.set(-1.45, 0, 0); V.arms[1].rotation.set(-1.45, 0, 0); V.elbows[0].rotation.x = 0; V.elbows[1].rotation.x = 0; }
+        H.mm = (H.mm || 0) - dt; if (H.mm <= 0 && k >= 1) { H.mm = 1.0; floatFx(t, rnd(['🧻', 'mmmph', '🧟'])); }
+        break;
+      }
+      case 'squeak': {
+        const ph = tt * 3 / H.dur, b = Math.abs(Math.sin(ph * Math.PI)), s = 1 - 0.35 * b; root.scale.set(1 + (1 - s) * 0.6, s, 1 + (1 - s) * 0.6);
+        const n = Math.floor(ph); if (n !== H.n) { H.n = n; if (n > 0 && n < 3) { if (hearsW(t.isDummy ? null : t)) tsound('squeak'); floatFx(t, 'BAWK!'); } }
+        break;
+      }
+      case 'party': {
+        root.position.y += Math.abs(Math.sin(tt * Math.PI * 2 / 0.6)) * 0.25 * Math.max(0, 1 - tt / H.dur);
+        if (worker && V) { V.arms[0].rotation.set(0, 0, -2.6); V.arms[1].rotation.set(0, 0, 2.6); V.elbows[0].rotation.x = 0; V.elbows[1].rotation.x = 0; }
         break;
       }
       case 'chair': {
@@ -9370,10 +9448,11 @@ function main(){
 
   // ================= slap, punch, kick and throw =================
   const MELEE = { slap: ['👋', 'Slap', 'slapped', ' across the face'], punch: ['👊', 'Punch', 'punched', ''], kick: ['🦶', 'Kick', 'kicked', ''], flykick: ['🦵', 'Flying kick', 'flying-kicked', ''] };
-  const THROWS = { meteor: ['☄️', 'Meteor'], car: ['🚗', 'Car'], laptop: ['💻', 'Laptop'], grenade: ['💣', 'Grenade'], dino: ['🦖', 'Dinosaur'], shield: ['🛡️', 'Shield'], hammer: ['🔨', 'Hammer'], cannon: ['💥', 'Cannon'], wheelchair: ['🦽', 'Wheelchair'] };
-  const BIG_HIT = { meteor: 1, car: 1, grenade: 1, dino: 1, hammer: 1, cannon: 1 };
+  const THROWS = { meteor: ['☄️', 'Meteor'], car: ['🚗', 'Car'], laptop: ['💻', 'Laptop'], grenade: ['💣', 'Grenade'], undies: ['🩲', 'Underwear'], shield: ['🛡️', 'Shield'], hammer: ['🔨', 'Hammer'], cannon: ['💥', 'Cannon'], wheelchair: ['🦽', 'Wheelchair'],
+    pie: ['🥧', 'Cream pie'], balloon: ['🎈', 'Water balloon'], banana: ['🍌', 'Banana peel'], snowball: ['❄️', 'Snowball'], tp: ['🧻', 'Toilet paper'], chicken: ['🐔', 'Rubber chicken'], confetti: ['🎉', 'Confetti bomb'] };
+  const BIG_HIT = { meteor: 1, car: 1, grenade: 1, hammer: 1, cannon: 1, banana: 1 };
   const BOOMERANG = { shield: 1, hammer: 1 };
-  const OUCH = { slap: 'Ow! 😵', punch: 'Oof! 😵', kick: 'Ouch! 🤕', flykick: 'OOF! 🦵', laptop: 'Bonk! 💻', meteor: 'AAAH! ☄️', car: 'Whoa! 🚗', grenade: 'BOOM! 💥', dino: 'RAWR?! 🦖', shield: 'CLANG! 🛡️', hammer: 'BONK! ⚡', cannon: 'KABOOM! 💥', wheelchair: 'Whoa! 🦽' };
+  const OUCH = { slap: 'Ow! 😵', punch: 'Oof! 😵', kick: 'Ouch! 🤕', flykick: 'OOF! 🦵', laptop: 'Bonk! 💻', meteor: 'AAAH! ☄️', car: 'Whoa! 🚗', grenade: 'BOOM! 💥', undies: 'Hey! Are these clean?! 😳', shield: 'CLANG! 🛡️', hammer: 'BONK! ⚡', cannon: 'KABOOM! 💥', wheelchair: 'Whoa! 🦽', pie: 'Mmph! 🥧', balloon: 'SPLASH! 💦', banana: 'WHOA— 🍌', snowball: 'Brrr! ❄️', tp: 'Mmmph! 🧻', chicken: 'BAWK?! 🐔', confetti: 'Yay?! 🎉' };
   const FLY = [];
   let lastAtk = -9;
   const tgtName = t => t.isDummy ? 'the training dummy' : objOf(t);
@@ -9408,7 +9487,7 @@ function main(){
     from.act = { kind: kind === 'meteor' ? 'summon' : kind === 'cannon' ? 'point' : 'throw', t0: elapsed, dur: kind === 'cannon' ? 1.6 : 0.8, obj: kind };
     if (from === me && NET.on && !NET.rx && (tgt.remote || tgt.isDummy)) netSend({ t: 'ev', k: 'throw', item: kind, to: tgtId(tgt) });
     const T = THROWS[kind];
-    post(null, T[0] + ' ' + nmOf(from) + (kind === 'meteor' ? ' called down a meteor on ' : kind === 'cannon' ? ' fired a cannon at ' : ' threw ' + (kind === 'dino' ? 'a dinosaur' : 'a ' + T[1].toLowerCase()) + ' at ') + tgtName(tgt) + '!');
+    post(null, T[0] + ' ' + nmOf(from) + (kind === 'meteor' ? ' called down a meteor on ' : kind === 'cannon' ? ' fired a cannon at ' : ' threw ' + (THROW_A[kind] || 'a ' + T[1].toLowerCase()) + ' at ') + tgtName(tgt) + '!');
     if (kind === 'cannon') { spawnCannon(from, tgt); return; }
     if (kind !== 'meteor' && from.v && from.v.hands) { const pr = throwMesh(kind); pr.scale.multiplyScalar(0.45); pr.position.set(0, -0.05, 0.08); from.v.hands[1].add(pr); from._prop = pr; }
     setTimeout(() => { if (from._prop) { if (from._prop.parent) from._prop.parent.remove(from._prop); from._prop = null; } launch(from, tgt, kind); }, kind === 'meteor' ? 450 : 430);
@@ -9445,6 +9524,38 @@ function main(){
       [-1, 1].forEach(s => bxm(0.03, 0.26, 0.28, M(0x7f8894, { metalness: 0.7, roughness: 0.3 }), s * 0.2, 0.28, 0));
     } else if (kind === 'cannon') {
       add(new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), M(0x1c1c22, { roughness: 0.4, metalness: 0.5 })), 0, 0, 0, g);
+    } else if (kind === 'undies') {
+      const red = M(0xe2334b, { roughness: 0.7 }), wht = M(0xffffff, { roughness: 0.8 });
+      bxm(0.42, 0.2, 0.24, red, 0, 0, 0); bxm(0.44, 0.055, 0.26, wht, 0, 0.12, 0);
+      [-1, 1].forEach(s => bxm(0.19, 0.13, 0.24, red, s * 0.11, -0.15, 0));
+      [[-0.12, 0.02], [0.1, -0.03], [0, -0.1], [0.14, 0.06], [-0.05, 0.06]].forEach(p => bxm(0.04, 0.04, 0.01, wht, p[0], p[1], 0.125));
+    } else if (kind === 'pie') {
+      add(new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.19, 0.07, 18), M(0xc8ccd2, { metalness: 0.7, roughness: 0.3 })), 0, 0, 0, g);
+      add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.05, 18), M(0xd9a35a, { roughness: 0.8 })), 0, 0.04, 0, g);
+      for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; add(new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), M(0xfffaf0, { roughness: 0.6 })), Math.cos(a) * 0.13, 0.09, Math.sin(a) * 0.13, g); }
+      add(new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), M(0xfffaf0, { roughness: 0.6 })), 0, 0.1, 0, g); add(new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), M(0xd6262f, { roughness: 0.3 })), 0, 0.2, 0, g);
+    } else if (kind === 'balloon') {
+      add(new THREE.Mesh(new THREE.SphereGeometry(0.2, 14, 10), M(0x3f8fff, { roughness: 0.15, transparent: true, opacity: 0.85 })), 0, 0, 0, g).scale.y = 1.15;
+      bxm(0.05, 0.05, 0.05, M(0x2f6fd6), 0, -0.24, 0);
+    } else if (kind === 'banana') {
+      const yel = M(0xf6d23a, { roughness: 0.6 }), brn = M(0x5a3a1a);
+      [[-0.16, 0.06, 0.5], [0, 0, 0], [0.16, 0.06, -0.5]].forEach(p => { const s = bxm(0.18, 0.07, 0.08, yel, p[0], p[1], 0); s.rotation.z = p[2]; });
+      bxm(0.04, 0.04, 0.04, brn, -0.27, 0.13, 0); bxm(0.03, 0.03, 0.03, brn, 0.27, 0.13, 0);
+      [-1, 1].forEach(s => { const fl = bxm(0.14, 0.03, 0.06, yel, 0.02, -0.02, s * 0.07); fl.rotation.y = s * 0.6; });
+    } else if (kind === 'snowball') {
+      add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.15, 1), M(0xf5fbff, { roughness: 0.9 })), 0, 0, 0, g);
+    } else if (kind === 'tp') {
+      add(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.2, 16), M(0xfafafa, { roughness: 0.9 })), 0, 0, 0, g);
+      add(new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.205, 10), M(0xa07a4a)), 0, 0, 0, g);
+      bxm(0.18, 0.004, 0.5, M(0xfafafa, { roughness: 0.9 }), 0.11, -0.1, -0.2);
+    } else if (kind === 'chicken') {
+      const yel = M(0xf3d247, { roughness: 0.5 }), org = M(0xf08a24), red = M(0xd6262f);
+      bxm(0.16, 0.14, 0.32, yel, 0, 0, 0); const nk = bxm(0.07, 0.24, 0.07, yel, 0, 0.14, 0.16); nk.rotation.x = 0.2;
+      bxm(0.11, 0.1, 0.12, yel, 0, 0.28, 0.2); bxm(0.03, 0.06, 0.08, red, 0, 0.36, 0.2); bxm(0.04, 0.03, 0.07, org, 0, 0.27, 0.29);
+      [-1, 1].forEach(s => { bxm(0.02, 0.2, 0.02, org, s * 0.05, -0.15, 0); bxm(0.06, 0.015, 0.06, org, s * 0.05, -0.25, 0.02); });
+    } else if (kind === 'confetti') {
+      const c = add(new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.34, 14), M(0xffd23f, { metalness: 0.5, roughness: 0.3 })), 0, 0, 0, g); c.rotation.x = Math.PI;
+      [0xff3fa4, 0x3fd0ff, 0x7cff6b, 0xb46bff].forEach((col, k) => { const a = k / 4 * Math.PI * 2; const r = bxm(0.03, 0.14, 0.01, M(col), Math.cos(a) * 0.06, 0.22, Math.sin(a) * 0.06); r.rotation.z = Math.cos(a) * 0.5; });
     } else if (kind === 'dino') {
       const gr = M(0x4fae4a, { roughness: 0.7 }), gr2 = M(0x3c8c38, { roughness: 0.7 }), wht = M(0xffffff), blk = M(0x111111);
       bxm(0.5, 0.5, 0.85, gr, 0, 0.75, 0);
@@ -9518,6 +9629,11 @@ function main(){
         if (k >= 1) { scene.remove(f.parts[0]); f.parts[0].material.dispose(); FLY.splice(i, 1); }
         continue;
       }
+      if (f.phase === 'conf') {
+        f.parts.forEach((o, j) => { const v = f.vel[j]; v[1] -= dt * 5.5; o.position.x += v[0] * dt; o.position.z += v[2] * dt; o.position.y = Math.max(0.02, o.position.y + v[1] * dt); if (o.position.y <= 0.02) { v[0] *= 0.9; v[2] *= 0.9; } else { o.rotation.x += dt * v[3]; o.rotation.z += dt * v[3] * 0.7; } });
+        if (t > 2.4) { f.parts.forEach(o => { scene.remove(o); o.material.dispose(); }); FLY.splice(i, 1); }
+        continue;
+      }
       if (f.phase === 'cannon') {
         f.m.scale.setScalar(Math.min(1, t / 0.25) * 1.0 + 0.001);
         if (!f.fired && t > 0.6) { f.fired = true; fireCannon(f); }
@@ -9534,7 +9650,7 @@ function main(){
       }
       const p = tgtPos(f.tgt);
       if (f.phase === 'fly') {
-        const k = Math.min(1, t / f.dur), ty = f.kind === 'grenade' || f.kind === 'dino' ? 0.15 : f.kind === 'meteor' ? 0.4 : 0.9;
+        const k = Math.min(1, t / f.dur), ty = f.kind === 'grenade' || f.kind === 'dino' ? 0.15 : f.kind === 'meteor' ? 0.4 : f.kind === 'undies' || f.kind === 'pie' ? 1.55 : f.kind === 'banana' ? 0.05 : 0.9;
         const gx = f.kind === 'grenade' ? p[0] + 0.45 : f.kind === 'dino' ? p[0] - Math.sin(f.from.yaw) * 0.9 : p[0], gz = f.kind === 'grenade' ? p[1] + 0.3 : f.kind === 'dino' ? p[1] - Math.cos(f.from.yaw) * 0.9 : p[1];
         f.m.position.set(f.F[0] + (gx - f.F[0]) * k, f.F[1] + (ty - f.F[1]) * k + Math.sin(Math.PI * k) * f.h, f.F[2] + (gz - f.F[2]) * k);
         if (f.kind === 'meteor') { f.m.rotation.x += dt * 4; f.trail -= dt; if (f.trail <= 0) { f.trail = 0.06; const sp = add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 6, 5), new THREE.MeshBasicMaterial({ color: 0xffa23a, transparent: true, opacity: 0.7, depthWrite: false })), f.m.position.x, f.m.position.y, f.m.position.z); sp.raycast = () => {}; FLY.push({ kind: 'spark', parts: [sp], t0: elapsed, phase: 'spark' }); } }
@@ -9566,6 +9682,12 @@ function main(){
     if (f.kind === 'dino') { f.phase = 'chomp'; f.t0 = elapsed; f.m.position.y = 0; f.m.rotation.x = 0; fxSound('roar'); return; }
     if (f.kind === 'cannon') { explode(p[0], 0.5, p[1], 1.6); hitTarget(f.tgt, f.from, 'cannon'); scene.remove(f.m); FLY.splice(FLY.indexOf(f), 1); return; }
     if (BOOMERANG[f.kind]) { hitTarget(f.tgt, f.from, f.kind); if (f.kind === 'hammer') { const pp = screenPos(f.tgt); if (pp) pow(pp); fxSound('zap'); } f.phase = 'return'; f.t0 = elapsed; f.R = [f.m.position.x, f.m.position.y, f.m.position.z]; f.dur = 0.35 + Math.hypot(f.from.x - p[0], f.from.z - p[1]) * 0.06; return; }
+    if (f.kind === 'confetti') { spawnConfetti(p[0], 1.1, p[1]); hitTarget(f.tgt, f.from, f.kind); scene.remove(f.m); FLY.splice(FLY.indexOf(f), 1); return; }
+    if (f.kind === 'undies' || f.kind === 'pie' || f.kind === 'balloon' || f.kind === 'snowball') {
+      if (f.kind === 'balloon' || f.kind === 'snowball') { for (let k = 0; k < 6; k++) { const sp = add(new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 5), new THREE.MeshBasicMaterial({ color: f.kind === 'balloon' ? 0x7fc0ff : 0xffffff, transparent: true, opacity: 0.8, depthWrite: false })), p[0] + (Math.random() - 0.5) * 0.6, 0.6 + Math.random() * 0.9, p[1] + (Math.random() - 0.5) * 0.6); sp.raycast = () => {}; FLY.push({ kind: 'spark', parts: [sp], t0: elapsed, phase: 'spark' }); } }
+      hitTarget(f.tgt, f.from, f.kind); scene.remove(f.m); FLY.splice(FLY.indexOf(f), 1); return;
+    }
+    if (f.kind === 'banana') { hitTarget(f.tgt, f.from, f.kind); f.phase = 'rest'; f.t0 = elapsed; f.m.rotation.set(0, Math.random() * 6, 0); f.m.position.set(p[0] + 0.25, 0.03, p[1] + 0.2); return; }
     hitTarget(f.tgt, f.from, f.kind);
     f.phase = 'rest'; f.t0 = elapsed; f.m.rotation.set(0, f.m.rotation.y, 0); f.m.position.set(p[0] + 0.55, f.kind === 'laptop' ? 0.02 : 0, p[1] + 0.35);
   }
@@ -9576,7 +9698,7 @@ function main(){
     if (THROWS[kind]) hitFx(tgt, kind);
     const big = !!BIG_HIT[kind];
     tgt.hit = big ? 2.0 : 1.4;
-    if (kind === 'slap') slapSound(); else fxSound(kind === 'kick' || kind === 'punch' ? 'thud' : kind === 'laptop' ? 'bonk' : kind === 'car' ? 'crash' : kind === 'shield' || kind === 'wheelchair' ? 'clang' : 'thud');
+    if (kind === 'slap') slapSound(); else if (SOFT_SND[kind]) SOFT_SND[kind](); else fxSound(kind === 'kick' || kind === 'punch' ? 'thud' : kind === 'laptop' ? 'bonk' : kind === 'car' ? 'crash' : kind === 'shield' || kind === 'wheelchair' ? 'clang' : 'thud');
     pow(screenPos(tgt));
     if (tgt === me) {
       me.speech = { text: OUCH[kind] || 'Ow!', until: Date.now() + 2500 };
@@ -9588,7 +9710,7 @@ function main(){
   }
   function dummyHit(kind) {
     DUMMY.n++; DUMMY.wob = BIG_HIT[kind] ? 0 : 1; if (BIG_HIT[kind]) DUMMY.down = elapsed;
-    if (kind === 'slap') slapSound(); else fxSound(kind === 'laptop' ? 'bonk' : kind === 'car' ? 'crash' : 'thud');
+    if (kind === 'slap') slapSound(); else if (SOFT_SND[kind]) SOFT_SND[kind](); else fxSound(kind === 'laptop' ? 'bonk' : kind === 'car' ? 'crash' : 'thud');
     pow(screenPos(DUMMY));
     if (THROWS[kind]) { if (HFX_KIND[kind] === 'spin' || HFX_KIND[kind] === 'chair' || HFX_KIND[kind] === 'launch' || HFX_KIND[kind] === 'eaten' || HFX_KIND[kind] === 'flat') DUMMY.down = 0; hitFx(DUMMY, kind); }
     else floatFx(DUMMY, BIG_HIT[kind] ? 'K.O.! 💫' : rnd(['Ow!', 'Oof!', '💢', 'Hit #' + DUMMY.n]));
@@ -9774,8 +9896,9 @@ function main(){
   function movieOffset() { const s = Math.max(0, Math.floor((Date.now() - (MOVIE.t0 || Date.now())) / 1000)); return s > 3 && s < 6 * 3600 ? s : 0; }
   function movieEmbed() {
     const u = MOVIE.url, off = movieOffset(), id = ytIdOf(u), lm = /[?&]list=([\w-]{10,})/i.exec(u);
-    if (id) return { mode: 'frame', src: 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1' + (off ? '&start=' + off : '') };
-    if (lm) return { mode: 'frame', src: 'https://www.youtube.com/embed/videoseries?list=' + lm[1] + '&autoplay=1' };
+    const jsapi = '&enablejsapi=1' + (/^https?:$/.test(location.protocol) ? '&origin=' + encodeURIComponent(location.origin) : '');
+    if (id) return { mode: 'frame', src: 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1' + jsapi + (off ? '&start=' + off : '') };
+    if (lm) return { mode: 'frame', src: 'https://www.youtube.com/embed/videoseries?list=' + lm[1] + '&autoplay=1' + jsapi };
     const L = parseLink(u); if (!L) return null;
     if (L.mode === 'video') return { mode: 'video', src: L.embed, off: off };
     let src = L.embed; if (/player\.vimeo\.com/.test(src) && off) src += '#t=' + off + 's';
@@ -9892,7 +10015,7 @@ function main(){
     const E = movieEmbed(); if (!E) { empty.hidden = false; return; }
     if (E.mode === 'video') {
       const v = document.createElement('video'); v.controls = true; v.autoplay = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.src = E.src;
-      v.volume = (+$('mvVol').value || 0) / 100;
+      v.volume = mvVolPct() / 100;
       v.addEventListener('loadedmetadata', () => { if (E.off && isFinite(v.duration) && E.off < v.duration - 2) { try { v.currentTime = E.off; } catch (e) {} } });
       v.addEventListener('error', () => toast('That video file couldn’t play here. Try another link.'));
       host.appendChild(v); MV.el = v; try { const p = v.play(); if (p && p.catch) p.catch(() => toast('Press ▶ on the player to start the movie.')); } catch (e) {}
@@ -9900,7 +10023,8 @@ function main(){
       const f = document.createElement('iframe');
       f.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture'); f.setAttribute('allowfullscreen', '');
       f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin'); f.src = E.src;
-      host.appendChild(f); MV.el = f;
+      host.appendChild(f); MV.el = f; MV.volTold = false;
+      f.addEventListener('load', () => { [300, 1200, 2500, 5000].forEach(ms => setTimeout(() => { if (MV.el === f) mvApplyVol(); }, ms)); });
     }
   }
   const mvA = new THREE.Vector3(), mvB = new THREE.Vector3(), mvC = new THREE.Vector3(), mvTo = new THREE.Vector3();
@@ -9923,7 +10047,24 @@ function main(){
   }
   $('mvExit').addEventListener('click', exitWatch);
   $('mvChange').addEventListener('click', () => { exitWatch(); openMovieBox(); });
-  $('mvVol').addEventListener('input', e => { if (MV.el && MV.el.tagName === 'VIDEO') MV.el.volume = (+e.target.value || 0) / 100; });
+
+  // ---- movie volume: works for video files, YouTube and Vimeo ----
+  function mvVolPct() { return Math.max(0, Math.min(100, +$('mvVol').value || 0)); }
+  function mvPost(f, msg) { try { if (f && f.contentWindow) f.contentWindow.postMessage(typeof msg === 'string' ? msg : JSON.stringify(msg), '*'); } catch (e) {} }
+  function mvApplyVol() {
+    const el = MV.el, pct = mvVolPct(); if (!el) return;
+    if (el.tagName === 'VIDEO') { el.volume = pct / 100; el.muted = pct === 0; return; }
+    if (el.tagName !== 'IFRAME') return;
+    const src = String(el.src || '');
+    if (/youtube(-nocookie)?\.com\/embed/.test(src)) {
+      mvPost(el, { event: 'listening', id: 1, channel: 'widget' });
+      mvPost(el, { event: 'command', func: pct === 0 ? 'mute' : 'unMute', args: [] });
+      mvPost(el, { event: 'command', func: 'setVolume', args: [pct] });
+    } else if (/player\.vimeo\.com/.test(src)) mvPost(el, { method: 'setVolume', value: pct / 100 });
+    else if (!MV.volTold) { MV.volTold = true; toast('🔊 This player has its own volume. Use the volume button on the player.'); }
+  }
+  try { const sv = localStorage.getItem('virtualOffice.movieVol'); if (sv != null && isFinite(+sv)) $('mvVol').value = String(Math.max(0, Math.min(100, +sv))); } catch (e) {}
+  $('mvVol').addEventListener('input', () => { mvApplyVol(); try { localStorage.setItem('virtualOffice.movieVol', String(mvVolPct())); } catch (e) {} });
   { const go = () => { const u = $('mvIn').value.trim(); if (!u) { toast('Paste a link first'); return; } if (setMovie(u, '', 'me')) $('mvIn').value = ''; };
     $('mvGo').addEventListener('click', go); $('mvIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); }); }
   regItem('movie screen', movieParts, (w, it) => { if (w === me) movieScreen(); });
