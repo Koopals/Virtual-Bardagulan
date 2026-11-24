@@ -623,7 +623,7 @@ body.watching #bubbles,body.watching .dock,body.watching .camctl,body.watching .
       <div class="row2"><button id="ytPlay" class="on">Play for everyone</button><button id="ytQueue">Add to queue</button></div>
       <p class="wnote">Paste a link and it plays for everyone in the room. Click ⛶ on the player for the big screen, great for movie night. Direct video files (.mp4, .webm) stay in sync for late joiners. Some sites (like Netflix) don’t allow playing inside other pages. This works in the Chrome/Edge version of the office. This preview blocks outside players.</p>
     </div>
-    <div class="msec"><div class="lbl">Up next</div><div id="queue"></div></div>
+    <div class="msec"><div class="lbl">Up next · plays automatically when the song ends</div><div id="queue"></div></div>
     <div class="msec"><div class="lbl">Music volume</div><input type="range" id="mvol" min="0" max="100" value="85" aria-label="Music volume"><div class="row2"><button data-m="test">🔔 Test sound</button></div></div>
   </div>
   </div>
@@ -2580,6 +2580,18 @@ function main(){
   PEOPLE.forEach((p, i) => makeWorker(p, i));
   const me = byId.me;
   function inRoom(w) { return !!w && w.x > 4.05 && w.x < 15 && w.z < -3.02 && w.z > -10; }
+
+  // ================= who can hear what =================
+  // Voice chat and sound effects only reach people in the same room as you (the Harbour meeting room counts as its own room).
+  // Music is not affected: it keeps playing wherever you are.
+  const SND = { hush: 0, fly: 0 };
+  function hearsW(w) {
+    if (!w || w === me || typeof w.x !== 'number' || typeof w.z !== 'number') return true;
+    if (inRoom(w) !== inRoom(me)) return false;
+    return zoneAt(w.x, w.z) === zoneAt(me.x, me.z);
+  }
+  function hush(w, f) { if (hearsW(w)) return f(); SND.hush++; try { return f(); } finally { SND.hush--; } }
+  const muted = () => SND.hush > 0 || SND.fly > 0;
   let meWasIn = false; const heldOut = [], mufT = {};
 
   function stInfo(w) {
@@ -2674,6 +2686,7 @@ function main(){
     } catch (e) {}
   }
   function slapSound() {
+    if (muted()) return;
     if (!audio.speaker || !audio.ctx) return;
     try {
       const c = audio.ctx, n = c.currentTime, len = Math.floor(0.16 * c.sampleRate), b = c.createBuffer(1, len, c.sampleRate), d = b.getChannelData(0);
@@ -2995,14 +3008,21 @@ function main(){
       try { const d = yt.player.getVideoData(); if (d && d.title && (/ video$| playlist$/.test(n.title) || !n.userTitle)) { n.title = d.title; document.getElementById('ytMiniT').textContent = d.title; } } catch (_) {}
       renderMusic();
     } else if (e.data === 2) { n.yt = 'paused'; renderMusic(); }
-    else if (e.data === 0) { if (!n.list || n.mixFailed) skipMusic(); }
+    else if (e.data === 0) {
+      let last = true;
+      if (n.list && !n.mixFailed) {
+        if (/^RD/.test(n.list)) last = music.queue.some(qPlayable);
+        else { try { const pl = yt.player.getPlaylist() || [], ix = yt.player.getPlaylistIndex(); last = !pl.length || ix >= pl.length - 1; } catch (_) {} }
+      }
+      if (last) songEnded(n);
+    }
   }
   function onYTErr(e) {
     const n = music.now; if (!n || n.kind !== 'yt') return;
     if (n.list && /^RD/.test(n.list) && n.id && !n.mixFailed) { n.mixFailed = true; try { ytLoadInto(n); } catch (_) {} return; }
     n.yt = 'error'; n.err = YT_ERR[e.data] || ('YouTube error ' + e.data + '.');
     renderMusic(); toast(n.err);
-    if (e.data !== 153 && music.queue.some(ytPlayable)) setTimeout(() => { if (music.now === n) skipMusic(); }, 2500);
+    if (e.data !== 153) setTimeout(() => { if (music.now === n && music.queue.some(qPlayable)) songEnded(n); }, 2500);
   }
 
   const STATIONS = {
@@ -3173,7 +3193,7 @@ function main(){
     if (NET.on) toast('Songs from your computer only play for you. Use the radio or a YouTube link to share music.');
     stopSynth();
     music.now = Object.assign({}, it, { kind: 'file', by: by || it.by || 'me' });
-    if (!playBuffer(it.buffer, false, () => skipMusic())) toast('Couldn’t play that file here.');
+    if (!playBuffer(it.buffer, false, () => songEnded(music.now))) toast('Couldn’t play that file here.');
     setTimeout(checkSound, 500);
     watchSilence();
     announce(music.now.by, it.title); renderMusic();
@@ -3191,7 +3211,7 @@ function main(){
         .then(buf => {
           const it = { kind: 'file', buffer: buf, title: f.name.replace(/\.[^.]+$/, ''), src: 'Your computer · ' + fmtDur(buf.duration), by: 'me' };
           if (!music.now) playFile(it, 'me');
-          else { music.queue.push(it); post(null, '🎵 You added “' + it.title + '” to the queue'); renderMusic(); toast('Added “' + it.title + '” to the queue'); }
+          else { queueAdd(it); toast('Added “' + it.title + '” to the queue'); }
         })
         .catch(() => toast('Couldn’t read “' + f.name + '”. Try an MP3 or M4A file.'));
     });
@@ -3232,12 +3252,100 @@ function main(){
     }, 300);
   }
   function stopMusic() { const had = !!music.now; if (had && NET.on && !NET.rx) netSend({ t: 'ev', k: 'music', kind: 'stop' }); stopSynth(); music.now = null; renderMusic(); if (had) post(null, '🎵 Music stopped'); }
+
+  // ================= shared queue: plays the next song automatically =================
+  const MQ = { seq: 0 };
+  const newQid = () => (NET.id || 'me') + '-' + Date.now().toString(36) + '-' + (++MQ.seq);
+  const qPlayable = q => !!q && (q.kind === 'file' || q.kind === 'link' || ytPlayable(q));
+  function roomIds() { return [NET.id].concat(workers.filter(w => w.remote && w.netId).map(w => w.netId)).filter(Boolean).sort(); }
+  // who moves the room to the next song: whoever started the current one, else the first person in the room
+  function isDJ() {
+    if (!NET.on) return true;
+    const n = music.now;
+    if (n && n.by === 'me') return true;
+    const starter = n && n.by && n.by !== 'me' ? byId[n.by] : null;
+    if (starter && starter.remote && workers.includes(starter)) return false;
+    return roomIds()[0] === NET.id;
+  }
+  function qWire(it, act) {
+    if (it.kind === 'link') return { t: 'ev', k: 'mq', act: act, key: it.qid, kind: 'link', url: it.url, title: String(it.title || '').slice(0, 80) };
+    if (ytPlayable(it)) return { t: 'ev', k: 'mq', act: act, key: it.qid, kind: 'yt', id: it.id || '', list: it.list || '', title: String(it.title || '').slice(0, 80), src: it.src || 'YouTube', url: it.url || '' };
+    return null;
+  }
+  function queueAdd(it, emo) {
+    it.qid = it.qid || newQid(); it.by = it.by || 'me';
+    music.queue.push(it);
+    post(null, (emo || '🎵') + ' You added “' + it.title + '” to the queue');
+    renderMusic();
+    if (NET.on && it.kind !== 'file') { const m = qWire(it, 'add'); if (m) netSend(m); }
+    maybeStartQueue();
+  }
+  function qDel(it) { if (NET.on && it && it.qid) netSend({ t: 'ev', k: 'mq', act: 'del', key: it.qid }); }
+  function applyNetMQ(m, w) {
+    const key = String(m.key || '').slice(0, 60); if (!key) return;
+    if (m.act === 'del') { const i = music.queue.findIndex(q => q.qid === key); if (i > -1) { music.queue.splice(i, 1); renderMusic(); } return; }
+    if (m.act === 'clear') { music.queue = music.queue.filter(q => q.kind === 'file'); renderMusic(); return; }
+    if (music.queue.some(q => q.qid === key)) return;
+    let it = null;
+    if (m.kind === 'link') { it = parseLink(String(m.url || '')); if (it && m.title) it.title = String(m.title).slice(0, 80); }
+    else if (m.kind === 'yt') {
+      const id = /^[\w-]{11}$/.test(String(m.id || '')) ? String(m.id) : null, list = /^[\w-]{10,64}$/.test(String(m.list || '')) ? String(m.list) : null;
+      if (!id && !list) return;
+      const isM = m.src === 'YouTube Music';
+      it = { id: id || undefined, list: list || undefined, title: String(m.title || 'YouTube song').slice(0, 80), userTitle: true, src: isM ? 'YouTube Music' : 'YouTube',
+        url: String(m.url || '') || (id ? 'https://www.youtube.com/watch?v=' + id : 'https://www.youtube.com/playlist?list=' + list) };
+      if (list && /^RD/.test(list)) it.mix = true;
+    }
+    if (!it) return;
+    it.qid = key; it.by = w ? w.id : 'me';
+    music.queue.push(it); renderMusic();
+    if (m.act === 'add' && w) post(null, '🎵 ' + w.name + ' added “' + it.title + '” to the queue');
+    maybeStartQueue();
+  }
+  function queueSyncTo(newId) {
+    if (!NET.on || roomIds().filter(i => i !== newId)[0] !== NET.id) return;
+    music.queue.forEach(q => { if (q.kind === 'file') return; const m = qWire(q, 'sync'); if (m) netSend(m); });
+  }
+  function advanceQueue() {
+    const fi = music.queue.findIndex(qPlayable);
+    if (fi > -1) {
+      const it = music.queue.splice(fi, 1)[0]; qDel(it);
+      toast('⏭️ Up next: ' + it.title);
+      playAny(Object.assign({}, it, { by: 'me' }));
+      return true;
+    }
+    if (music.radioBack && STATIONS[music.radioBack]) { const k = music.radioBack; music.radioBack = null; post(null, '📻 The queue is done. Back to the radio.'); playRadio(k, 'me'); return true; }
+    stopMusic(); return false;
+  }
+  // the current song finished (or failed): move on if the queue has something
+  function songEnded(n) {
+    if (!n || music.now !== n) return;
+    n.yt = 'ended'; renderMusic();
+    if (isDJ()) { advanceQueue(); return; }
+    setTimeout(() => { if (music.now === n && n.yt === 'ended' && roomIds()[0] === NET.id) advanceQueue(); }, 6000);
+  }
+  // something was added while nothing (or only the radio) is playing: start it
+  function maybeStartQueue() {
+    setTimeout(() => {
+      if (!music.queue.some(qPlayable)) return;
+      const n = music.now, idle = !n || n.yt === 'ended' || n.yt === 'error' || n.yt === 'blocked', radio = !!(n && n.kind === 'radio');
+      if (!(idle || radio) || !isDJ()) return;
+      if (radio) { music.radioBack = n.key; post(null, '📻 The radio pauses for the queue. It comes back when the queue is empty.'); }
+      advanceQueue();
+    }, 300);
+  }
   function skipMusic() {
-    const fi = music.queue.findIndex(q => q.kind === 'file' || q.kind === 'link' || ytPlayable(q));
-    if (fi > -1) { playAny(music.queue.splice(fi, 1)[0]); return; }
+    if (music.queue.some(qPlayable)) { advanceQueue(); return; }
     if (music.now && music.now.kind === 'radio') { const ks = Object.keys(STATIONS); playRadio(ks[(ks.indexOf(music.now.key) + 1) % ks.length], 'me'); return; }
+    if (music.radioBack && STATIONS[music.radioBack]) { advanceQueue(); return; }
     stopMusic();
   }
+  // Vimeo and SoundCloud players say when they finish
+  window.addEventListener('message', e => {
+    const n = music.now; if (!n || n.kind !== 'link' || !n.el || !n.el.contentWindow || e.source !== n.el.contentWindow) return;
+    let d = e.data; if (typeof d === 'string') { try { d = JSON.parse(d); } catch (_) { return; } }
+    if (d && (d.event === 'finish' || d.method === 'finish' || d.event === 'ended')) songEnded(n);
+  });
   function parseYT(s, srcSel) {
     s = s.trim(); if (!s) return null;
     const isMusic = /music\.youtube\.com/i.test(s) || (!/^https?:/i.test(s) && srcSel === 'ytm');
@@ -3258,14 +3366,14 @@ function main(){
       if (!lk) { toast('Paste a full link that starts with https://'); return; }
       const lb = ti.value.trim(); if (lb) lk.title = lb.slice(0, 80);
       lk.by = 'me'; inp.value = ''; ti.value = '';
-      if (playNow || !music.now) playLink(lk, 'me'); else { music.queue.push(lk); post(null, '🎬 You added “' + lk.title + '” to the queue'); renderMusic(); }
+      if (playNow || !music.now) playLink(lk, 'me'); else queueAdd(lk, '🎬');
       return;
     }
     const lbl = ti.value.trim(); if (lbl) { it.title = lbl; it.userTitle = true; }
     if (!it.title) it.title = it.src + ' video';
     it.by = 'me'; inp.value = ''; ti.value = '';
     if (playNow || !music.now) playYT(it, 'me');
-    else { music.queue.push(it); post(null, '🎵 You added “' + it.title + '” to the queue'); renderMusic(); }
+    else queueAdd(it);
   }
   const SONGS = [['Lofi Girl – beats to relax/study to', 'lofi girl beats to relax study to'], ['Daft Punk – Get Lucky', 'daft punk get lucky'], ['Norah Jones – Don’t Know Why', 'norah jones dont know why'], ['Earth, Wind & Fire – September', 'earth wind and fire september'], ['Nujabes – Feather', 'nujabes feather'], ['Coldplay – Viva La Vida', 'coldplay viva la vida']];
   function coworkerSong(w) {
@@ -3299,9 +3407,9 @@ function main(){
     else if (d.m === 'skip') skipMusic();
     else if (d.m === 'th') toggleTheater();
     else if (d.m === 'save') saveCurrentPick();
-    else if (d.qp != null) { const it = music.queue.splice(+d.qp, 1)[0]; if (it) playAny(it); }
+    else if (d.qp != null) { const it = music.queue.splice(+d.qp, 1)[0]; if (it) { qDel(it); playAny(Object.assign({}, it, { by: 'me' })); } }
     else if (d.m === 'file') $('fileIn').click();
-    else if (d.qx != null) { music.queue.splice(+d.qx, 1); renderMusic(); }
+    else if (d.qx != null) { const it = music.queue.splice(+d.qx, 1)[0]; qDel(it); renderMusic(); }
   });
 
   // ================= one-click music: YouTube, YouTube Music, Spotify, My picks =================
@@ -3331,7 +3439,7 @@ function main(){
   function playPick(it, queue) {
     if (!it) return;
     it = Object.assign({}, it, { by: 'me' });
-    if (queue && music.now) { music.queue.push(it); post(null, '🎵 You added “' + it.title + '” to the queue'); renderMusic(); return; }
+    if (queue && music.now) { queueAdd(it); return; }
     playAny(it);
   }
   function renderPicks() {
@@ -3706,6 +3814,7 @@ function main(){
   const CHORDS_G = [[55, 59, 62, 67], [52, 55, 59, 64], [48, 52, 55, 60], [50, 54, 57, 62]];
   let strumI = 0;
   function strum() {
+    if (muted()) return;
     if (!audio.speaker) return;
     const c = actx(); if (!c) return;
     try {
@@ -3820,6 +3929,7 @@ function main(){
     an.onfinish = () => drop(f);
   }
   function rxSound(type) {
+    if (muted()) return;
     if (!audio.speaker) return;
     const c = actx(); if (!c) return;
     try {
@@ -4199,6 +4309,7 @@ function main(){
 
   // ---- sound effects ----
   function sfx(kind) {
+    if (muted()) return;
     if (!audio.speaker) return;
     const c = actx(); if (!c) return;
     try {
@@ -4463,6 +4574,7 @@ function main(){
 
   // ---- sounds ----
   function tsound(kind) {
+    if (muted()) return;
     if (!audio.speaker) return;
     const c = actx(); if (!c) return;
     try {
@@ -4623,7 +4735,8 @@ function main(){
     w.touch = { tg: tg, spot: spot, face: spot.face, t0: null };
     if (w === me) { const T = me.touch; sendMeTo(spot); me.touch = T; } else goTo(w, spot);
   }
-  function fireTouch(w, tg) {
+  function fireTouch(w, tg) { return hush(w, () => fireTouch0(w, tg)); }
+  function fireTouch0(w, tg) {
     w.reach = elapsed + 0.6;
     if (w === me && NET.on && !NET.rx) { if (tg.laptop) netSend({ t: 'ev', k: 'touch', laptop: tg.laptop.id }); else if (tg.it) { const ix = ITEMS_T.indexOf(tg.it); if (ix > -1) netSend({ t: 'ev', k: 'touch', item: ix }); } }
     if (tg.laptop) { touchLaptop(w, tg.laptop); return; }
@@ -4781,7 +4894,7 @@ function main(){
       loadGames(m.games, new Set(peers.map(p => String(p.id))));
     } else if (m.t === 'join') {
       const w = addPeer(m.id, m.state);
-      if (w) { post(null, '✨ ' + w.name + ' fell from the sky and joined the office'); blip(); ddBadge('team'); setTimeout(bucketSyncTo, 800); setTimeout(() => { if (workers.includes(w)) dropIn(w); }, 60); }
+      if (w) { post(null, '✨ ' + w.name + ' fell from the sky and joined the office'); blip(); ddBadge('team'); setTimeout(bucketSyncTo, 800); setTimeout(() => queueSyncTo(w.netId), 900); setTimeout(() => { if (workers.includes(w)) dropIn(w); }, 60); }
       netStatus('on');
     } else if (m.t === 'leave') {
       const w = peerW(m.id); if (w) post(null, w.name + ' left the office');
@@ -4790,7 +4903,7 @@ function main(){
     else if (m.t === 'chat') { const w = peerW(m.from); if (w && m.text) post(w.id, String(m.text).slice(0, 300), { net: true, to: m.to ? 'me' : null, voice: !!m.voice, priv: !!m.priv, mid: m.mid ? String(m.mid).slice(0, 24) : null, re: reIn(m.re) }); }
     else if (m.t === 'muf') { const w = peerW(m.from); if (w) muffled(w); }
     else if (m.t === 'ev' && m.k === 'game') gameNet(m);
-    else if (m.t === 'ev') netEvent(peerW(m.from), m);
+    else if (m.t === 'ev') { const w0 = peerW(m.from); hush(w0, () => netEvent(w0, m)); }
     else if (m.t === 'rtc') onRtc(String(m.from || ''), m.data);
     else if (m.t === 'token' && m.token) saveToken(String(m.token));
     else if (m.t === 'auth') onAuth(m);
@@ -4920,6 +5033,7 @@ function main(){
       else if (m.k === 'hit' && MELEE[m.type]) { const tgt = m.to === NET.id ? me : m.to === 'dummy' ? DUMMY : peerW(m.to); if (tgt && tgt !== w) doMelee(w, tgt, m.type); }
       else if (m.k === 'carry' && ['pick', 'throw', 'drop', 'free'].indexOf(m.act) > -1) applyNetCarry(m, w);
       else if (m.k === 'bucket' && ['hold', 'place', 'take', 'pickup'].indexOf(m.act) > -1) applyNetBucket(m, w);
+      else if (m.k === 'mq' && ['add', 'sync', 'del', 'clear'].indexOf(m.act) > -1) applyNetMQ(m, w);
       else if (m.k === 'throw' && THROWS[m.item]) { const tgt = m.to === NET.id ? me : m.to === 'dummy' ? DUMMY : peerW(m.to); if (tgt && tgt !== w) doThrow(w, tgt, m.item); }
       else if (m.k === 'arcade' && +m.score > 0) post(null, '🐍 ' + w.name + ' scored ' + Math.min(999, Math.floor(+m.score)) + ' at Snake');
       else if (m.k === 'treat' && ITEMS[m.item]) {
@@ -5133,7 +5247,7 @@ function main(){
   // How loud someone is: full volume up close, fading out by 10 tiles, silent through the meeting room glass.
   function hearGain(w) {
     if (inRoom(w) !== inRoom(me)) return 0;
-    if (GRP(zoneAt(w.x, w.z)) !== GRP(zoneAt(me.x, me.z))) return 0;
+    if (zoneAt(w.x, w.z) !== zoneAt(me.x, me.z)) return 0;
     const d = Math.hypot(w.x - me.x, w.z - me.z);
     return d <= 3 ? 1 : d >= HEAR ? 0 : Math.max(0.12, 1 - (d - 3) / (HEAR - 3));
   }
@@ -5157,7 +5271,7 @@ function main(){
     if (!P) return '<div class="vline">🎧 No voice connection</div>';
     if (P.state !== 'connected') return '<div class="vline">🎧 Connecting voice…</div>';
     const g = hearGain(w);
-    return '<div class="vline">' + (GRP(zoneAt(w.x, w.z)) !== GRP(zoneAt(me.x, me.z)) ? '🔇 In another room' : inRoom(w) !== inRoom(me) ? '🔇 Behind the meeting room glass' : g > 0 ? '🔊 In earshot: you can hear each other' : '🔇 Too far away to hear') + (w.mic ? '' : ' · they’re muted') + '</div>';
+    return '<div class="vline">' + (zoneAt(w.x, w.z) !== zoneAt(me.x, me.z) ? '🔇 In another room' : inRoom(w) !== inRoom(me) ? '🔇 Behind the meeting room glass' : g > 0 ? '🔊 In earshot: you can hear each other' : '🔇 Too far away to hear') + (w.mic ? '' : ' · they’re muted') + '</div>';
   }
 
   const AMBIENT_BY = {
@@ -6665,7 +6779,7 @@ function main(){
     else if (t < T1) { lx = -0.8; ly = 2.25 * ((t - T0) / (T1 - T0)); pose = 'climb'; }
     else if (t < T2) { lx = -0.8 + 1.4 * ((t - T1) / (T2 - T1)); ly = 2.25; pose = 'walk'; }
     else if (t < T3) { lx = 0.62; ly = 2.15; pose = 'sit'; }
-    else if (t < T4) { const k = (t - T3) / (T4 - T3), e = k * k; lx = 0.83 + 2.94 * e; ly = 2.09 - 1.81 * e; pose = 'slide'; if (S.snd < 1) { S.snd = 1; if (!otherZone(w)) fxSound('whoosh'); floatFx(w, '🛝 Wheee!'); } }
+    else if (t < T4) { const k = (t - T3) / (T4 - T3), e = k * k; lx = 0.83 + 2.94 * e; ly = 2.09 - 1.81 * e; pose = 'slide'; if (S.snd < 1) { S.snd = 1; if (hearsW(w)) fxSound('whoosh'); floatFx(w, '🛝 Wheee!'); } }
     else { finishSlide(w); return; }
     if (t >= T1 && S.snd < 0.5) { S.snd = 0.5; tsound('boing'); }
     const x = S.G[0] + lx, z = S.G[1];
@@ -7550,6 +7664,7 @@ function main(){
   }
   function beamMat() { return new THREE.MeshBasicMaterial({ color: 0xfff1c4, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }); }
   function choir() {
+    if (muted()) return;
     if (!audio.speaker) return; const c = actx(); if (!c) return;
     try {
       const n = c.currentTime, out = c.createGain();
@@ -7574,7 +7689,7 @@ function main(){
     const pool = new THREE.Mesh(new THREE.CircleGeometry(1.05, 28), beamMat()); pool.rotation.x = -Math.PI / 2; pool.position.y = 0.03; B.add(pool);
     B.traverse(o => { o.raycast = () => {}; o.castShadow = false; o.receiveShadow = false; }); B.position.set(w.x, 0, w.z); scene.add(B);
     w.drop = { t0: elapsed, B: B, cone: cone, core: core, pool: pool, landed: false, path: path };
-    if (!otherZone(w)) choir();
+    if (hearsW(w)) choir();
   }
   function dropPose(w) {
     const D = w.drop; if (!D) return;
@@ -7643,7 +7758,7 @@ function main(){
       if (k >= 1) {
         CARRY.flights.splice(i, 1); F.w.flying = false;
         const wet = WATER_IN(F.to[0], F.to[1]);
-        fxSound(wet ? 'thud' : 'crash'); pow(screenPos(F.w)); floatFx(F.w, wet ? '💦 SPLASH!' : '💥');
+        hush(F.w, () => fxSound(wet ? 'thud' : 'crash')); pow(screenPos(F.w)); floatFx(F.w, wet ? '💦 SPLASH!' : '💥');
         place(F.w, F.to, !wet);
         if (F.at) hitByThrow(F.at, F.w, F.by);
       }
@@ -8119,11 +8234,13 @@ function main(){
     } else if (w._swim) { w._swim = false; floatFx(w, '💦'); }
   }
   function splash() {
+    if (muted()) return;
     if (!audio.speaker) return; const c = actx(); if (!c) return;
     try { const len = Math.floor(0.5 * c.sampleRate), bf = c.createBuffer(1, len, c.sampleRate), d = bf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
       const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(); s.buffer = bf; f.type = 'bandpass'; f.frequency.value = 900; g.gain.value = 0.9; s.connect(f); f.connect(g); g.connect(audio.gain); s.start(); } catch (e) {}
   }
   function bsound(kind) {
+    if (muted() || zoneAt(me.x, me.z) !== 'court') return;
     if (!audio.speaker) return; const c = actx(); if (!c) return;
     try {
       const n = c.currentTime;
@@ -8529,6 +8646,7 @@ function main(){
   function flyTick(dt) {
     for (let i = FLY.length - 1; i >= 0; i--) {
       const f = FLY[i], t = elapsed - f.t0;
+      { const P = f.tgt || f.from || (f.parts && f.parts[0] ? { x: f.parts[0].position.x, z: f.parts[0].position.z } : f.m ? { x: f.m.position.x, z: f.m.position.z } : null); SND.fly = hearsW(P) ? 0 : 1; }
       if (f.phase === 'boom') {
         const k = Math.min(1, t / 0.6);
         f.parts[0].scale.setScalar(0.2 + k * f.size); f.parts[1].scale.setScalar(0.1 + k * f.size * 0.6);
@@ -8592,7 +8710,8 @@ function main(){
     hitTarget(f.tgt, f.from, f.kind);
     f.phase = 'rest'; f.t0 = elapsed; f.m.rotation.set(0, f.m.rotation.y, 0); f.m.position.set(p[0] + 0.55, f.kind === 'laptop' ? 0.02 : 0, p[1] + 0.35);
   }
-  function hitTarget(tgt, from, kind) {
+  function hitTarget(tgt, from, kind) { return hush(tgt, () => hitTarget0(tgt, from, kind)); }
+  function hitTarget0(tgt, from, kind) {
     if (!tgt) return;
     if (tgt.isDummy) { dummyHit(kind); return; }
     if (THROWS[kind]) hitFx(tgt, kind);
@@ -8656,9 +8775,10 @@ function main(){
       const d = Math.hypot(p.tgt.x - me.x, p.tgt.z - me.z);
       if (d < 1.9) doMelee(me, p.tgt, p.kind); else toast('They moved away before you got there!');
     } else if (me.pendAtk && elapsed - me.pendAtk.t > 10) me.pendAtk = null;
-    flyTick(dt); dummyTick(dt); scatTick(dt);
+    flyTick(dt); SND.fly = 0; dummyTick(dt); scatTick(dt);
   }
   function fxSound(kind) {
+    if (muted()) return;
     if (!audio.speaker) return; const c = actx(); if (!c) return;
     try {
       const n = c.currentTime;
@@ -8730,8 +8850,8 @@ function main(){
       v.addEventListener('loadedmetadata', () => { if (n.startAt && isFinite(v.duration) && n.startAt < v.duration - 2) { try { v.currentTime = n.startAt; } catch (e) {} } });
       v.addEventListener('playing', () => { if (music.now === n) { n.yt = 'playing'; renderMusic(); } });
       v.addEventListener('pause', () => { if (music.now === n && !v.ended) { n.yt = 'paused'; renderMusic(); } });
-      v.addEventListener('ended', () => { if (music.now === n) skipMusic(); });
-      v.addEventListener('error', () => { if (music.now === n) { n.yt = 'error'; n.err = 'This file couldn’t play here. The site may block it, or the format isn’t supported.'; renderMusic(); } });
+      v.addEventListener('ended', () => songEnded(n));
+      v.addEventListener('error', () => { if (music.now === n) { n.yt = 'error'; n.err = 'This file couldn’t play here. The site may block it, or the format isn’t supported.'; renderMusic(); setTimeout(() => { if (music.now === n && music.queue.some(qPlayable)) songEnded(n); }, 2500); } });
       lh.appendChild(v); n.el = v;
       try { const p = v.play(); if (p && p.catch) p.catch(() => { if (music.now === n) { n.yt = 'paused'; renderMusic(); toast('Open the 🎵 Music menu and press ▶ Play to start it.'); } }); } catch (e) {}
     } else {
@@ -8741,7 +8861,7 @@ function main(){
       f.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-popups allow-forms');
       f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
       f.src = n.embed;
-      f.addEventListener('load', () => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } });
+      f.addEventListener('load', () => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } try { [0, 800, 2500].forEach(d => setTimeout(() => { if (music.now !== n || !f.contentWindow) return; f.contentWindow.postMessage(JSON.stringify({ method: 'addEventListener', value: 'finish' }), '*'); f.contentWindow.postMessage(JSON.stringify({ method: 'addEventListener', value: 'ended' }), '*'); }, d)); } catch (e) {} });
       lh.appendChild(f); n.el = f;
       setTimeout(() => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } }, 4000);
       if (!/youtube|vimeo|dailymotion|drive\.google/.test(n.embed)) setTimeout(() => { if (music.now === n) toast('🎵 If it doesn’t start, open the 🎵 Music menu → ⛶ Big screen and press play there.'); }, 2500);
