@@ -8,15 +8,17 @@ A pixel-hotel style virtual office that runs in the browser. Real people open th
 - **Hero costumes:** 10 original superhero costumes inspired by the Avengers, like Star Captain with a shield on his back, Red Armor, and Thunder God with a cape and hammer. They are original designs, not official Marvel costumes.
 - **Talk with live voice:** unmute and people near you hear you. Voices get quieter with distance and fade out about 10 tiles away.
 - **See everyone live:** where people walk and sit, their status, emotes, what they're eating or drinking, and who's talking.
+- **Clean screen:** the office fills the whole window. Round buttons in the top-right corner open dropdown menus: your profile (status, mic, speaker and actions), 🎤 mic on/off, 👥 Team, ✅ Tasks and 🎵 Music. A red dot shows when something new happened, like someone joining, a new task for you or a song starting. The chat lives in a 💬 bubble in the bottom-right corner, like Facebook Messenger, with a red unread count.
 - **Chat, reply and mention:** messages to the whole room, or a private whisper to one person (`/w Name hi`). Hover a message and click **↩** to reply to it. Type **@** to pick someone to mention, or use `@everyone`. The person you mention or reply to gets a sound and a pop-up.
 - **Soundproof meeting room:** inside the Harbour room, only people inside hear your voice and get your chat messages. Everyone else sees `· · ·`.
 - **Lock a room:** click **🔒 Lock room** in the top-left panel and choose a passcode. People who join later need it.
 - **Do things together:** emoji reactions, 20 dances (invite someone to dance with you), slaps with a trout, treating everyone to coffee or pizza, and touching the tree, presents, corgi, plants, lamp, whiteboard, bell and laptops.
 - **Shared music:** the office radio and YouTube / YouTube Music links play for everyone in the room. Songs from your own computer only play for you.
+- **One-click music:** the 🎵 Music menu has tabs for **YouTube** (24/7 lofi radios, hits, love songs, classics, Christmas), **YouTube Music** (song radios that keep playing similar songs), **Spotify** (18 Spotify playlists; full songs need Spotify Premium logged in, otherwise 30-second previews) and **⭐ My picks** (press ⭐ Save on anything that's playing to keep it for one-click listening). With a YouTube key on the server you can also search any song.
 - **Play any link for the room:** the jukebox plays YouTube, YouTube Music, Vimeo, Dailymotion, Spotify, SoundCloud, Twitch, Google Drive videos, direct video files (`.mp4`, `.webm`) and most other embeddable links. Click **⛶** on the player for the big screen and have a movie night. Late joiners jump to the right spot in direct video files. Some sites, like Netflix, don't allow playing inside other pages. Songs from your own computer only play for you.
 - **Office, hallway and rooms:** you start in the office, with a hallway (half the office's size) right in front of it, so you see both at once. Walk through the opening in the low wall to get from one to the other. The hallway is a lobby lounge with sofas, armchairs, coffee tables, rugs, lamps, plants, art, a room directory, a vending machine and a water cooler. The hallway has a row of glowing doors, one for each room: game room, pool, basketball court, sleeping quarters, bar, movie room, gym and beach. Hover over a door to see which room it is and how many people are inside, then click it to go in. Each room is as big as the office (with windows along the back) and shows on its own. Use the room's door to come back, or the **Rooms** buttons to jump anywhere. People only show up, and can only hear each other, when they're in the same area. Chat still reaches everyone.
 - **Entertainment wing:** a hallway runs through the east wing, with a door into each room: game room, pool and basketball court on one side, sleeping quarters, bar and movie room on the other, and the gym at the end with a door out to the beach.
-- **Movie room:** two rows of sofas facing a big screen. The screen shows what's playing, and clicking it opens the big-screen player for everyone's movie link.
+- **Movie room:** click the big screen to put a movie on (paste a YouTube, Vimeo or video link) and press **▶ Watch**. Your character takes a seat and the view switches to first person, looking straight at the screen with the movie playing on it. Only people who press Watch see the movie up close and hear it; everyone else sees “Now showing” on the screen. Press **✕ Exit** or Esc to stop watching. People who join later start at the same point in the movie.
 - **Fitness gym:** treadmills, exercise bikes, a punching bag, a bench press, dumbbells and yoga mats. Your character works out on each one, and a long workout makes you walk faster for a minute.
 - **Beach:** walk through the gym's east door onto a huge beach with palm trees, towels and umbrellas, sun loungers, a tiki bar, a bonfire, a lifeguard tower, a sandcastle, surfboards, a beach ball and crabs. Your character changes into a beach outfit as soon as you step on the sand, and back again when you come inside. Walk into the sea to swim.
 - **Camera angle:** use the buttons on the right edge of the office view (⟲ ⟳ to rotate, 📐 to change the tilt, ⌂ to reset), right-drag to turn the view freely, or press Q / E to rotate, T to tilt and R to reset. Walls between you and the room fade out so you can always see inside.
@@ -56,6 +58,16 @@ GitHub Pages can only host files, and multiplayer needs a small server. Render c
 4. When it says **Live**, open the address it gives you, like `https://virtual-office-xxxx.onrender.com`. That's your multiplayer office. Share it, or add `?room=yourteam`.
 
 **Free plan limits:** Render puts a free service to sleep after 15 minutes with no visitors. The next visitor waits about a minute while it wakes up. While people are in the office, the page sends a small keep-alive message every few minutes so it stays awake.
+
+## Song search (optional)
+
+To search any song from the 🎵 Music menu, give the server a free YouTube Data API key:
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com), create a project, open **APIs & Services → Library**, and turn on **YouTube Data API v3**.
+2. Open **APIs & Services → Credentials → Create credentials → API key**, and copy the key.
+3. On Render, open your service, go to **Environment**, add **YOUTUBE_API_KEY** with that key, and save. Render restarts the server.
+
+The free daily quota allows about 100 searches; results are cached for 30 minutes.
 
 ## Room passcodes
 

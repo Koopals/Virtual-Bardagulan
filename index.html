@@ -387,21 +387,86 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
 .ylink{width:100%;margin-top:8px;font-family:var(--font-mono);font-size:11px}
 @media (max-width:820px){
   :root{--panel-w:0px}
-  #side{top:auto;left:0;width:auto;height:46vh;border-left:0;border-top:1px solid var(--color-border-light)}
-  #stage,#bubbles{bottom:46vh}
   .help{display:none}
   .toast{left:50%;max-width:calc(100% - 28px)}
   .ytmini{right:14px;width:240px}
   .pantry{width:auto;right:14px}
-  .dpick{left:50%;bottom:calc(46vh + 70px);width:calc(100% - 28px)}
+  .dpick{left:50%;bottom:70px;width:calc(100% - 28px)}
   .dpg{grid-template-columns:repeat(4,1fr)}
   .setup{align-items:flex-end;padding:10px}
   .setup-card{width:100%;max-height:62vh}
-  .card{bottom:calc(46vh + 70px);max-height:36vh}
-  .dock{left:50%;bottom:calc(46vh + 14px);max-width:calc(100% - 28px)}
+  .card{bottom:80px;max-height:52vh}
+  .dock{left:calc(50% - 30px);max-width:calc(100% - 100px)}
   .hud{width:220px}
   .hud .views,.hud .lbl{display:none}
 }
+
+/* ---- top-right menus and the chat bubble ---- */
+:root{--panel-w:0px !important}
+#side{position:static;width:auto;background:none;border:0;display:block}
+.topbar{position:fixed;top:12px;right:14px;z-index:80;display:flex;gap:6px;align-items:center}
+.tb{position:relative;width:42px;height:42px;padding:0;border-radius:50%;font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;background:var(--color-bg-secondary);border:1px solid var(--color-border);box-shadow:var(--shadow-md)}
+.tb.open{background:var(--page-accent);border-color:var(--page-accent);color:#fff}
+.tbme{width:auto;padding:0 10px 0 4px;gap:4px;border-radius:999px}
+.tbav{width:32px;height:32px;border-radius:50%;background:var(--c,#64748b);color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.tbst{font-size:15px}
+.tbslash{position:absolute;width:26px;height:3px;background:#e8342e;border-radius:2px;transform:rotate(-45deg);box-shadow:0 0 0 1px #fff}
+#tbMic.live{background:#2e9a2e;border-color:#2e9a2e;color:#fff}
+#tbMic.live .tbslash{display:none}
+.rdot{position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;background:#e8342e;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.rbadge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#e8342e;color:#fff;font-size:11px;font-weight:800;line-height:16px;border:2px solid #fff;text-align:center}
+.dd{position:fixed;top:62px;right:14px;width:min(380px,calc(100vw - 28px));max-height:calc(100vh - 160px);overflow:auto;z-index:79;padding:0;display:flex;flex-direction:column}
+.dd[hidden]{display:none}
+.ddh{font-weight:800;font-size:14px;padding:11px 14px 8px;border-bottom:1px solid var(--color-border-light);position:sticky;top:0;background:var(--color-bg-secondary);z-index:1}
+.dd .pane{flex:none;overflow:visible}
+#ddMe .mebox{border-bottom:0}
+.chatfab{position:fixed;right:18px;bottom:14px;width:54px;height:54px;border-radius:50%;padding:0;font-size:25px;line-height:1;z-index:81;background:var(--page-accent);border:0;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center}
+.chatfab.open{background:#22262e}
+.chatwin{position:fixed;right:18px;bottom:80px;width:min(350px,calc(100vw - 36px));height:min(500px,calc(100vh - 170px));z-index:80;display:flex;flex-direction:column;padding:0;overflow:hidden}
+.chatwin[hidden]{display:none}
+.cwh{display:flex;align-items:center;gap:8px;padding:9px 10px 9px 12px;background:var(--page-accent);color:#fff}
+.cwh b{font-size:14px}
+.cwav{font-size:17px}
+.cwsub{flex:1;min-width:0;font-size:11px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cwh button{border:0;background:rgba(255,255,255,.18);color:#fff;width:28px;height:28px;padding:0;border-radius:50%;font-size:18px;line-height:1}
+.chatwin #pChat{flex:1;min-height:0;display:flex;flex-direction:column}
+.dock{max-width:calc(100% - 200px)}
+.ytmini{top:62px;right:14px}
+.camctl{top:auto;bottom:14px;right:auto;left:14px;transform:none;flex-direction:row;padding:5px 6px}
+body.habbo .tb,body.habbo .chatfab{border:2px solid #111;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+body.habbo .ddh{font-family:var(--hb-font)}
+body.habbo .cwh{font-family:var(--hb-font)}
+
+/* ---- movie room watch mode ---- */
+.movieview{position:fixed;inset:0;z-index:90;pointer-events:none}
+.movieview[hidden]{display:none}
+.movieview::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 38%,rgba(0,0,0,.72) 100%)}
+.mvbar{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-radius:999px;background:rgba(14,16,24,.88);color:#fff;pointer-events:auto;box-shadow:0 6px 20px rgba(0,0,0,.35);max-width:calc(100% - 24px)}
+.mvtt{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38vw}
+.mvvl{display:flex;align-items:center;gap:4px;font-size:13px}.mvvl input{width:90px}
+.mvbar button{padding:6px 12px;font-size:12.5px;border-radius:999px}
+.mvscreen{position:absolute;left:0;top:0;width:10px;height:10px;pointer-events:auto;background:#000;box-shadow:0 0 0 2px #111,0 0 60px rgba(120,150,255,.25);opacity:0}
+#mvHost,#mvHost iframe,#mvHost video{width:100%;height:100%;border:0;display:block;background:#000}
+.mvempty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#fff;text-align:center;padding:12px;background:linear-gradient(#101828,#05060a)}
+.mvempty[hidden]{display:none}
+.mvempty span{font-size:13px;opacity:.8}.mvempty div{display:flex;gap:6px;width:min(420px,90%)}.mvempty input{flex:1}
+body.watching #bubbles,body.watching .dock,body.watching .camctl,body.watching .roompill,body.watching .hud,body.watching .help,body.watching #topbar,body.watching .dd{display:none !important}
+
+#help{display:none !important}
+.srctabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:0 0 8px}
+.srctabs button{padding:6px 2px;font-size:11.5px;border-radius:8px}
+.srctabs button.on{background:var(--page-accent);border-color:var(--page-accent);color:#fff}
+.pk{display:flex;align-items:center;gap:8px;padding:5px 4px;border-radius:8px;cursor:pointer}
+.pk:hover{background:var(--color-surface-hover)}
+.pk img{width:56px;height:32px;object-fit:cover;border-radius:4px;flex:none;background:#111}
+.pke{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;border-radius:6px;background:var(--color-surface)}
+.pkt{flex:1;min-width:0;display:flex;flex-direction:column}
+.pkt b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pkt span{font-size:11px;color:var(--color-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk button{width:28px;height:28px;padding:0;border-radius:50%;font-size:13px;flex:none}
+.pksearch{display:flex;gap:6px;margin:0 0 8px}.pksearch input{flex:1;min-width:0}
+.pknote{font-size:11.5px;color:var(--color-text-secondary);padding:6px 4px;line-height:1.4}
+#picksBody .lbl{margin-top:8px}
 </style>
 </head>
 <body>
@@ -455,6 +520,14 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
 <div class="float card pantry" id="pantry" hidden></div>
 <div class="float card pantry" id="barBox" hidden></div>
 <div class="float card pantry" id="atkBox" hidden></div>
+<div class="float card pantry" id="movieBox" hidden></div>
+<div class="movieview" id="movieView" hidden>
+  <div class="mvbar"><span class="mvtt">🎬 <b id="mvT">Movie</b></span><label class="mvvl">🔊<input type="range" id="mvVol" min="0" max="100" value="90" aria-label="Movie volume"></label><button id="mvChange">🔁 Change movie</button><button id="mvExit" class="on">✕ Exit (Esc)</button></div>
+  <div class="mvscreen" id="mvScreen"><div id="mvHost"></div>
+    <div class="mvempty" id="mvEmpty" hidden><b>Nothing is showing yet</b><span>Paste a YouTube, Vimeo or video link to start the movie for the room</span><div><input id="mvIn" maxlength="1000" autocomplete="off" placeholder="https://…"><button id="mvGo" class="on">▶ Play</button></div></div>
+  </div>
+</div>
+
 <div class="float gamebox" id="gameBox" hidden><div class="gbh"><b id="gbT">Game</b><button id="gbX" aria-label="Close the game">×</button></div><canvas id="gbCv" width="480" height="480"></canvas><div id="gbS"></div></div>
 <div class="float dpick" id="dpick" hidden></div>
 <div class="setup" id="setup" hidden></div>
@@ -469,7 +542,21 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
 <div class="dock" id="dock" role="toolbar" aria-label="Emoji reactions"></div>
 <div class="float help" id="help">Click the floor to walk, a desk or chair to sit · Click a person to whisper or slap · Drag to orbit · Right-drag to pan · Scroll to zoom · M: mic · 1–4: emotes</div>
 
+<nav class="topbar" id="topbar" aria-label="Menus">
+  <button class="tb tbme" data-dd="me" title="You: status, mic and actions" aria-haspopup="true" aria-expanded="false"><span class="tbav" id="tbAv">?</span><span class="tbst" id="tbSt">💻</span></button>
+  <button class="tb" id="tbMic" title="Mic (M)" aria-pressed="false">🎤<span class="tbslash"></span></button>
+  <button class="tb" data-dd="team" title="Team" aria-haspopup="true" aria-expanded="false">👥<span class="rdot" id="bTeam" hidden></span></button>
+  <button class="tb" data-dd="tasks" title="Tasks" aria-haspopup="true" aria-expanded="false">✅<span class="rdot" id="bTasks" hidden></span></button>
+  <button class="tb" data-dd="music" title="Music" aria-haspopup="true" aria-expanded="false">🎵<span class="rdot" id="bMusic" hidden></span></button>
+</nav>
 <aside id="side">
+  <div class="tabs" id="tabs" hidden>
+    <button data-tab="team" class="on">Team</button>
+    <button data-tab="chat">Chat room</button>
+    <button data-tab="tasks">Tasks</button>
+    <button data-tab="music">Music</button>
+  </div>
+  <div class="float dd" id="ddMe" hidden>
   <div class="mebox">
     <div id="meBar"></div>
     <div class="avbar">
@@ -479,23 +566,12 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
     </div>
     <div class="emo" id="emoBar"></div>
   </div>
-  <div class="tabs" id="tabs">
-    <button data-tab="team" class="on">Team</button>
-    <button data-tab="chat">Chat room<span class="badge" id="unread" hidden>0</span></button>
-    <button data-tab="tasks">Tasks</button>
-    <button data-tab="music">Music</button>
   </div>
+  <div class="float dd" id="ddTeam" hidden><div class="ddh">👥 Team</div>
   <div class="pane" id="pTeam"></div>
-  <div class="pane" id="pChat" hidden>
-    <div class="msgs" id="msgs"></div>
-    <div class="rbar" id="rBar" hidden></div>
-    <div class="compose" id="compose">
-      <select id="chatTo" aria-label="Send to"></select>
-      <input id="chatIn" maxlength="200" placeholder="Message the office… (type @ to mention someone)" autocomplete="off">
-      <button id="chatSend">Send</button>
-    </div>
   </div>
-  <div class="pane" id="pTasks" hidden>
+  <div class="float dd" id="ddTasks" hidden><div class="ddh">✅ Tasks</div>
+  <div class="pane" id="pTasks">
     <div class="tfil" id="tfil">
       <button data-f="all" class="on">All</button>
       <button data-f="mine">Mine</button>
@@ -508,8 +584,14 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
     </div>
     <div id="tList"></div>
   </div>
-  <div class="pane" id="pMusic" hidden>
+  </div>
+  <div class="float dd" id="ddMusic" hidden><div class="ddh">🎵 Music</div>
+  <div class="pane" id="pMusic">
     <div class="np" id="np"></div>
+    <div class="msec" id="picks">
+      <div class="srctabs" id="srcTabs"><button data-src="yt" class="on">▶️ YouTube</button><button data-src="ytm">🎵 YT Music</button><button data-src="sp">🟢 Spotify</button><button data-src="my">⭐ My picks</button></div>
+      <div id="picksBody"></div>
+    </div>
     <div class="msec">
       <div class="lbl">Office radio · plays right here for the whole floor</div>
       <div class="stations" id="stations"></div>
@@ -520,19 +602,33 @@ body.dragging #stage{outline:4px dashed #8b5cf6;outline-offset:-8px}
       <input type="file" id="fileIn" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac,.opus" multiple hidden>
     </div>
     <div class="msec">
-      <div class="lbl">Play any link · YouTube, movies, videos, Vimeo, Spotify, SoundCloud…</div>
+      <div class="lbl">Or paste any link · YouTube, Spotify, SoundCloud, videos…</div>
       <div class="ytf">
         <select id="ytSrc" aria-label="Source"><option value="yt">YouTube</option><option value="ytm">YouTube Music</option></select>
         <input id="ytIn" maxlength="1000" autocomplete="off" placeholder="Paste any video, movie or song link">
       </div>
       <input id="ytTitle" maxlength="80" autocomplete="off" placeholder="Name (optional)">
       <div class="row2"><button id="ytPlay" class="on">Play for everyone</button><button id="ytQueue">Add to queue</button></div>
-      <p class="wnote">Paste a link and it plays for everyone in the room. Click ⛶ on the player for the big screen, great for movie night. Direct video files (.mp4, .webm) stay in sync for late joiners. Some sites (like Netflix) don’t allow playing inside other pages.</p>
+      <p class="wnote">Paste a link and it plays for everyone in the room. Click ⛶ on the player for the big screen, great for movie night. Direct video files (.mp4, .webm) stay in sync for late joiners. Some sites (like Netflix) don’t allow playing inside other pages. This works in the Chrome/Edge version of the office. This preview blocks outside players.</p>
     </div>
     <div class="msec"><div class="lbl">Up next</div><div id="queue"></div></div>
     <div class="msec"><div class="lbl">Music volume</div><input type="range" id="mvol" min="0" max="100" value="85" aria-label="Music volume"><div class="row2"><button data-m="test">🔔 Test sound</button></div></div>
   </div>
+  </div>
 </aside>
+<div class="float chatwin" id="chatWin" hidden role="dialog" aria-label="Chat room">
+  <div class="cwh"><span class="cwav">💬</span><b>Chat room</b><span class="cwsub" id="cwSub">Everyone in the office</span><button id="cwMin" aria-label="Minimize chat" title="Minimize">–</button></div>
+  <div class="pane" id="pChat">
+    <div class="msgs" id="msgs"></div>
+    <div class="rbar" id="rBar" hidden></div>
+    <div class="compose" id="compose">
+      <select id="chatTo" aria-label="Send to"></select>
+      <input id="chatIn" maxlength="200" placeholder="Message the office… (type @ to mention someone)" autocomplete="off">
+      <button id="chatSend">Send</button>
+    </div>
+  </div>
+</div>
+<button class="chatfab" id="chatFab" title="Chat room" aria-label="Open chat">💬<span class="rbadge" id="unread" hidden>0</span></button>
 
 <script>
 function main(){
@@ -2437,7 +2533,7 @@ function main(){
   // ================= tasks =================
   let taskSeq = 1;
   const tasks = [];
-  function addTask(owner, title, progress) { const t = { id: taskSeq++, owner: owner, title: title, progress: progress || 0, done: false }; tasks.push(t); return t; }
+  function addTask(owner, title, progress) { const t = { id: taskSeq++, owner: owner, title: title, progress: progress || 0, done: false }; tasks.push(t); if (owner === 'me' && typeof ddBadge === 'function' && !addTask.mine) ddBadge('tasks'); return t; }
   const TASKS_BY = {
     me: ['Check today’s break schedule', 'Follow up on open escalations', 'Prep weekly team sync'],
     tl: ['Review QA audits', 'Prep the team huddle', 'Check the break and lunch schedule', 'Review escalations', 'Update the shift roster'],
@@ -2567,6 +2663,7 @@ function main(){
   function isTalking(w) { return w === me ? mic.talking : (!!w.netTalk || w.talkUntil > Date.now()); }
   function micTag(w) { return '<span class="mi' + (w.mic ? '' : ' off') + '" title="' + (w.mic ? 'Mic on' : 'Muted') + '">' + (w.mic ? ICON.mic : ICON.micOff) + '</span>'; }
   function renderAV() {
+    if (typeof renderTopbar === 'function') renderTopbar();
     const mb = $('micBtn'), sb = $('spkBtn');
     mb.className = 'ic ' + (mic.on ? 'live' : 'off'); mb.setAttribute('aria-pressed', String(mic.on));
     mb.innerHTML = (mic.on ? ICON.mic : ICON.micOff) + '<span>' + (mic.on ? 'Mic on' : 'Muted') + '</span>';
@@ -2721,7 +2818,7 @@ function main(){
       if (who !== 'me') {
         if (o.late) { /* caught up later */ } else if (wh) say(w, text, true); else if (voice) say(w, text, false); else blip();
         if (tab !== 'chat') {
-          unread++; const u = $('unread'); u.textContent = String(unread); u.hidden = false;
+          unread++; const u = $('unread'); u.textContent = unread > 99 ? '99+' : String(unread); u.hidden = false;
           if (wh && o.to === 'me' && !pinged) toast('🤫 ' + w.name + ' whispered: “' + (text.length > 60 ? text.slice(0, 58) + '…' : text) + '”');
         }
         if (pinged) pingMe(w, text, pinged);
@@ -2765,7 +2862,8 @@ function main(){
   function ytLoadInto(it) {
     const v = Math.round(music.vol * 100);
     try { yt.player.setVolume(v); } catch (e) {}
-    if (it.id) yt.player.loadVideoById(it.startAt ? { videoId: it.id, startSeconds: it.startAt } : it.id);
+    if (it.list && /^RD/.test(it.list) && !it.mixFailed) yt.player.loadPlaylist({ list: it.list, listType: 'playlist', index: 0 });
+    else if (it.id) yt.player.loadVideoById(it.startAt ? { videoId: it.id, startSeconds: it.startAt } : it.id);
     else yt.player.loadPlaylist({ list: it.list, listType: 'playlist', index: 0 });
   }
   function startYT(n) {
@@ -2777,7 +2875,7 @@ function main(){
       if (!yt.player) {
         const pv = { autoplay: 1, playsinline: 1, rel: 0, modestbranding: 1 };
         if (/^https?:$/.test(location.protocol)) pv.origin = location.origin;
-        if (n.startAt) pv.start = Math.floor(n.startAt); if (!n.id) { pv.listType = 'playlist'; pv.list = n.list; }
+        if (n.startAt) pv.start = Math.floor(n.startAt); if (!n.id || (n.list && /^RD/.test(n.list))) { pv.listType = 'playlist'; pv.list = n.list; }
         yt.player = new YT.Player('ytHost', {
           width: '100%', height: '100%', videoId: n.id || undefined, playerVars: pv,
           events: {
@@ -2802,10 +2900,11 @@ function main(){
       try { const d = yt.player.getVideoData(); if (d && d.title && (/ video$| playlist$/.test(n.title) || !n.userTitle)) { n.title = d.title; document.getElementById('ytMiniT').textContent = d.title; } } catch (_) {}
       renderMusic();
     } else if (e.data === 2) { n.yt = 'paused'; renderMusic(); }
-    else if (e.data === 0) { if (!n.list) skipMusic(); }
+    else if (e.data === 0) { if (!n.list || n.mixFailed) skipMusic(); }
   }
   function onYTErr(e) {
     const n = music.now; if (!n || n.kind !== 'yt') return;
+    if (n.list && /^RD/.test(n.list) && n.id && !n.mixFailed) { n.mixFailed = true; try { ytLoadInto(n); } catch (_) {} return; }
     n.yt = 'error'; n.err = YT_ERR[e.data] || ('YouTube error ' + e.data + '.');
     renderMusic(); toast(n.err);
     if (e.data !== 153 && music.queue.some(ytPlayable)) setTimeout(() => { if (music.now === n) skipMusic(); }, 2500);
@@ -2938,6 +3037,7 @@ function main(){
     return music.level;
   }
   function announce(by, title) {
+    if (by && by !== 'me' && typeof ddBadge === 'function') ddBadge('music');
     const w = byId[by] || me;
     post(null, '🎵 ' + nmOf(w) + ' started “' + title + '” for everyone');
     const fans = workers.filter(x => x !== me && x !== w && ['avail', 'focus', 'custom', 'break'].indexOf(x.status) > -1);
@@ -3084,7 +3184,7 @@ function main(){
     else {
       const by = byId[n.by] || me;
       s = '<div class="npc"><div class="eq' + (audible() ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 On the player · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
-        (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">⛶ Big screen</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
+        (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">⛶ Big screen</button><button data-m="save">⭐ Save</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
         (n.kind === 'yt' && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') +
         (n.kind === 'yt' && !(n.yt === 'playing' || n.yt === 'paused' || n.yt === 'loading') ? '<a class="btn yt" href="' + esc(n.url) + '" target="_blank" rel="noopener">' + (n.yt === 'search' ? 'Search on ' : 'Open on ') + esc(n.src) + '</a>' : '') +
         (n.kind !== 'yt' && n.kind !== 'link' || ytPlayable(n) ? '<div class="lvl"><i id="npLvl"></i></div>' : '') + '<button data-m="skip">' + (music.queue.some(q => q.kind === 'file' || q.kind === 'link' || ytPlayable(q)) ? 'Next song' : n.kind === 'radio' ? 'Next station' : 'Skip') + '</button><button data-m="stop">Stop</button></div>';
@@ -3102,10 +3202,99 @@ function main(){
     else if (d.m === 'pp' && yt.player && yt.ready) { try { if (music.now.yt === 'playing') yt.player.pauseVideo(); else yt.player.playVideo(); } catch (e) {} }
     else if (d.m === 'skip') skipMusic();
     else if (d.m === 'th') toggleTheater();
+    else if (d.m === 'save') saveCurrentPick();
     else if (d.qp != null) { const it = music.queue.splice(+d.qp, 1)[0]; if (it) playAny(it); }
     else if (d.m === 'file') $('fileIn').click();
     else if (d.qx != null) { music.queue.splice(+d.qx, 1); renderMusic(); }
   });
+
+  // ================= one-click music: YouTube, YouTube Music, Spotify, My picks =================
+  const YT_GROUPS = [
+    ['📻 24/7 radio', [['jfKfPfyJRdk', 'Lofi hip hop radio', 'Lofi Girl'], ['4xDzrJKXOOY', 'Synthwave radio', 'Lofi Girl'], ['DWcJFNfaw9c', 'Lofi beats to sleep/chill to', 'Lofi Girl']]],
+    ['🔥 Hits', [['OPf0YbXqDm0', 'Uptown Funk', 'Mark Ronson ft. Bruno Mars'], ['JGwWNGJdvx8', 'Shape of You', 'Ed Sheeran'], ['kJQP7kiw5Fk', 'Despacito', 'Luis Fonsi ft. Daddy Yankee'], ['hT_nvWreIhg', 'Counting Stars', 'OneRepublic'], ['09R8_2nJtjg', 'Sugar', 'Maroon 5'], ['nfWlot6h_JM', 'Shake It Off', 'Taylor Swift'], ['RgKAFK5djSk', 'See You Again', 'Wiz Khalifa ft. Charlie Puth'], ['CevxZvSJLk8', 'Roar', 'Katy Perry'], ['60ItHLz5WEA', 'Faded', 'Alan Walker'], ['UceaB4D0jpo', 'rockstar', 'Post Malone ft. 21 Savage']]],
+    ['💕 Love songs', [['2Vv-BfVoq4g', 'Perfect', 'Ed Sheeran'], ['lp-EO5I60KA', 'Thinking Out Loud', 'Ed Sheeran'], ['LjhCEhWiKXk', 'Just the Way You Are', 'Bruno Mars'], ['hLQl3WQQoQ0', 'Someone Like You', 'Adele'], ['bo_efYhYU2A', 'Shallow', 'Lady Gaga, Bradley Cooper'], ['1G4isv_Fylg', 'Paradise', 'Coldplay']]],
+    ['🎸 Classics', [['fJ9rUzIMcZQ', 'Bohemian Rhapsody', 'Queen'], ['Zi_XLOBDo_Y', 'Billie Jean', 'Michael Jackson'], ['hTWKbfoikeg', 'Smells Like Teen Spirit', 'Nirvana'], ['dQw4w9WgXcQ', 'Never Gonna Give You Up', 'Rick Astley']]],
+    ['🎄 Christmas', [['yXQViqx6GMY', 'All I Want for Christmas Is You', 'Mariah Carey']]]
+  ];
+  const SP_LISTS = [['37i9dQZF1DXcBWIGoYBM5M', 'Today’s Top Hits', '🔥'], ['37i9dQZF1DWWQRwui0ExPn', 'lofi beats', '🎧'], ['37i9dQZF1DX4WYpdgoIcn6', 'Chill Hits', '😌'], ['37i9dQZF1DXdPec7aLTmlC', 'Happy Hits!', '😄'],
+    ['37i9dQZF1DX3rxVfibe1L0', 'Mood Booster', '☀️'], ['37i9dQZF1DWYBO1MoTDhZI', 'Good Vibes', '🌈'], ['37i9dQZF1DX0BcQWzuB7ZO', 'Dance Hits', '💃'], ['37i9dQZF1DX76Wlfdnj7AP', 'Beast Mode', '💪'],
+    ['37i9dQZF1DX8NTLI2TtZa6', 'Intense Studying', '📚'], ['37i9dQZF1DX4sWSpwq3LiO', 'Peaceful Piano', '🎹'], ['37i9dQZF1DXbITWG1ZJKYt', 'Jazz Classics', '🎷'], ['37i9dQZF1DWXRqgorJj26U', 'Rock Classics', '🎸'],
+    ['37i9dQZF1DX5Ejj0EkURtP', 'All Out 2010s', '📀'], ['37i9dQZF1DX4o1oenSJRJd', 'All Out 2000s', '💿'], ['37i9dQZF1DX9tPFwDMOaN1', 'K-Pop ON!', '🇰🇷'], ['37i9dQZF1DX10zKzsJ2jva', 'Viva Latino', '🌶️'],
+    ['37i9dQZF1DWZd79rJ6a7lp', 'Sleep', '😴'], ['37i9dQZF1DX0Yxoavh5qJV', 'Christmas Hits', '🎄']];
+  const PK = { src: 'yt', results: null, q: '', busy: false };
+  const PICKS_KEY = 'virtualOffice.picks.v1';
+  function loadPicks() { try { const a = JSON.parse(localStorage.getItem(PICKS_KEY) || '[]'); return Array.isArray(a) ? a.slice(0, 40) : []; } catch (e) { return []; } }
+  function savePicks(a) { try { localStorage.setItem(PICKS_KEY, JSON.stringify(a.slice(0, 40))); } catch (e) {} }
+  const thumb = id => 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg';
+  function ytItem(id, title, artist, mode) {
+    const music2 = mode === 'ytm';
+    const it = { id: id, title: title + (artist ? ' – ' + artist : ''), userTitle: true, src: music2 ? 'YouTube Music' : 'YouTube', url: (music2 ? 'https://music.youtube.com/watch?v=' : 'https://www.youtube.com/watch?v=') + id };
+    if (music2) { it.list = 'RD' + id; it.mix = true; it.title = '📻 ' + it.title + ' radio'; }
+    return it;
+  }
+  function playPick(it, queue) {
+    if (!it) return;
+    it = Object.assign({}, it, { by: 'me' });
+    if (queue && music.now) { music.queue.push(it); post(null, '🎵 You added “' + it.title + '” to the queue'); renderMusic(); return; }
+    playAny(it);
+  }
+  function renderPicks() {
+    const el = document.getElementById('picksBody'); if (!el) return;
+    document.querySelectorAll('#srcTabs [data-src]').forEach(b => b.classList.toggle('on', b.dataset.src === PK.src));
+    let h = '';
+    const row = (key, img, emo, title, sub) => '<div class="pk" data-pk="' + key + '">' + (img ? '<img src="' + img + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '<span class="pke">' + emo + '</span>') + '<div class="pkt"><b>' + esc(title) + '</b><span>' + esc(sub || '') + '</span></div><button data-pk="' + key + '" data-act="play" title="Play for everyone">▶</button><button data-pk="' + key + '" data-act="q" title="Add to queue">＋</button></div>';
+    if (PK.src === 'yt' || PK.src === 'ytm') {
+      const ytm = PK.src === 'ytm';
+      h += '<div class="pksearch"><input id="pkQ" maxlength="80" autocomplete="off" placeholder="' + (SEARCH_ON ? 'Search ' + (ytm ? 'YouTube Music' : 'YouTube') + ' for a song or artist…' : 'Search needs a YouTube key on the server (see below)') + '" value="' + esc(PK.q) + '"' + (SEARCH_ON ? '' : ' disabled') + '><button data-pkgo="1"' + (SEARCH_ON ? '' : ' disabled') + '>🔍</button></div>';
+      if (PK.busy) h += '<div class="pknote">Searching…</div>';
+      if (PK.results) h += '<div class="lbl">Results</div>' + (PK.results.length ? PK.results.map((r, k) => row('s' + k, r.thumb || thumb(r.id), '🎵', r.title, r.channel + (ytm ? ' · starts a radio' : ''))).join('') : '<div class="pknote">No songs found. Try another search.</div>');
+      if (ytm) h += '<div class="pknote">🎵 YouTube Music picks start a <b>song radio</b>: the song plays, then similar songs keep coming.</div>';
+      YT_GROUPS.forEach((g, gi) => { h += '<div class="lbl">' + g[0] + '</div>' + g[1].map((s, si) => row('g' + gi + '_' + si, thumb(s[0]), '🎵', s[1], s[2] + (ytm && gi ? ' · radio' : ''))).join(''); });
+      if (!SEARCH_ON) h += '<p class="wnote">To search any song here, the server owner adds a free YouTube Data API key to the Render service as <b>YOUTUBE_API_KEY</b>. Until then, pick from the lists above or paste a link below.</p>';
+    } else if (PK.src === 'sp') {
+      h += '<div class="pknote">🟢 Spotify plays in the little player for each person. Press ▶ on it to start. Full songs need you to be logged in to Spotify Premium in this browser; otherwise Spotify plays 30-second previews.</div>';
+      h += SP_LISTS.map((p, k) => row('p' + k, null, p[2], p[1], 'Spotify playlist')).join('');
+    } else {
+      const P = loadPicks();
+      h += P.length ? P.map((p, k) => row('m' + k, p.id ? thumb(p.id) : null, p.kind === 'link' ? '🔗' : '🎵', p.title, p.src || '').replace('</div><button', '</div><button data-pk="m' + k + '" data-act="del" title="Remove">×</button><button')).join('') : '<div class="pknote">Nothing saved yet. While something is playing, press <b>⭐ Save</b> next to it and it shows up here for one-click listening.</div>';
+    }
+    el.innerHTML = h;
+    const q = document.getElementById('pkQ'); if (q) q.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') doSearch(q.value); });
+  }
+  function pickByKey(key) {
+    const ytm = PK.src === 'ytm';
+    if (key[0] === 'g') { const a = key.slice(1).split('_').map(Number), s = YT_GROUPS[a[0]][1][a[1]]; return ytItem(s[0], s[1], s[2], ytm && a[0] > 0 ? 'ytm' : 'yt'); }
+    if (key[0] === 's') { const r = PK.results && PK.results[+key.slice(1)]; return r ? ytItem(r.id, r.title, '', ytm ? 'ytm' : 'yt') : null; }
+    if (key[0] === 'p') { const p = SP_LISTS[+key.slice(1)], L = parseLink('https://open.spotify.com/playlist/' + p[0]); if (L) L.title = '🟢 ' + p[1]; return L; }
+    if (key[0] === 'm') { const p = loadPicks()[+key.slice(1)]; if (!p) return null; if (p.kind === 'link') { const L = parseLink(p.url); if (L) L.title = p.title; return L; } return Object.assign({}, p); }
+    return null;
+  }
+  function saveCurrentPick() {
+    const n = music.now; if (!n || (n.kind !== 'yt' && n.kind !== 'link')) { toast('Play a YouTube, Spotify or link song first, then save it.'); return; }
+    const P = loadPicks(), it = n.kind === 'yt' ? { kind: 'yt', id: n.id, list: n.list, mix: n.mix, title: n.title, userTitle: true, src: n.src, url: n.url } : { kind: 'link', url: n.url, title: n.title, src: n.src };
+    if (P.some(p => (p.id && p.id === it.id && p.list === it.list) || (p.url && p.url === it.url))) { toast('⭐ Already in My picks'); return; }
+    P.unshift(it); savePicks(P); toast('⭐ Saved to My picks'); if (PK.src === 'my') renderPicks();
+  }
+  function doSearch(q) {
+    q = String(q || '').trim(); PK.q = q; if (!q || !SEARCH_ON) return;
+    PK.busy = true; renderPicks();
+    fetch('/api/yt-search?q=' + encodeURIComponent(q)).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+      PK.busy = false; PK.results = Array.isArray(d.items) ? d.items.slice(0, 10).filter(r => r && /^[\w-]{11}$/.test(String(r.id))).map(r => ({ id: String(r.id), title: String(r.title || '').slice(0, 100), channel: String(r.channel || '').slice(0, 60), thumb: /^https:\/\/i\.ytimg\.com\//.test(String(r.thumb || '')) ? String(r.thumb) : '' })) : [];
+      renderPicks();
+    }).catch(err => { PK.busy = false; PK.results = []; renderPicks(); toast(err === 429 ? 'Too many searches. Wait a minute and try again.' : 'Search isn’t working right now. Pick from the lists or paste a link.'); });
+  }
+  const SEARCH_ON = !!window.VO_YTSEARCH && ONLINE;
+  $('picks').addEventListener('click', e => {
+    const t = e.target.closest('[data-src]'); if (t) { PK.src = t.dataset.src; PK.results = null; renderPicks(); return; }
+    if (e.target.closest('[data-pkgo]')) { const q = document.getElementById('pkQ'); if (q) doSearch(q.value); return; }
+    const b = e.target.closest('[data-act][data-pk]');
+    if (b) {
+      if (b.dataset.act === 'del') { const P = loadPicks(); P.splice(+b.dataset.pk.slice(1), 1); savePicks(P); renderPicks(); return; }
+      playPick(pickByKey(b.dataset.pk), b.dataset.act === 'q'); return;
+    }
+    const r = e.target.closest('.pk[data-pk]'); if (r) playPick(pickByKey(r.dataset.pk), false);
+  });
+  renderPicks();
   $('fileIn').addEventListener('change', e => { loadFiles(e.target.files); e.target.value = ''; });
   window.addEventListener('dragover', e => { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') > -1) { e.preventDefault(); document.body.classList.add('dragging'); } });
   window.addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('dragging'); });
@@ -4365,10 +4554,11 @@ function main(){
       const n = peers.length;
       post(null, '🟢 You’re online in room “' + NET.room + '”. ' + (n ? n + (n === 1 ? ' other person is' : ' other people are') + ' here.' : 'You’re the first one here. Copy the invite link to bring people in.'));
       if (m.music) applyNetMusic(m.music, peerW(m.music.by));
+      if (m.movie) applyNetMovie(m.movie, peerW(m.movie.by));
       loadGames(m.games, new Set(peers.map(p => String(p.id))));
     } else if (m.t === 'join') {
       const w = addPeer(m.id, m.state);
-      if (w) { post(null, '👋 ' + w.name + ' joined the office'); blip(); }
+      if (w) { post(null, '👋 ' + w.name + ' joined the office'); blip(); ddBadge('team'); }
       netStatus('on');
     } else if (m.t === 'leave') {
       const w = peerW(m.id); if (w) post(null, w.name + ' left the office');
@@ -4496,6 +4686,7 @@ function main(){
         if (tg.laptop || tg.it) fireTouch(w, tg);
       }
       else if (m.k === 'music') applyNetMusic(m, w);
+      else if (m.k === 'movie') applyNetMovie(m, w);
       else if (m.k === 'slide') startSlide(w);
       else if (m.k === 'shoot') { if (m.next) matchShot(w, !!m.made, +m.pts === 3 ? 3 : 2, String(m.next)); else startShot(w, !!m.made, +m.pts === 3 ? 3 : 2); }
       else if (m.k === 'bbpass') { const to = byPid(String(m.to || '')); if (to) matchPass(w, to); }
@@ -4807,6 +4998,7 @@ function main(){
   };
   const meBar = document.getElementById('meBar');
   function renderMe() {
+    if (typeof renderTopbar === 'function') renderTopbar();
     const info = stInfo(me);
     let h = '<div class="top"><span class="av" style="--c:' + me.color + '">' + esc(me.name[0] || '?') + '</span><div style="min-width:0"><b>' + esc(me.name) + ' (you)</b>' + pills(info) + '</div><button class="lookb" data-look="1">🎨 Customize</button></div><div class="quick">';
     ['avail', 'focus', 'meeting', 'break', 'lunch', 'help', 'call', 'away'].forEach(k => {
@@ -4849,17 +5041,43 @@ function main(){
 
   // tabs
   const tabsEl = document.getElementById('tabs');
-  tabsEl.addEventListener('click', e => {
-    const b = e.target.closest('[data-tab]'); if (!b) return;
-    tab = b.dataset.tab;
-    tabsEl.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x === b));
-    document.getElementById('pTeam').hidden = tab !== 'team';
-    document.getElementById('pChat').hidden = tab !== 'chat';
-    document.getElementById('pTasks').hidden = tab !== 'tasks';
-    document.getElementById('pMusic').hidden = tab !== 'music';
-    if (tab === 'chat') { unread = 0; document.getElementById('unread').hidden = true; document.getElementById('unread').classList.remove('at'); msgsEl.scrollTop = msgsEl.scrollHeight; }
-  });
-  function showTab(t) { const b = tabsEl.querySelector('[data-tab="' + t + '"]'); if (b) b.click(); }
+  // ---- top-right dropdown menus + the bottom-right chat window ----
+  const DD = { me: $('ddMe'), team: $('ddTeam'), tasks: $('ddTasks'), music: $('ddMusic') };
+  const DDB = { team: 'bTeam', tasks: 'bTasks', music: 'bMusic' };
+  var ddOpen = null, chatOpen = false, ddReady = true;
+  function syncTab() { tab = chatOpen ? 'chat' : (ddOpen || 'none'); }
+  function openDD(name) {
+    if (ddOpen === name) { closeDD(); return; }
+    Object.keys(DD).forEach(k => { DD[k].hidden = k !== name; });
+    document.querySelectorAll('#topbar [data-dd]').forEach(b => { const on = b.dataset.dd === name; b.classList.toggle('open', on); b.setAttribute('aria-expanded', String(on)); });
+    ddOpen = name; if (DDB[name]) $(DDB[name]).hidden = true;
+    if (name === 'team') renderTeam(); if (name === 'tasks') renderTasks(); if (name === 'music') renderMusic();
+    syncTab();
+  }
+  function closeDD() { Object.keys(DD).forEach(k => { DD[k].hidden = true; }); document.querySelectorAll('#topbar [data-dd]').forEach(b => { b.classList.remove('open'); b.setAttribute('aria-expanded', 'false'); }); ddOpen = null; syncTab(); }
+  function ddBadge(name) { if (!ddReady) return; if (ddOpen !== name && DDB[name]) $(DDB[name]).hidden = false; }
+  function openChat() {
+    chatOpen = true; $('chatWin').hidden = false; $('chatFab').classList.add('open');
+    unread = 0; $('unread').hidden = true; $('unread').classList.remove('at');
+    msgsEl.scrollTop = msgsEl.scrollHeight; syncTab();
+  }
+  function closeChat() { chatOpen = false; $('chatWin').hidden = true; $('chatFab').classList.remove('open'); syncTab(); }
+  $('topbar').addEventListener('click', e => { const b = e.target.closest('[data-dd]'); if (b) openDD(b.dataset.dd); });
+  $('tbMic').addEventListener('click', () => toggleMic());
+  $('chatFab').addEventListener('click', () => { if (chatOpen) closeChat(); else { openChat(); setTimeout(() => chatIn.focus(), 30); } });
+  $('cwMin').addEventListener('click', closeChat);
+  window.addEventListener('pointerdown', e => { if (!ddOpen) return; const t = e.target; if (t.closest && (t.closest('.dd') || t.closest('#topbar') || t.closest('.card') || t.closest('.setup'))) return; closeDD(); }, true);
+  window.addEventListener('keydown', e => { if (e.key === 'Escape' && ddOpen) closeDD(); });
+  function renderTopbar() {
+    if (!ddReady) return;
+    const av = $('tbAv'), st = $('tbSt'); if (!av) return;
+    av.textContent = (me.name && me.name[0]) || '?'; av.style.setProperty('--c', me.color);
+    st.textContent = stInfo(me).emoji;
+    const m = $('tbMic'); m.classList.toggle('live', !!mic.on); m.setAttribute('aria-pressed', String(!!mic.on)); m.title = mic.on ? 'Mic on (M)' : 'Muted (M)';
+  }
+  tab = 'none';
+
+  function showTab(t) { if (t === 'chat') openChat(); else if (DD[t]) { if (ddOpen !== t) openDD(t); } }
 
   // chat compose
   const chatIn = $('chatIn'), chatTo = $('chatTo'), compose = $('compose');
@@ -5037,7 +5255,7 @@ function main(){
   });
   function addFromForm() {
     const v = tIn.value.trim(); if (!v) return;
-    const t = addTask(tOwner.value, v, 0); tIn.value = '';
+    addTask.mine = true; const t = addTask(tOwner.value, v, 0); addTask.mine = false; tIn.value = '';
     if (t.owner !== 'me') post(null, 'You assigned “' + v + '” to ' + byId[t.owner].name);
     refreshUI(byId[t.owner]);
     if (t.owner !== 'me') setTimeout(() => post(t.owner, rnd(['Got it, adding it to my list', 'Thanks, I will pick it up next'])), 1800);
@@ -5271,6 +5489,7 @@ function main(){
     if (!e.repeat && k.length === 1 && '1234'.indexOf(k) > -1) setEmote(me, ['dance', 'sing', 'guitar', 'sleep'][+k - 1]);
     if (!e.repeat && k === '5') toggleLie();
     if (!e.repeat && k === '6') toggleSit();
+    if (k === 'escape' && MV.on) { exitWatch(); return; }
     if (k === 'escape') { const dp = document.getElementById('dpick'); if (dp && !dp.hidden) dp.hidden = true; else if (walking) fly('overview'); else closeCard(); }
     if (walking && k.indexOf('arrow') === 0) e.preventDefault();
   });
@@ -5360,6 +5579,7 @@ function main(){
   cvs.addEventListener('contextmenu', e => e.preventDefault());
   cvs.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, pan: e.shiftKey, rot: e.button === 2 || e.altKey || e.button === 1 }; cvs.setPointerCapture(e.pointerId); tw = null; });
   cvs.addEventListener('pointermove', e => {
+    if (MV.on) return;
     if (drag) {
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
       if (walking) { wk.yaw -= dx * 0.004; wk.pitch = Math.max(-1.2, Math.min(1.2, wk.pitch - dy * 0.004)); }
@@ -5380,6 +5600,7 @@ function main(){
   });
   cvs.addEventListener('pointerleave', () => { tileCur.visible = false; hideDoorTip(); });
   cvs.addEventListener('pointerup', e => {
+    if (MV.on) { drag = null; return; }
     if (me.slide) { drag = null; return; }
     if (drag && drag.rot) { if (drag.moved) saveCam(); drag = null; return; }
     if (drag && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 5) {
@@ -7411,30 +7632,171 @@ function main(){
   const barItem = regItem('bar', barParts, (w, it) => { itemAnim(it, 'shake', 0.4, 0.3); sfx('clink'); if (w === me) openBar(); });
   let discoBoost = 0;
   regItem('disco ball', [disco], (w, it) => { discoBoost = elapsed + 4; tsound('chime'); floatAt(it, '✨'); });
+  // ================= movie room: its own screen, first-person Watch mode =================
+  const MOVIE = { url: '', title: '', t0: 0, by: null };
+  const MV = { on: false, from: null, k: 0, el: null, key: '' };
   let movKey = '';
   function drawMovie() {
-    const n = music.now, vid = n && (n.kind === 'link' || n.kind === 'yt'), key = vid ? 'v' + n.title + (n.yt || '') : n ? 'm' + n.title : 'idle';
+    const on = !!MOVIE.url, key = on ? 'v' + MOVIE.title + MOVIE.t0 : 'idle';
     if (key === movKey) return; movKey = key;
     const x = movCv.getContext('2d'), w = movCv.width, hh = movCv.height;
-    const g = x.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, vid ? '#101828' : '#1a1020'); g.addColorStop(1, '#05060a'); x.fillStyle = g; x.fillRect(0, 0, w, hh);
+    const g = x.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, on ? '#101828' : '#1a1020'); g.addColorStop(1, '#05060a'); x.fillStyle = g; x.fillRect(0, 0, w, hh);
     x.textAlign = 'center'; x.textBaseline = 'middle';
-    if (vid) {
-      x.fillStyle = 'rgba(255,255,255,.12)'; x.beginPath(); x.arc(w / 2, hh * 0.42, 46, 0, Math.PI * 2); x.fill();
-      x.fillStyle = '#ffffff'; x.beginPath(); x.moveTo(w / 2 - 14, hh * 0.42 - 22); x.lineTo(w / 2 + 24, hh * 0.42); x.lineTo(w / 2 - 14, hh * 0.42 + 22); x.closePath(); x.fill();
-      x.fillStyle = '#ffd23f'; x.font = 'bold 22px Segoe UI, Arial, sans-serif'; x.fillText('NOW SHOWING', w / 2, hh * 0.7);
-      x.fillStyle = '#ffffff'; x.font = 'bold 26px Segoe UI, Arial, sans-serif'; const t = String(n.title || ''); x.fillText(t.length > 30 ? t.slice(0, 29) + '…' : t, w / 2, hh * 0.84);
+    if (on) {
+      x.fillStyle = 'rgba(255,255,255,.12)'; x.beginPath(); x.arc(w / 2, hh * 0.36, 44, 0, Math.PI * 2); x.fill();
+      x.fillStyle = '#ffffff'; x.beginPath(); x.moveTo(w / 2 - 13, hh * 0.36 - 21); x.lineTo(w / 2 + 23, hh * 0.36); x.lineTo(w / 2 - 13, hh * 0.36 + 21); x.closePath(); x.fill();
+      x.fillStyle = '#ffd23f'; x.font = 'bold 22px Segoe UI, Arial, sans-serif'; x.fillText('NOW SHOWING', w / 2, hh * 0.62);
+      x.fillStyle = '#ffffff'; x.font = 'bold 26px Segoe UI, Arial, sans-serif'; const t = String(MOVIE.title || ''); x.fillText(t.length > 30 ? t.slice(0, 29) + '…' : t, w / 2, hh * 0.75);
+      x.fillStyle = '#d8dce6'; x.font = '18px Segoe UI, Arial, sans-serif'; x.fillText('Click the screen and press ▶ Watch to join', w / 2, hh * 0.88);
     } else {
       x.fillStyle = '#ffd23f'; x.font = 'bold 40px Segoe UI, Arial, sans-serif'; x.fillText('🎬 MOVIE NIGHT', w / 2, hh * 0.4);
-      x.fillStyle = '#d8dce6'; x.font = '22px Segoe UI, Arial, sans-serif'; x.fillText('Click the screen to pick a movie', w / 2, hh * 0.62);
-      x.fillText('Paste any video link in the Music tab', w / 2, hh * 0.75);
+      x.fillStyle = '#d8dce6'; x.font = '22px Segoe UI, Arial, sans-serif'; x.fillText('Click the screen to put a movie on', w / 2, hh * 0.62);
+      x.fillText('Paste any video link', w / 2, hh * 0.75);
     }
     movTex.needsUpdate = true;
   }
-  function movieScreen() {
-    const n = music.now;
-    if (n && (n.kind === 'link' || n.kind === 'yt')) { showMini(true); toggleTheater(true); toast('🎬 Big screen on. Click 🗗 on the player to make it small again.'); }
-    else { showTab('music'); toast('🎬 Paste a movie or video link in the Music tab and press “Play for everyone”. Then click ⛶ Big screen.'); setTimeout(() => { const i = document.getElementById('ytIn'); if (i) i.focus(); }, 200); }
+  const MOVIE_SCREEN = movieParts[3];
+  function ytIdOf(u) { const m = /(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/i.exec(u); return m ? m[1] : null; }
+  function movieOffset() { const s = Math.max(0, Math.floor((Date.now() - (MOVIE.t0 || Date.now())) / 1000)); return s > 3 && s < 6 * 3600 ? s : 0; }
+  function movieEmbed() {
+    const u = MOVIE.url, off = movieOffset(), id = ytIdOf(u), lm = /[?&]list=([\w-]{10,})/i.exec(u);
+    if (id) return { mode: 'frame', src: 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1' + (off ? '&start=' + off : '') };
+    if (lm) return { mode: 'frame', src: 'https://www.youtube.com/embed/videoseries?list=' + lm[1] + '&autoplay=1' };
+    const L = parseLink(u); if (!L) return null;
+    if (L.mode === 'video') return { mode: 'video', src: L.embed, off: off };
+    let src = L.embed; if (/player\.vimeo\.com/.test(src) && off) src += '#t=' + off + 's';
+    return { mode: 'frame', src: src };
   }
+  function setMovie(url, title, by, t0) {
+    const L = url ? parseLink(url) : null;
+    if (url && !L && !ytIdOf(url)) { toast('Paste a full link that starts with https://'); return false; }
+    MOVIE.url = url || ''; MOVIE.title = url ? (String(title || '').trim().slice(0, 80) || (ytIdOf(url) ? 'YouTube video' : L.title || 'Movie')) : ''; MOVIE.by = url ? (by || 'me') : null; MOVIE.t0 = url ? (t0 || Date.now()) : 0;
+    if ((by || 'me') === 'me' && NET.on && !NET.rx) netSend(url ? { t: 'ev', k: 'movie', kind: 'link', url: MOVIE.url, title: MOVIE.title, t0: MOVIE.t0 } : { t: 'ev', k: 'movie', kind: 'stop' });
+    const who = byId[MOVIE.by] || me;
+    if (url) post(null, '🎬 ' + nmOf(who) + ' put “' + MOVIE.title + '” on in the Movie room'); else post(null, '🎬 The movie was stopped');
+    drawMovie(); renderMovieBox(); if (MV.on) loadMoviePlayer();
+    if (url && !MV.on && !MV.pendSeat && zoneAt(me.x, me.z) === 'movie' && !inMovieSeat() && !setupOpen) { seatForMovie(false); if (MV.pendSeat) toast('🍿 The movie is starting. Taking an open seat… press ▶ Watch on the screen to see and hear it.'); }
+    return true;
+  }
+  function applyNetMovie(m, w) {
+    NET.rx = true;
+    try { if (m.kind === 'stop') setMovie('', '', w ? w.id : null); else if (m.url) setMovie(String(m.url), String(m.title || ''), w ? w.id : null, +m.t0 || Date.now()); }
+    finally { NET.rx = false; }
+  }
+  // ---- the menu you get when you click the screen ----
+  function openMovieBox() { closeCard(); closePantry(); closeBar(); closeAtk(); $('movieBox').hidden = false; renderMovieBox(); }
+  function closeMovieBox() { $('movieBox').hidden = true; }
+  function renderMovieBox() {
+    const el = $('movieBox'); if (!el || el.hidden) return;
+    const on = !!MOVIE.url, who = on ? (byId[MOVIE.by] || me) : null, mins = on ? Math.floor((Date.now() - MOVIE.t0) / 60000) : 0;
+    el.innerHTML = '<button class="x" data-mv="close" aria-label="Close">×</button>' +
+      '<div class="ph"><span class="av" style="--c:#9c1a2c">🎬</span><div><h2>Movie room</h2><p>' + (on ? 'Now showing' : 'Nothing on the screen yet') + '</p></div></div>' +
+      (on ? '<div class="held"><span class="pe">🍿</span><div><b>' + esc(MOVIE.title) + '</b><span>Put on by ' + esc(who === me ? 'you' : who.name) + (mins ? ' · ' + mins + ' min ago' : ' · just now') + '</span></div></div>' : '') +
+      '<div class="acts" style="margin:0 0 12px"><button data-mv="watch" class="on">▶ Watch' + (on ? '' : ' (big screen)') + '</button>' + (on ? '<button data-mv="stop">■ Stop the movie</button>' : '') + '</div>' +
+      '<div class="lbl">' + (on ? 'Change the movie' : 'Put a movie on') + '</div>' +
+      '<input id="mvUrl" maxlength="1000" autocomplete="off" placeholder="Paste a YouTube, Vimeo or video link" style="width:100%;margin:0 0 6px">' +
+      '<input id="mvTitle" maxlength="80" autocomplete="off" placeholder="Name (optional)" style="width:100%;margin:0 0 6px">' +
+      '<div class="acts" style="margin-top:0"><button data-mv="play">🎬 Play on the big screen</button></div>' +
+      '<p class="wnote">Only people who press ▶ Watch see the movie up close and hear it. Everyone else just sees “Now showing” on the screen.</p>';
+    ['mvUrl', 'mvTitle'].forEach(id => { const i = document.getElementById(id); if (i) i.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') playFromBox(); }); });
+  }
+  function playFromBox() { const u = (document.getElementById('mvUrl') || {}).value || '', t = (document.getElementById('mvTitle') || {}).value || ''; if (!u.trim()) { toast('Paste a link first'); return; } if (setMovie(u.trim(), t, 'me')) { closeMovieBox(); startWatch(); } }
+  $('movieBox').addEventListener('click', e => {
+    const b = e.target.closest('[data-mv]'); if (!b) return; const a = b.dataset.mv;
+    if (a === 'close') closeMovieBox(); else if (a === 'watch') { closeMovieBox(); startWatch(); } else if (a === 'stop') setMovie('', '', 'me'); else if (a === 'play') playFromBox();
+  });
+  function movieScreen() { openMovieBox(); }
+  // ---- watching: first-person view of the screen with the real player on top ----
+  function duckMusic(on) {
+    const v = on ? 0 : music.vol;
+    try { if (music.gain) music.gain.gain.value = v * 1.6; } catch (e) {}
+    try { if (yt.player && yt.ready) yt.player.setVolume(Math.round(v * 100)); } catch (e) {}
+    try { if (music.now && music.now.el && music.now.el.tagName === 'VIDEO') music.now.el.volume = Math.min(1, v); } catch (e) {}
+  }
+  function clearHost(h) { try { if (MV.el && MV.el.tagName === 'VIDEO') { MV.el.pause(); MV.el.removeAttribute('src'); MV.el.load(); } } catch (e) {} while (h.firstChild) h.removeChild(h.firstChild); h.innerHTML = ''; }
+  const inMovieSeat = () => !!(me.at && me.at.area === 'movie' && me.mode === 'sit' && !me.path.length);
+  function freeMovieSeat() {
+    const seats = (SPOTS.xtra || []).concat(SPOTS.movie).filter(s => s.area === 'movie' && (!s.by || s.by === 'me') && zoneAt(s.pos[0], s.pos[1]) === 'movie');
+    return seats.sort((a, b) => Math.hypot(a.pos[0] - me.x, a.pos[1] - me.z) - Math.hypot(b.pos[0] - me.x, b.pos[1] - me.z))[0] || null;
+  }
+  function seatForMovie(thenWatch) {
+    if (inMovieSeat()) return true;
+    const s = freeMovieSeat(); if (!s) return false;
+    sitAt(s); MV.pendSeat = s; MV.pendWatch = !!thenWatch; MV.pendT = elapsed;
+    return false;
+  }
+  function movieTick() {
+    const S = MV.pendSeat; if (!S) return;
+    if (me.at === S && me.mode === 'sit' && !me.path.length) { MV.pendSeat = null; if (MV.pendWatch) beginWatch(); }
+    else if ((me.at !== S && !me.travel && !me.travelDoor) || elapsed - MV.pendT > 40) { MV.pendSeat = null; MV.pendWatch = false; }
+  }
+  function startWatch() {
+    if (setupOpen) return;
+    if (zoneAt(me.x, me.z) !== 'movie') { goZone('movie', () => startWatch()); return; }
+    if (!seatForMovie(true)) { if (MV.pendSeat) { toast('🍿 Taking an open seat…'); return; } }
+    beginWatch();
+  }
+  function beginWatch() {
+    MV.on = true; MV.k = 0; MV.from = persp.position.clone(); MV.fromQ = (camera === persp ? persp.quaternion.clone() : null);
+    if (camera !== persp) { MV.from.copy(camera.position); }
+    document.body.classList.add('watching'); $('movieView').hidden = false;
+    closeCard(); closeMovieBox(); if (typeof closeDD === 'function') closeDD(); tileCur.visible = false; hideDoorTip();
+    duckMusic(true);
+    loadMoviePlayer();
+    if (music.now && audible()) toast('🔇 Office music is muted for you while you watch.');
+  }
+  function exitWatch() {
+    MV.pendSeat = null; MV.pendWatch = false;
+    if (!MV.on) return;
+    MV.on = false; document.body.classList.remove('watching'); $('movieView').hidden = true;
+    const host = $('mvHost'); clearHost(host); MV.el = null; MV.key = '';
+    duckMusic(false); applyCam();
+  }
+  function loadMoviePlayer() {
+    const host = $('mvHost'), empty = $('mvEmpty');
+    $('mvT').textContent = MOVIE.url ? MOVIE.title : 'Nothing is showing yet';
+    const key = MOVIE.url ? MOVIE.url + '|' + MOVIE.t0 : '';
+    if (key === MV.key && (MV.el || !MOVIE.url)) { empty.hidden = !!MOVIE.url; return; }
+    MV.key = key; clearHost(host); MV.el = null;
+    empty.hidden = !!MOVIE.url;
+    if (!MOVIE.url) return;
+    const E = movieEmbed(); if (!E) { empty.hidden = false; return; }
+    if (E.mode === 'video') {
+      const v = document.createElement('video'); v.controls = true; v.autoplay = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.src = E.src;
+      v.volume = (+$('mvVol').value || 0) / 100;
+      v.addEventListener('loadedmetadata', () => { if (E.off && isFinite(v.duration) && E.off < v.duration - 2) { try { v.currentTime = E.off; } catch (e) {} } });
+      v.addEventListener('error', () => toast('That video file couldn’t play here. Try another link.'));
+      host.appendChild(v); MV.el = v; try { const p = v.play(); if (p && p.catch) p.catch(() => toast('Press ▶ on the player to start the movie.')); } catch (e) {}
+    } else {
+      const f = document.createElement('iframe');
+      f.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture'); f.setAttribute('allowfullscreen', '');
+      f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin'); f.src = E.src;
+      host.appendChild(f); MV.el = f;
+    }
+  }
+  const mvA = new THREE.Vector3(), mvB = new THREE.Vector3(), mvC = new THREE.Vector3(), mvTo = new THREE.Vector3();
+  function movieCam(dt) {
+    const S = MOVIE_SCREEN; S.updateMatrixWorld(true);
+    const hw = 1.8 * S.scale.x, hh = 1.01 * S.scale.y, p = S.getWorldPosition(mvC);
+    const tv = Math.tan(persp.fov * Math.PI / 360), th = tv * persp.aspect;
+    const d = Math.max(hw / (0.9 * th), hh / (0.8 * tv));
+    mvTo.set(p.x, p.y, p.z + d);
+    camera = persp;
+    MV.k = Math.min(1, MV.k + dt / 0.7); const e = 1 - Math.pow(1 - MV.k, 3);
+    persp.position.lerpVectors(MV.from, mvTo, e); persp.lookAt(p.x, p.y, p.z);
+    persp.updateMatrixWorld(true);
+    // place the player exactly over the screen
+    const rc = cvs.getBoundingClientRect();
+    mvA.set(p.x - hw, p.y + hh, p.z).project(persp); mvB.set(p.x + hw, p.y - hh, p.z).project(persp);
+    const x0 = rc.left + (mvA.x + 1) / 2 * rc.width, y0 = rc.top + (1 - mvA.y) / 2 * rc.height, x1 = rc.left + (mvB.x + 1) / 2 * rc.width, y1 = rc.top + (1 - mvB.y) / 2 * rc.height;
+    const box = $('mvScreen'); box.style.left = x0.toFixed(1) + 'px'; box.style.top = y0.toFixed(1) + 'px'; box.style.width = Math.max(10, x1 - x0).toFixed(1) + 'px'; box.style.height = Math.max(10, y1 - y0).toFixed(1) + 'px';
+    box.style.opacity = String(Math.min(1, Math.max(0, (MV.k - 0.55) / 0.45)));
+  }
+  $('mvExit').addEventListener('click', exitWatch);
+  $('mvChange').addEventListener('click', () => { exitWatch(); openMovieBox(); });
+  $('mvVol').addEventListener('input', e => { if (MV.el && MV.el.tagName === 'VIDEO') MV.el.volume = (+e.target.value || 0) / 100; });
+  { const go = () => { const u = $('mvIn').value.trim(); if (!u) { toast('Paste a link first'); return; } if (setMovie(u, '', 'me')) $('mvIn').value = ''; };
+    $('mvGo').addEventListener('click', go); $('mvIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); }); }
   regItem('movie screen', movieParts, (w, it) => { if (w === me) movieScreen(); });
   regItem('popcorn machine', popcorn, (w, it) => { itemAnim(it, 'shake', 0.6, 0.5); tsound('pop'); floatAt(it, '🍿'); setTimeout(() => floatAt(it, '🍿'), 300); });
   drawScore(); arcadeScreen(); drawMovie();
@@ -7473,7 +7835,7 @@ function main(){
     workers.forEach(ballTick);
     if (Math.floor(elapsed * 2) !== Math.floor((elapsed - dt) * 2)) drawMovie();
     movieLight.intensity = night ? 0.7 : 0.25;
-    if (me.at && me.at.area === 'movie' && me.mode === 'sit' && !me.path.length) { if (!me._mvTold) { me._mvTold = true; const n = music.now; toast(n && (n.kind === 'link' || n.kind === 'yt') ? '🍿 Enjoy the show! Click the screen for the big player.' : '🍿 Comfy! Click the screen to start a movie.'); } } else if (me._mvTold && (!me.at || me.at.area !== 'movie')) me._mvTold = false;
+    if (me.at && me.at.area === 'movie' && me.mode === 'sit' && !me.path.length) { if (!me._mvTold) { me._mvTold = true; const n = music.now; toast(MOVIE.url ? '🍿 “' + MOVIE.title + '” is on. Click the screen and press ▶ Watch.' : '🍿 Comfy! Click the screen and press ▶ Watch.'); } } else if (me._mvTold && (!me.at || me.at.area !== 'movie')) me._mvTold = false;
   }
 
 
@@ -7704,7 +8066,7 @@ function main(){
       if (instant) { tw = null; ctl.target.set(v.x, v.y, v.z); ctl.r = v.r; applyCam(); document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.v === 'overview')); }
       else flyV(v, 'overview');
     }
-    if (gChanged) { closeCard(); closePantry(); closeBar(); closeAtk(); tileCur.visible = false; hideDoorTip(); }
+    if (gChanged) { closeCard(); closePantry(); closeBar(); closeAtk(); tileCur.visible = false; hideDoorTip(); if (typeof exitWatch === 'function') { exitWatch(); closeMovieBox(); } }
     renderRoomPill();
   }
   const fadeEl = document.createElement('div'); fadeEl.className = 'roomfade'; stage.appendChild(fadeEl);
@@ -7797,12 +8159,12 @@ function main(){
   function loop(now) {
     requestAnimationFrame(loop);
     const dt = Math.min(clk.getDelta(), 0.05); elapsed += dt;
-    micTick(dt); musicLevel(); xmasTick(dt); roomTick(); pantryTick(dt); touchTick(dt); netTick(dt); voiceTick(dt); wingTick(dt); zoneTick(dt); camTick(); furnTick(dt); slideTick();
+    micTick(dt); musicLevel(); xmasTick(dt); roomTick(); pantryTick(dt); touchTick(dt); netTick(dt); voiceTick(dt); wingTick(dt); zoneTick(dt); camTick(); furnTick(dt); slideTick(); movieTick();
     dogBody.scale.y = 0.1 * (1 + Math.sin(elapsed * 2.2) * 0.06);
     dogT -= dt; if (dogT <= 0) { dogT = 1.7; if (elapsed > dogAwake) floatFx(dogW, rnd(['z', 'Z', 'zz']), 'z'); }
     if (marker.visible) { if (!me.path.length || me.at !== marker.userData.tgt) marker.visible = false; else { const k = 1 + Math.sin(elapsed * 6) * 0.12; marker.scale.set(k, k, k); } }
     workers.forEach(w => animateWorker(w, dt));
-    if (walking) stepWalk(dt); else { stepTween(now || performance.now()); applyCam(); }
+    if (MV.on) movieCam(dt); else if (walking) stepWalk(dt); else { stepTween(now || performance.now()); applyCam(); }
     renderer.render(scene, camera);
     placeBubbles();
     uiTick += dt;

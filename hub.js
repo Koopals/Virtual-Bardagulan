@@ -120,7 +120,7 @@ function createHub(opts) {
         c.state = cleanState(m.state);
         const peers = [...room.clients.values()].map(p => ({ id: p.id, state: p.state }));
         room.clients.set(c.id, c);
-        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, games: room.games, token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
+        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, movie: room.movie || null, games: room.games, token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
         broadcast(room, { t: 'join', id: c.id, state: c.state }, c.id);
         return;
       }
@@ -182,6 +182,7 @@ function createHub(opts) {
           return;
         }
         if (ev.k === 'music') room.music = ev.kind === 'stop' ? null : Object.assign({}, ev, { by: c.id });
+        if (ev.k === 'movie') room.movie = ev.kind === 'stop' ? null : Object.assign({}, ev, { by: c.id });
         if (ev.k === 'dance' && ev.to) {   // dance invites go to one person
           const tgt = room.clients.get(String(ev.to));
           if (tgt) send(tgt, ev);
