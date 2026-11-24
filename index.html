@@ -3221,7 +3221,7 @@ function main(){
     ['37i9dQZF1DX8NTLI2TtZa6', 'Intense Studying', '📚'], ['37i9dQZF1DX4sWSpwq3LiO', 'Peaceful Piano', '🎹'], ['37i9dQZF1DXbITWG1ZJKYt', 'Jazz Classics', '🎷'], ['37i9dQZF1DWXRqgorJj26U', 'Rock Classics', '🎸'],
     ['37i9dQZF1DX5Ejj0EkURtP', 'All Out 2010s', '📀'], ['37i9dQZF1DX4o1oenSJRJd', 'All Out 2000s', '💿'], ['37i9dQZF1DX9tPFwDMOaN1', 'K-Pop ON!', '🇰🇷'], ['37i9dQZF1DX10zKzsJ2jva', 'Viva Latino', '🌶️'],
     ['37i9dQZF1DWZd79rJ6a7lp', 'Sleep', '😴'], ['37i9dQZF1DX0Yxoavh5qJV', 'Christmas Hits', '🎄']];
-  const PK = { src: 'yt', results: null, q: '', busy: false, err: '' };
+  const PK = { src: 'yt', results: null, q: '', busy: false, err: '', tries: 0, auto: false, retryT: 0 };
   const PICKS_KEY = 'virtualOffice.picks.v1';
   function loadPicks() { try { const a = JSON.parse(localStorage.getItem(PICKS_KEY) || '[]'); return Array.isArray(a) ? a.slice(0, 40) : []; } catch (e) { return []; } }
   function savePicks(a) { try { localStorage.setItem(PICKS_KEY, JSON.stringify(a.slice(0, 40))); } catch (e) {} }
@@ -3278,7 +3278,7 @@ function main(){
   }
   function doSearch(q) {
     q = String(q || '').trim(); PK.q = q; if (!q) { toast('Type a song or artist first.'); return; }
-    PK.err = '';
+    PK.err = ''; clearTimeout(PK.retryT); if (!PK.auto) PK.tries = 0; PK.auto = false;
     if (!ONLINE || !API_BASE) { PK.results = null; PK.err = 'Search works when the office is connected to the server. Pick from the lists below or paste a link.'; renderPicks(); return; }
     PK.busy = true; PK.results = null; renderPicks();
     fetch(API_BASE + '/api/yt-search?q=' + encodeURIComponent(q)).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
@@ -3290,7 +3290,10 @@ function main(){
         : err === 404 ? 'Song search is off on the server. The server owner adds a free YouTube key to Render as YOUTUBE_API_KEY. Until then, pick from the lists below or paste a link.'
         : err === 502 ? 'YouTube turned down the search. The server owner can check Render → Logs for the reason (usually the key or the API setting).'
         : typeof err === 'number' ? 'Search isn’t working right now (error ' + err + '). Try again in a minute.'
-        : 'The server is waking up. Try the search again in a minute.';
+        : NET.on ? 'The server is online but blocked the search. Render is probably still running the old server.js. Upload the latest server.js to GitHub, let Render redeploy, then press Ctrl+F5.'
+        : (PK.tries || 0) < 6 ? 'The server is waking up. Your search runs again on its own in a few seconds…'
+        : 'The server isn’t answering. Check that the Render service is running, then try again.';
+      if (typeof err !== 'number' && !NET.on && (PK.tries || 0) < 6) { PK.tries = (PK.tries || 0) + 1; const src = PK.src; PK.retryT = setTimeout(() => { if (PK.q === q && PK.src === src) { PK.auto = true; doSearch(q); } }, 10000); }
       renderPicks();
     });
   }
