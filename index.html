@@ -269,7 +269,7 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpg{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .dpg button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 3px;font-size:11px;min-width:0;line-height:1.2}
 .dpg .de{font-size:19px;line-height:1.1}
-.carrybar{left:50%;bottom:86px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:14px;z-index:30;font-size:13px}.carrybar span{padding:0 4px}.carrybar{flex-wrap:wrap;justify-content:center;max-width:min(560px,calc(100% - 28px))}.cyaim{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding-top:6px;border-top:1px solid var(--color-border-light)}.cyaim .cyh{font-size:11.5px;color:var(--color-text-secondary)}.cyaim button small{color:var(--color-text-muted)}
+.carrybar{left:50%;bottom:86px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:14px;z-index:30;font-size:13px}.carrybar span{padding:0 4px}
 .ipg{grid-template-columns:repeat(3,1fr)}
 .dplbl{font-size:11px;font-weight:700;color:var(--color-text-secondary);margin:8px 2px 4px}
 .dpg button.cur,.dpf button.cur{background:#ec4899;border-color:#ec4899;color:#fff}
@@ -289,7 +289,6 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .dpad{display:grid;grid-template-columns:repeat(3,44px);gap:4px;justify-content:center;margin:8px 0}.dpad button{height:38px;padding:0;font-size:15px}
 .meter{height:8px;border-radius:4px;background:var(--color-surface-active);overflow:hidden;margin:0 0 4px}.meter i{display:block;height:100%;background:linear-gradient(90deg,#f5c542,#f08a24,#d6262f)}
 #lkHost{display:none;width:100%;height:100%}#lkHost iframe,#lkHost video{display:block;width:100%;height:100%;border:0;background:#000}
-.ytmini:not(.theater){position:fixed!important;left:-10000px!important;top:0!important;right:auto!important;width:320px!important;opacity:0;pointer-events:none}
 .ytmini.theater{top:50%;left:calc((100% - var(--panel-w)) / 2);right:auto;transform:translate(-50%,-50%);width:min(960px,calc(100% - var(--panel-w) - 40px));z-index:70}
 .ytmini.theater .ytframe{height:auto;aspect-ratio:16/9;max-height:calc(100vh - 120px)}
 .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 10px}
@@ -644,6 +643,7 @@ function main(){
   const rnd = a => a[Math.floor(Math.random() * a.length)];
   const fmtT = d => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   // band stage state (filled in when the Bar room is built)
+  const TABLE_TOPS = [];   // table tops where a beer bucket can go
   const BAND = { sound: false, rect: null, leds: [], lights: [], cym: [], heads: [], platters: [], spot: {}, bpm: 112, last: -1, bus: null, noise: null, standGtr: null, keyLcd: null, djScr: null, live: false, hit: 0 };
   function makeEGuitar() {
     const g = new THREE.Group(), mR = new THREE.MeshStandardMaterial({ color: 0xd6262f, metalness: 0.35, roughness: 0.3 }), mW = new THREE.MeshStandardMaterial({ color: 0xf4f1ea, roughness: 0.5 }), mN = new THREE.MeshStandardMaterial({ color: 0x5a3417, roughness: 0.6 }), mM = new THREE.MeshStandardMaterial({ color: 0xc8ccd2, metalness: 0.8, roughness: 0.25 });
@@ -1466,7 +1466,7 @@ function main(){
     SPOTS.sleep.push({ area: 'sleep', pos: p, anchor: a, via: [], face: rot, sit: 0.6, lie: true, by: null, rect: r });
     return g;
   }
-  function ftable(x, z, w, d, top, h) { const g = fgrp(x, z, 0); fp(g, w, 0.05, d, top, 0, (h || 0.45) - 0.025, 0); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(o => fp(g, 0.06, (h || 0.45) - 0.05, 0.06, mDark, o[0] * (w / 2 - 0.08), ((h || 0.45) - 0.05) / 2, o[1] * (d / 2 - 0.08))); nb(x - w / 2, x + w / 2, z - d / 2, z + d / 2); return g; }
+  function ftable(x, z, w, d, top, h) { TABLE_TOPS.push({ x: x, z: z, y: h || 0.45 }); const g = fgrp(x, z, 0); fp(g, w, 0.05, d, top, 0, (h || 0.45) - 0.025, 0); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(o => fp(g, 0.06, (h || 0.45) - 0.05, 0.06, mDark, o[0] * (w / 2 - 0.08), ((h || 0.45) - 0.05) / 2, o[1] * (d / 2 - 0.08))); nb(x - w / 2, x + w / 2, z - d / 2, z + d / 2); return g; }
   function fplant(x, z, s) { plant(x, z, s); nb(x - 0.25 * (s || 1), x + 0.25 * (s || 1), z - 0.25 * (s || 1), z + 0.25 * (s || 1)); }
   function fposter(x, z, title, a, b) {
     const t = canvasTex(160, 240, (c, W2, H2) => { const gr = c.createLinearGradient(0, 0, 0, H2); gr.addColorStop(0, a); gr.addColorStop(1, '#0b0d14'); c.fillStyle = gr; c.fillRect(0, 0, W2, H2); c.fillStyle = b; c.beginPath(); c.arc(80, 95, 46, 0, Math.PI * 2); c.fill(); c.fillStyle = '#ffffff'; c.font = 'bold 20px Segoe UI, Arial, sans-serif'; c.textAlign = 'center'; title.split('\n').forEach((l, k) => c.fillText(l, 80, 182 + k * 24)); c.strokeStyle = '#d9b46a'; c.lineWidth = 6; c.strokeRect(3, 3, W2 - 6, H2 - 6); });
@@ -1650,7 +1650,7 @@ function main(){
         FURN_ITEMS.push(['DJ set', [g], (w, it) => instrTouch(w, 'dj')]); }
     }
 
-    [[b0 - 10, -6], [b0 - 10, -2.4]].forEach(p => { cyl(0.45, 0.45, 0.05, mDark, p[0], 1.0, p[1]); cyl(0.04, 0.04, 1.0, MC(0xc8ccd2, { metalness: 0.6, roughness: 0.3 }), p[0], 0.5, p[1], null, 8); nb(p[0] - 0.3, p[0] + 0.3, p[1] - 0.3, p[1] + 0.3);
+    [[b0 - 10, -6], [b0 - 10, -2.4]].forEach(p => { cyl(0.45, 0.45, 0.05, mDark, p[0], 1.0, p[1]); TABLE_TOPS.push({ x: p[0], z: p[1], y: 1.025 }); cyl(0.04, 0.04, 1.0, MC(0xc8ccd2, { metalness: 0.6, roughness: 0.3 }), p[0], 0.5, p[1], null, 8); nb(p[0] - 0.3, p[0] + 0.3, p[1] - 0.3, p[1] + 0.3);
       [-0.75, 0.75].forEach(o => { stool(p[0] + o, p[1]); xseat('party', p[0] + o, p[1], o < 0 ? Math.PI / 2 : -Math.PI / 2, 0.45, { anchor: [p[0] + o, p[1] + 0.95] }); }); });
     frug(b0 - 1, 6, 6, 4, '#3a1840', '#ff7ad9');
     fsofa(b0 - 1, 4.4, 3.0, 0, 0x5a2d82, 'party'); fsofa(b0 - 1, 7.6, 3.0, Math.PI, 0x5a2d82, 'party'); ftable(b0 - 1, 6, 1.6, 0.8, MC(0x2b2d33), 0.42);
@@ -3268,8 +3268,8 @@ function main(){
     if (!n) s = '<div class="npe">Nothing playing. Pick a station, or play a song from your computer.</div>';
     else {
       const by = byId[n.by] || me;
-      s = '<div class="npc"><div class="eq' + (audible() ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 Playing for the room · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
-        (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">' + (($('ytMini') && $('ytMini').classList.contains('theater')) ? '🗗 Close big screen' : '⛶ Big screen') + '</button><button data-m="save">⭐ Save</button>' : '') + (n.kind === 'link' && n.mode === 'video' && n.el && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
+      s = '<div class="npc"><div class="eq' + (audible() ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 On the player · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
+        (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">⛶ Big screen</button><button data-m="save">⭐ Save</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
         (n.kind === 'yt' && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') +
         (n.kind === 'yt' && !(n.yt === 'playing' || n.yt === 'paused' || n.yt === 'loading') ? '<a class="btn yt" href="' + esc(n.url) + '" target="_blank" rel="noopener">' + (n.yt === 'search' ? 'Search on ' : 'Open on ') + esc(n.src) + '</a>' : '') +
         (n.kind !== 'yt' && n.kind !== 'link' || ytPlayable(n) ? '<div class="lvl"><i id="npLvl"></i></div>' : '') + '<button data-m="skip">' + (music.queue.some(q => q.kind === 'file' || q.kind === 'link' || ytPlayable(q)) ? 'Next song' : n.kind === 'radio' ? 'Next station' : 'Skip') + '</button><button data-m="stop">Stop</button></div>';
@@ -3284,7 +3284,6 @@ function main(){
     if (d.radio) { if (music.key === d.radio) stopMusic(); else playRadio(d.radio, 'me'); }
     else if (d.m === 'stop') stopMusic();
     else if (d.m === 'test') testSound();
-    else if (d.m === 'pp' && music.now && music.now.kind === 'link' && music.now.el && music.now.el.play) { try { if (music.now.yt === 'playing') music.now.el.pause(); else { const pr = music.now.el.play(); if (pr && pr.catch) pr.catch(() => {}); } } catch (e) {} }
     else if (d.m === 'pp' && yt.player && yt.ready) { try { if (music.now.yt === 'playing') yt.player.pauseVideo(); else yt.player.playVideo(); } catch (e) {} }
     else if (d.m === 'skip') skipMusic();
     else if (d.m === 'th') toggleTheater();
@@ -3426,12 +3425,11 @@ function main(){
     sleep: { label: 'Sleeping', emoji: '😴', color: '#3b82f6', short: 'Sleep' }
   };
 
-  // ================= 33 dances (23 classics + 4 Pinoy TikTok + 6 TikTok viral) =================
+  // ================= 30 dances (20 classics + 4 Pinoy TikTok + 6 TikTok viral) =================
   const DANCES = [['groove', 'Groove', '🕺'], ['disco', 'Disco point', '✨'], ['robot', 'Robot', '🤖'], ['floss', 'Floss', '🧵'], ['dab', 'Dab', '😎'],
     ['twist', 'Twist', '🌀'], ['runman', 'Running man', '🏃'], ['sprinkler', 'Sprinkler', '💦'], ['cart', 'Shopping cart', '🛒'], ['roof', 'Raise the roof', '🙌'],
     ['chicken', 'Chicken dance', '🐔'], ['hula', 'Hula', '🌺'], ['spin', 'Spin', '💫'], ['jacks', 'Jumping jacks', '⭐'], ['headbang', 'Headbang', '🤘'],
     ['wave', 'Arm wave', '🌊'], ['cabbage', 'Cabbage patch', '🥬'], ['cancan', 'Can-can', '🦵'], ['salsa', 'Salsa', '💃'], ['moonwalk', 'Moonwalk', '🌙'],
-    ['hiphop', 'Hip-hop', '🧢'], ['shuffle', 'Shuffle', '👟'], ['toprock', 'Breakdance', '🔥'],
     // Pinoy TikTok dances (simple takes on the moves, made for the office characters)
     ['ikembot', 'Ikembot Mo', '🏄', 'ph'], ['ale', 'Ale fit check', '👗', 'ph'], ['budots', 'Budots', '🔊', 'ph'], ['drbeat', 'Dr. Beat', '🩺', 'ph'],
     // global TikTok viral dances
@@ -3561,17 +3559,6 @@ function main(){
         if (k3 % 2 === 0) { legs(-0.45 * kick, 0); kn = [0.2 * kick, 0.08]; } else { legs(0, -0.45 * kick); kn = [0.08, 0.2 * kick]; }
         arm(0, -0.25 - kick * 0.15, -0.2); arm(1, -0.25 - kick * 0.15, 0.2); el = [-1.4, -1.4];
         B.rotation.y = k3 < 2 ? 0.2 : -0.2; Hd.rotation.set(0.05, 0, k3 < 2 ? 0.12 : -0.12); up(kick * 0.03); break; }
-      case 'hiphop':
-        kn = [0.35 + as * 0.4, 0.35 + as * 0.4]; up(-as * 0.05); legs(-0.12 - as * 0.15, -0.12 - as * 0.15); legz(-0.12, 0.12);
-        B.rotation.x = 0.12 + as * 0.08; B.rotation.y = Math.sin(b / 2) * 0.35;
-        arm(0, -0.5 - P * 0.7, -0.3 - P * 0.45); arm(1, -0.5 - N * 0.7, 0.3 + N * 0.45); el = [-1.25, -1.25];
-        Hd.rotation.x = as * 0.28; Hd.rotation.y = -Math.sin(b / 2) * 0.2; break;
-      case 'shuffle':
-        legz(-P * 0.55, N * 0.55); legs(-P * 0.3, -N * 0.3); kn = [0.1 + P * 0.7, 0.1 + N * 0.7]; up(as * 0.05); side(Math.sin(b / 2) * 0.05);
-        arm(0, -0.6 + s * 0.35, -0.2); arm(1, -0.6 - s * 0.35, 0.2); el = [-1.45, -1.45]; Hd.rotation.x = as * 0.12; break;
-      case 'toprock':
-        legs(-P * 0.7, -N * 0.7); kn = [0.3 + P * 0.8, 0.3 + N * 0.8]; B.rotation.x = 0.22; B.rotation.y = s * 0.4; up(-0.02 + as * 0.04);
-        arm(0, -1.1, -0.2 - c * 0.8); arm(1, -1.1, 0.2 + c * 0.8); el = [-1.0, -1.0]; Hd.rotation.y = -s * 0.25; Hd.rotation.x = 0.1; break;
       case 'moonwalk':
         legs(s * 0.3, -s * 0.3); kn = [N * 0.9 + 0.05, P * 0.9 + 0.05]; if (!sit) B.position.z = -0.22 * (0.5 - 0.5 * Math.cos(b / 4));
         arm(0, -0.2 * s, -0.15); arm(1, 0.2 * s, 0.15); el = [-0.5, -0.5]; Hd.rotation.x = 0.1; B.rotation.x = 0.05; up(as * 0.02); break;
@@ -4905,6 +4892,7 @@ function main(){
       else if (m.k === 'bbsteal') { if (!MATCH.fl) { MATCH.holder = pidOf(w); MATCH.lastEv = elapsed; } }
       else if (m.k === 'hit' && MELEE[m.type]) { const tgt = m.to === NET.id ? me : m.to === 'dummy' ? DUMMY : peerW(m.to); if (tgt && tgt !== w) doMelee(w, tgt, m.type); }
       else if (m.k === 'carry' && ['pick', 'throw', 'drop', 'free'].indexOf(m.act) > -1) applyNetCarry(m, w);
+      else if (m.k === 'bucket' && (m.act === 'place' || m.act === 'take')) applyNetBucket(m, w);
       else if (m.k === 'throw' && THROWS[m.item]) { const tgt = m.to === NET.id ? me : m.to === 'dummy' ? DUMMY : peerW(m.to); if (tgt && tgt !== w) doThrow(w, tgt, m.item); }
       else if (m.k === 'arcade' && +m.score > 0) post(null, '🐍 ' + w.name + ' scored ' + Math.min(999, Math.floor(+m.score)) + ' at Snake');
       else if (m.k === 'treat' && ITEMS[m.item]) {
@@ -5825,7 +5813,6 @@ function main(){
       const w = pickAt(e.clientX, e.clientY);
       if (w === JUKE) { showTab('music'); closeCard(); itemAnim(jukeItem, 'bounce', 0.6, 0.7); tsound('boop'); }
       else if (w && w.pantry) { openPantry(); if (w.pantry === 'coffee') fetchItem('coffee'); }
-      else if (w && me.carrying && w !== me && w !== me.carrying && !w.isDummy) throwAt(w);
       else if (w) openCard(w.id);
       else if (me.downUntil > Date.now()) toast('💫 You’re still seeing stars… give it a few seconds.');
       else { closeCard(); if (!walking) { const fp = floorPoint(), ih = itemFromHit(); if (ih && ih.it && ih.it.slide) { goSlide(); } else if (ih && ih.it && ih.it.door) { useDoor(ih.it.door); } else if (ih && ih.it && ih.it.game) { goGame(ih.it.game); } else if (ih && ih.it === barItem) { openBar(); } else if (ih && ih.it === dummyItem) { openAtk(); } else if (fp && POOL_IN(fp[0], fp[1]) && !(ih && ih.it)) { swimClick({ x: fp[0], z: fp[1] }); } else if (ih && (ih.it || ih.laptop)) startTouch(me, ih); else { const seat = seatFromHit(); if (seat) sitAt(seat); else if (ih && ih.gen) startTouch(me, ih); else { const p = floorPoint(); if (p) walkMeTo(p[0], p[1]); } } } }
@@ -7124,7 +7111,7 @@ function main(){
       '<div class="lbl">Tonight</div><div class="meter"><i style="width:' + Math.min(100, Math.round(n * 100 / 6)) + '%"></i></div><div class="gbsub">' + n + (n === 1 ? ' beer' : ' beers') + ' · ' + mood + (dk ? ' · wobbly for about ' + dk + ' more min (water helps)' : '') + (n === 2 ? ' · one more and you’ll be drunk' : n >= 5 ? ' · one more and you’re off to bed' : '') + '</div>' +
       '<div class="lbl">Order</div><div class="pgrid">' + ['beer', 'cola', 'water'].map(id => '<button class="pit" data-br="get" data-v="' + id + '"><span class="pe">' + ITEMS[id].e + '</span><b>' + ITEMS[id].name + '</b></button>').join('') +
       '<button class="pit" data-br="cheers"><span class="pe">🍻</span><b>Cheers</b></button></div>' +
-      '<div class="acts"><button data-br="round">🍺 Buy a round for everyone</button></div>';
+      '<div class="acts"><button data-br="bucket" class="on">🪣 Bucket of 5 beers for the table</button><button data-br="round">🍺 Buy a round for everyone</button></div>';
   }
   $('barBox').addEventListener('click', e => {
     const b = e.target.closest('[data-br]'); if (!b) return;
@@ -7133,6 +7120,7 @@ function main(){
     else if (a === 'get') fetchItem(b.dataset.v, ON_BEACH(me.x, me.z) ? 'tiki' : 'bar');
     else if (a === 'cheers') cheers();
     else if (a === 'round') treatRound('beer');
+    else if (a === 'bucket') { orderBucket(); return; }
     renderBar();
   });
   function cheers() {
@@ -7342,6 +7330,85 @@ function main(){
     const g = makeEGuitar(); g.position.set(0.02, 0.84, 0.2); g.rotation.set(0, 0, 1.1); g.scale.set(1.25, 1.25, 1.25); w.v.body.add(g); w.v.egtr = g; applyStyleTo(g); return g;
   }
 
+
+  // ================= bucket of beer (shared, 5 bottles on the table) =================
+  const BUCKETS = []; let bucketN = 0;
+  const mBkt = new THREE.MeshStandardMaterial({ color: 0xc8ccd2, metalness: 0.75, roughness: 0.3, side: THREE.DoubleSide }), mIce = new THREE.MeshStandardMaterial({ color: 0xe8f6ff, roughness: 0.15, transparent: true, opacity: 0.85 }),
+    mBot = new THREE.MeshStandardMaterial({ color: 0x7a3f10, roughness: 0.2, metalness: 0.1 }), mCapB = new THREE.MeshStandardMaterial({ color: 0xd4a93a, metalness: 0.8, roughness: 0.3 }), mLblB = new THREE.MeshStandardMaterial({ color: 0xf2d36b, roughness: 0.6 });
+  function makeBucket(x, y, z) {
+    const g = new THREE.Group(); g.position.set(x, y, z);
+    const mk = (geo, mat, px, py, pz, par) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = true; (par || g).add(m); return m; };
+    mk(new THREE.CylinderGeometry(0.2, 0.15, 0.26, 18, 1, true), mBkt, 0, 0.13, 0); mk(new THREE.CylinderGeometry(0.15, 0.15, 0.012, 18), mBkt, 0, 0.006, 0);
+    const rim = mk(new THREE.TorusGeometry(0.2, 0.012, 6, 20), mBkt, 0, 0.26, 0); rim.rotation.x = Math.PI / 2;
+    [-1, 1].forEach(s => mk(new THREE.BoxGeometry(0.03, 0.05, 0.06), mBkt, s * 0.205, 0.2, 0));
+    mk(new THREE.CylinderGeometry(0.188, 0.188, 0.03, 18), mIce, 0, 0.225, 0);
+    [[0.1, 0.05], [-0.08, 0.1], [0.02, -0.12], [-0.12, -0.04], [0.13, -0.07]].forEach((p, k) => { const c = mk(new THREE.BoxGeometry(0.05, 0.04, 0.05), mIce, p[0], 0.25, p[1]); c.rotation.y = k; });
+    const bottles = [];
+    [[0, 0], [0.09, 0.03], [-0.07, 0.07], [-0.05, -0.08], [0.06, -0.08]].forEach((p, k) => {
+      const b = new THREE.Group(); b.position.set(p[0], 0.24, p[1]); b.rotation.set(p[1] * 1.6, 0, -p[0] * 1.6); g.add(b);
+      mk(new THREE.CylinderGeometry(0.03, 0.03, 0.17, 10), mBot, 0, 0.0, 0, b); mk(new THREE.CylinderGeometry(0.031, 0.031, 0.06, 10), mLblB, 0, 0.0, 0, b);
+      mk(new THREE.CylinderGeometry(0.012, 0.026, 0.07, 10), mBot, 0, 0.12, 0, b); mk(new THREE.CylinderGeometry(0.014, 0.014, 0.012, 8), mCapB, 0, 0.16, 0, b);
+      bottles.push(b);
+    });
+    return { g: g, bottles: bottles };
+  }
+  const bucketZone = (x, z) => (ZBY[zoneAt(x, z)] || ZBY.office).bit;
+  function showBottles(B) { B.bottles.forEach((b, k) => { b.visible = k < B.n; }); }
+  function addBucket(id, x, y, z, n, by) {
+    if (BUCKETS.some(b => b.id === id)) return null;
+    const M2 = makeBucket(x, y, z);
+    const B = { id: id, x: x, y: y, z: z, n: Math.max(0, Math.min(5, Math.round(n))), by: by, t0: Date.now(), g: M2.g, bottles: M2.bottles };
+    const it = { name: 'bucket of beer', els: [M2.g], touch: w => takeFromBucket(w, B) }; B.it = it;
+    M2.g.traverse(o => { o.userData.item = it; });
+    scene.add(M2.g); applyStyleTo(M2.g); setMask(M2.g, bucketZone(x, z));
+    showBottles(B); BUCKETS.push(B); return B;
+  }
+  function bucketSpot() {
+    const zc = GRP(zoneAt(me.x, me.z)); let best = null, bd = 7;
+    TABLE_TOPS.forEach(t => {
+      if (GRP(zoneAt(t.x, t.z)) !== zc || BUCKETS.some(b => Math.hypot(b.x - t.x, b.z - t.z) < 0.45)) return;
+      const d = Math.hypot(t.x - me.x, t.z - me.z); if (d < bd) { bd = d; best = t; }
+    });
+    if (best) return [best.x, best.y, best.z, true];
+    const p = NAVG.snap(me.x + Math.sin(me.yaw) * 0.7, me.z + Math.cos(me.yaw) * 0.7) || [me.x + 0.5, me.z];
+    return [p[0], 0, p[1], false];
+  }
+  function orderBucket() {
+    if (me.downUntil > Date.now()) { toast('💫 You’re still seeing stars…'); return; }
+    const mine = BUCKETS.find(b => b.by === 'me' && b.n > 0);
+    if (mine) { toast('🪣 Your bucket still has ' + mine.n + (mine.n === 1 ? ' bottle' : ' bottles') + ' left. Finish those first!'); return; }
+    const s = bucketSpot(), id = (NET.on && NET.id ? NET.id : 'me') + ':' + (++bucketN) + ':' + (Date.now() % 100000);
+    const B = addBucket(id, s[0], s[1], s[2], 5, 'me'); if (!B) return;
+    tsound('chime'); floatAt(B.it, '🪣🍺');
+    toast('🪣 A bucket of 5 ice-cold beers is ' + (s[3] ? 'on the table' : 'by your feet') + '! Click it to grab a bottle. Anyone can share.');
+    post(null, '🍻 ' + me.name + ' ordered a bucket of beer for the table!');
+    if (NET.on) netSend({ t: 'ev', k: 'bucket', act: 'place', id: id, mv: r2(s[0]) + ',' + r2(s[1]) + ',' + r2(s[2]), n: 5 });
+    closeBar();
+    const zc = GRP(zoneAt(s[0], s[2]));
+    workers.filter(w => w !== me && !w.remote && !w.path.length && !w.held && !w.fetch && GRP(zoneAt(w.x, w.z)) === zc && Math.hypot(w.x - s[0], w.z - s[2]) < 7).slice(0, 2)
+      .forEach((w, k) => setTimeout(() => { if (B.n > 1 && !w.held && BUCKETS.includes(B)) { B.n--; showBottles(B); giveItem(w, 'beer', true); post(w.id, rnd(['Cheers! 🍻', 'Ooh, a bucket! Thanks ' + me.name + '!', 'Don’t mind if I do 🍺'])); } }, 2500 + k * 3000));
+  }
+  function takeFromBucket(w, B) {
+    if (w !== me) return;
+    if (!BUCKETS.includes(B) || B.n <= 0) { toast('🪣 The bucket is empty. Order another one at the bar!'); return; }
+    if (me.held && me.held.id === 'beer') { toast('🍺 Finish the beer in your hand first!'); return; }
+    B.n--; showBottles(B); giveItem(me, 'beer', true); floatAt(B.it, '🍺');
+    toast('🍺 You grabbed a bottle from the bucket. ' + (B.n ? B.n + ' left.' : 'That was the last one!'));
+    if (NET.on) netSend({ t: 'ev', k: 'bucket', act: 'take', id: B.id });
+    if (B.n <= 0) emptyBucket(B);
+  }
+  function emptyBucket(B) { if (B.gone) return; B.gone = true; post(null, '🪣 The beer bucket is empty. Cheers, everyone! 🍻'); setTimeout(() => removeBucket(B), 4000); }
+  function removeBucket(B) { const i = BUCKETS.indexOf(B); if (i > -1) BUCKETS.splice(i, 1); if (B.g.parent) B.g.parent.remove(B.g); }
+  function applyNetBucket(m, w) {
+    const id = String(m.id || '').slice(0, 60); if (!id) return;
+    if (m.act === 'place') {
+      const p = String(m.mv || '').split(',').map(Number); if (p.length !== 3 || !p.every(v => isFinite(v))) return;
+      const B = addBucket(id, p[0], Math.max(0, Math.min(1.3, p[1])), p[2], +m.n || 5, w.id);
+      if (B) post(null, '🍻 ' + w.name + ' ordered a bucket of beer for the table!');
+    } else if (m.act === 'take') { const B = BUCKETS.find(b => b.id === id); if (B && B.n > 0) { B.n--; showBottles(B); if (B.n <= 0) emptyBucket(B); } }
+  }
+  function bucketTick() { const n = Date.now(); BUCKETS.slice().forEach(B => { if (n - B.t0 > 15 * 60000) removeBucket(B); }); }
+
   // ================= drunk walking (3+ beers) =================
   // 3 beers = drunk for 3 minutes: slow, weaving walk, stumbles, and sometimes you fall flat.
   const DRUNK_MS = 180000;
@@ -7443,14 +7510,13 @@ function main(){
     if (NET.on && tgt.remote) netSend({ t: 'ev', k: 'carry', act: drop ? 'drop' : 'throw', to: tgt.netId, mv: r2(to[0]) + ',' + r2(to[1]) });
     release(me, tgt, to, !drop);
   }
-  function release(from, tgt, to, thrown, at) {
+  function release(from, tgt, to, thrown) {
     if (from) { from.carrying = null; if (thrown) from.act = { kind: 'throw', t0: elapsed, dur: 0.6 }; }
     tgt.carriedBy = null;
     if (thrown) {
-      const R = from ? from.v.root.position : tgt.v.root.position, dist = Math.hypot(to[0] - R.x, to[1] - R.z);
-      CARRY.flights.push({ w: tgt, from: [R.x, R.z], to: to, t0: elapsed, dur: at ? Math.max(0.6, Math.min(1.4, 0.45 + dist * 0.09)) : 0.95, at: at || null, by: from }); tgt.flying = true;
-      if (!at) post(null, '🚀 ' + nmOf(from) + ' threw ' + objOf(tgt) + ' across the room!');
-      else floatFx(at, rnd(['Wait—', 'Uh oh…', 'NO NO NO', '😨']));
+      const R = from ? from.v.root.position : tgt.v.root.position;
+      CARRY.flights.push({ w: tgt, from: [R.x, R.z], to: to, t0: elapsed, dur: 0.95 }); tgt.flying = true;
+      post(null, '🚀 ' + nmOf(from) + ' threw ' + objOf(tgt) + ' across the room!');
       floatFx(tgt, rnd(['AAAAH!', 'Wheee!', 'Noooo!', '😵']));
     } else place(tgt, to, false);
     renderCarryBar();
@@ -7477,11 +7543,11 @@ function main(){
     post(null, '🤸 You wiggled free from ' + c.name + '!'); renderCarryBar();
   }
   function applyNetCarry(m, w) {
-    const tgt = m.act === 'free' ? w : (m.to ? cByNet(String(m.to)) : w && w.carrying), from = m.act === 'free' ? cByNet(String(m.to || '')) : w;
+    const tgt = m.act === 'free' ? w : cByNet(String(m.to || '')), from = m.act === 'free' ? cByNet(String(m.to || '')) : w;
     if (!tgt || !from || tgt === from) return;
     const mp = String(m.mv == null ? '' : m.mv).split(',').map(Number), to = mp.length === 2 && isFinite(mp[0]) && isFinite(mp[1]) && m.mv !== '' ? NAVG.snap(mp[0], mp[1]) || [from.x, from.z] : [from.x, from.z];
     if (m.act === 'pick') { if (from.carrying) from.carrying.carriedBy = null; if (tgt.carriedBy && tgt.carriedBy !== from) tgt.carriedBy.carrying = null; grab(from, tgt); }
-    else if (m.act === 'throw' || m.act === 'drop') { if (tgt.carriedBy === from || from.carrying === tgt) { const at = m.act === 'throw' && m.key ? cByNet(String(m.key)) : null; release(from, tgt, to, m.act === 'throw', at && at !== tgt && at !== from ? at : null); } }
+    else if (m.act === 'throw' || m.act === 'drop') { if (tgt.carriedBy === from || from.carrying === tgt) release(from, tgt, to, m.act === 'throw'); }
     else if (m.act === 'free') { if (from.carrying === tgt) from.carrying = null; tgt.carriedBy = null; if (tgt !== me) place(tgt, to, false); post(null, '🤸 ' + tgt.name + ' wiggled free from ' + objOf(from) + '!'); renderCarryBar(); }
   }
   function carryPose(w) {
@@ -7512,7 +7578,6 @@ function main(){
       if (!workers.includes(c)) { me.carriedBy = null; place(me, NAVG.snap(me.x, me.z) || [me.x, me.z], false); renderCarryBar(); }
       else { me.x = c.x; me.z = c.z; }
     }
-    if (me.carrying && Math.floor(elapsed) !== Math.floor(elapsed - dt)) renderCarryBar();
     if (me.carrying) {
       const tg = me.carrying;
       if (!workers.includes(tg) || tg.carriedBy !== me) { me.carrying = null; renderCarryBar(); }
@@ -7530,47 +7595,16 @@ function main(){
         const wet = WATER_IN(F.to[0], F.to[1]);
         fxSound(wet ? 'thud' : 'crash'); pow(screenPos(F.w)); floatFx(F.w, wet ? '💦 SPLASH!' : '💥');
         place(F.w, F.to, !wet);
-        if (F.at) hitByThrow(F.at, F.w, F.by);
       }
     }
   }
   const carryBar = document.createElement('div'); carryBar.id = 'carryBar'; carryBar.className = 'float carrybar'; carryBar.hidden = true; document.body.appendChild(carryBar);
   function renderCarryBar() {
-    if (me.carrying) { const tt = throwTargets(); carryBar.hidden = false; carryBar.innerHTML = '<span>🤲 Carrying <b>' + esc(me.carrying.name) + '</b></span><button data-cy="throw" class="on">🚀 Throw</button>' + (tt.length ? '<button data-cy="aim"' + (carryBar._aim ? ' class="on"' : '') + '>🎯 Throw at…</button>' : '') + '<button data-cy="drop">⬇ Put down</button>' +
-      (carryBar._aim && tt.length ? '<div class="cyaim"><span class="cyh">Throw ' + esc(me.carrying.name) + ' at:</span>' + tt.map(w => '<button data-cy="at" data-id="' + esc(w.id) + '">' + esc(w.name) + ' <small>' + Math.round(Math.hypot(w.x - me.x, w.z - me.z)) + 'm</small></button>').join('') + '<span class="cyh">or click someone in the office</span></div>' : ''); }
-    else carryBar._aim = false;
-    if (me.carrying) return;
+    if (me.carrying) { carryBar.hidden = false; carryBar.innerHTML = '<span>🤲 Carrying <b>' + esc(me.carrying.name) + '</b></span><button data-cy="throw" class="on">🚀 Throw</button><button data-cy="drop">⬇ Put down</button>'; }
     else if (me.carriedBy) { carryBar.hidden = false; carryBar.innerHTML = '<span>😱 <b>' + esc(me.carriedBy.name) + '</b> is carrying you!</span><button data-cy="wiggle" class="on">🤸 Wiggle free</button>'; }
     else carryBar.hidden = true;
   }
-  carryBar.addEventListener('click', e => { const b = e.target.closest('[data-cy]'); if (!b) return; const a = b.dataset.cy; if (a === 'throw') { carryBar._aim = false; throwCarried(false); } else if (a === 'aim') { carryBar._aim = !carryBar._aim; renderCarryBar(); } else if (a === 'at') { carryBar._aim = false; throwAt(byId[b.dataset.id]); } else if (a === 'drop') { carryBar._aim = false; throwCarried(true); } else if (a === 'wiggle') wiggleFree(); });
-
-  // ---- throw the person you carry at someone else ----
-  function throwTargets() {
-    if (!me.carrying) return [];
-    const g = GRP(zoneAt(me.x, me.z));
-    return workers.filter(w => w !== me && w !== me.carrying && !w.isDummy && !w.carriedBy && !w.flying && GRP(zoneAt(w.x, w.z)) === g && Math.hypot(w.x - me.x, w.z - me.z) < 12)
-      .sort((a, b) => Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z)).slice(0, 6);
-  }
-  function throwAt(tgtW) {
-    const tg = me.carrying; if (!tg || !tgtW || tgtW === tg || tgtW === me) return;
-    if (GRP(zoneAt(tgtW.x, tgtW.z)) !== GRP(zoneAt(me.x, me.z))) { toast(tgtW.name + ' is in another room.'); return; }
-    const d = Math.hypot(tgtW.x - me.x, tgtW.z - me.z);
-    if (d > 12) { toast(tgtW.name + ' is too far away to hit. Get closer!'); return; }
-    me.tyaw = me.yaw = Math.atan2(tgtW.x - me.x, tgtW.z - me.z);
-    const back = Math.min(0.5, d * 0.3), to = NAVG.snap(tgtW.x - Math.sin(me.yaw) * back, tgtW.z - Math.cos(me.yaw) * back) || [tgtW.x, tgtW.z];
-    if (NET.on) netSend({ t: 'ev', k: 'carry', act: 'throw', to: tg === me ? '' : (tg.remote ? tg.netId : ''), mv: r2(to[0]) + ',' + r2(to[1]), key: cIdOf(tgtW) || '' });
-    release(me, tg, to, true, tgtW);
-  }
-  function hitByThrow(victim, missile, thrower) {
-    if (!victim || victim.flying || victim.carriedBy) return;
-    if (WATER_IN(victim.x, victim.z)) { floatFx(victim, '💦'); return; }
-    pow(screenPos(victim)); floatFx(victim, rnd(['OOF!', 'BONK!', 'STRIKE! 🎳', '😵']));
-    if (victim === me) { knockDown(5); toast('🎳 ' + (missile === me ? 'You' : missile.name) + ' got thrown into you! Down for 5 s…'); }
-    else victim.hit = 2.2;
-    post(null, '🎳 Strike! ' + nmOf(thrower) + ' threw ' + objOf(missile) + ' right into ' + (victim === me ? 'you' : victim.name) + '!');
-  }
-
+  carryBar.addEventListener('click', e => { const b = e.target.closest('[data-cy]'); if (!b) return; const a = b.dataset.cy; if (a === 'throw') throwCarried(false); else if (a === 'drop') throwCarried(true); else if (a === 'wiggle') wiggleFree(); });
 
   // ================= falling down =================
   function knockDown(secs) {
@@ -8249,7 +8283,7 @@ function main(){
       v.addEventListener('ended', () => { if (music.now === n) skipMusic(); });
       v.addEventListener('error', () => { if (music.now === n) { n.yt = 'error'; n.err = 'This file couldn’t play here. The site may block it, or the format isn’t supported.'; renderMusic(); } });
       lh.appendChild(v); n.el = v;
-      try { const p = v.play(); if (p && p.catch) p.catch(() => { if (music.now === n) { n.yt = 'paused'; renderMusic(); toast('Open the 🎵 Music menu and press ▶ Play to start it.'); } }); } catch (e) {}
+      try { const p = v.play(); if (p && p.catch) p.catch(() => { if (music.now === n) { n.yt = 'paused'; renderMusic(); toast('Click ▶ on the player to start it.'); } }); } catch (e) {}
     } else {
       const f = document.createElement('iframe');
       f.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
@@ -8260,11 +8294,10 @@ function main(){
       f.addEventListener('load', () => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } });
       lh.appendChild(f); n.el = f;
       setTimeout(() => { if (music.now === n && n.yt === 'loading') { n.yt = 'embed'; renderMusic(); } }, 4000);
-      if (!/youtube|vimeo|dailymotion|drive\.google/.test(n.embed)) setTimeout(() => { if (music.now === n) toast('🎵 If it doesn’t start, open the 🎵 Music menu → ⛶ Big screen and press play there.'); }, 2500);
     }
   }
-  function toggleTheater(on) { const m = $('ytMini'); const v = on == null ? !m.classList.contains('theater') : on; m.classList.toggle('theater', v); $('ytTh').textContent = v ? '✕ Close screen' : '⛶'; $('ytTh').title = v ? 'Close the big screen (keeps playing)' : 'Big screen'; if (typeof renderMusic === 'function') renderMusic(); }
-  $('ytTh').addEventListener('click', () => { const was = $('ytMini').classList.contains('theater'); toggleTheater(); if (was) toast('🎵 Still playing. Use the Music menu to pause or stop.'); });
+  function toggleTheater(on) { const m = $('ytMini'); const v = on == null ? !m.classList.contains('theater') : on; m.classList.toggle('theater', v); $('ytTh').textContent = v ? '🗗' : '⛶'; }
+  $('ytTh').addEventListener('click', () => toggleTheater());
 
   // ================= wing items & animation =================
   [mPart, mPartCap].forEach(m => SCENERY.add(m));
@@ -8477,7 +8510,7 @@ function main(){
       if (me.emote && me.emote.type === 'sleep') setEmote(me, null);
       toast('🤕 You wake up with a headache. Maybe some water?'); me.drunkBed = null; renderBar(); renderPantry();
     }
-    bbTick(dt); gymTick(dt); beachTick(dt); combatTick(dt); carryTick(dt); instrTick(dt); matchBallTick();
+    bbTick(dt); gymTick(dt); beachTick(dt); combatTick(dt); carryTick(dt); instrTick(dt); bucketTick(); matchBallTick();
     workers.forEach(ballTick);
     if (Math.floor(elapsed * 2) !== Math.floor((elapsed - dt) * 2)) drawMovie();
     movieLight.intensity = night ? 0.7 : 0.25;
