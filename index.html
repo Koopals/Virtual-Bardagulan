@@ -1361,8 +1361,8 @@ function main(){
   // yoga mats
   [[43.4, 3.8], [43.4, 6.0]].forEach((p, k) => { box(0.7, 0.015, 1.7, k ? M(0x7ec8a6, { roughness: 1 }) : M(0xc9a6ff, { roughness: 1 }), p[0], 0.02, p[1]).castShadow = false; gymSpot('yoga', [p[0], p[1]], -Math.PI / 2, 0, [p[0] - 0.35, p[0] + 0.35, p[1] - 0.85, p[1] + 0.85]); });
   // water cooler and towels
-  box(0.4, 1.0, 0.4, mWhite, 37.6, 0.5, 9.4); cyl(0.15, 0.15, 0.35, M(0x9fd6ff, { roughness: 0.2, transparent: true, opacity: 0.8 }), 37.6, 1.17, 9.4, null, 12);
-  box(0.9, 0.05, 0.35, mWood2, 44.5, 1.2, 1.9); [44.2, 44.5, 44.8].forEach((x, k) => box(0.2, 0.2, 0.3, [mWhite, mGymB, mWhite][k], x, 1.33, 1.9));
+  GYM.cooler = [box(0.4, 1.0, 0.4, mWhite, 37.6, 0.5, 9.4), cyl(0.15, 0.15, 0.35, M(0x9fd6ff, { roughness: 0.2, transparent: true, opacity: 0.8 }), 37.6, 1.17, 9.4, null, 12)];
+  GYM.towels = [box(0.9, 0.05, 0.35, mWood2, 44.5, 1.2, 1.9)]; [44.2, 44.5, 44.8].forEach((x, k) => GYM.towels.push(box(0.2, 0.2, 0.3, [mWhite, mGymB, mWhite][k], x, 1.33, 1.9)));
   plant(44.4, -9.4, 1);
 
   // training dummy in the gym, for practising slaps, punches, kicks and throws
@@ -1733,12 +1733,53 @@ function main(){
       nb(x - 0.45, x + 0.45, -9.15, -9.0); nb(x - 0.45, x - 0.36, -9.1, -8.5); nb(x + 0.36, x + 0.45, -9.1, -8.5);
     });
     { const mir = new THREE.Mesh(new THREE.PlaneGeometry(8, 1.6), new THREE.MeshStandardMaterial({ color: 0xd8e6ef, roughness: 0.05, metalness: 0.9 })); mir.position.set(g0 - 9.3, 1.9, -9.95); scene.add(mir); }
-    [-3.2, -0.8].forEach(zz => { const x = g0 - 10.5; box(0.35, 0.12, 2.0, mRub, x, 0.06, zz); box(0.3, 0.06, 0.4, mDark, x, 0.34, zz + 0.35); box(0.06, 0.3, 0.06, mChrome, x, 0.17, zz + 0.35); box(0.5, 0.05, 0.06, mChrome, x, 0.5, zz - 0.75); cyl(0.22, 0.22, 0.12, mGymB, x, 0.3, zz - 0.85, null, 14).rotation.z = Math.PI / 2;
-      gymSpot('bike', [x, zz + 0.35], Math.PI, 0.32, [x - 0.3, x + 0.3, zz - 1.0, zz + 1.0], { anchor: [x + 0.9, zz + 0.35] }); nb(x - 0.2, x + 0.2, zz - 1.0, zz - 0.6); });
+    GYM.rows = GYM.rows || []; GYM.squats = GYM.squats || []; GYM.dls = GYM.dls || [];
+    [-3.2, -0.8].forEach(zz => { const x = g0 - 10.5; box(0.35, 0.12, 2.0, mRub, x, 0.06, zz); const seat = box(0.3, 0.06, 0.4, mDark, x, 0.34, zz + 0.35), post = box(0.06, 0.3, 0.06, mChrome, x, 0.17, zz + 0.35);
+      [-1, 1].forEach(s => box(0.12, 0.03, 0.16, mDark, x + s * 0.11, 0.2, zz - 0.42).rotation.x = -0.6);
+      const handle = box(0.5, 0.05, 0.06, mChrome, x, 0.5, zz - 0.75), fw = cyl(0.22, 0.22, 0.12, mGymB, x, 0.3, zz - 0.85, null, 14); fw.rotation.z = Math.PI / 2;
+      const cable = box(0.015, 0.015, 1, mDark, x, 0.45, zz - 0.8); cable.scale.z = 0.05;
+      const sp = gymSpot('row', [x, zz + 0.35], Math.PI, 0.32, [x - 0.3, x + 0.3, zz - 1.0, zz + 1.0], { anchor: [x + 0.9, zz + 0.35] }); nb(x - 0.2, x + 0.2, zz - 1.0, zz - 0.6);
+      GYM.rows.push({ spot: sp, seat: seat, post: post, handle: handle, fw: fw, cable: cable, sz: zz + 0.35, hy: 0.5, hz: zz - 0.75, fz: zz - 0.85, x: x }); });
     { const x = g0 - 11, z = 3; [-0.75, 0.75].forEach(o => { box(0.08, 2.2, 0.08, mChrome, x + o, 1.1, z - 0.5); box(0.08, 2.2, 0.08, mChrome, x + o, 1.1, z + 0.5); box(0.08, 0.08, 1.0, mChrome, x + o, 2.2, z); });
-      const rod = add(new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.0, 8), mChrome), x, 1.45, z - 0.5); rod.rotation.z = Math.PI / 2; [-0.85, 0.85].forEach(o => { const pl = add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.06, 16), mGymR), x + o, 1.45, z - 0.5); pl.rotation.z = Math.PI / 2; });
+      const sqb = new THREE.Group(); sqb.position.set(x, 1.45, z - 0.5); scene.add(sqb);
+      { const rod = add(new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.0, 8), mChrome), 0, 0, 0, sqb); rod.rotation.z = Math.PI / 2; [-0.85, 0.85].forEach(o => { const pl = add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.06, 16), mGymR), o, 0, 0, sqb); pl.rotation.z = Math.PI / 2; }); }
+      [-0.75, 0.75].forEach(o => box(0.1, 0.06, 0.12, mDark, x + o, 1.4, z - 0.44));
       [[-0.85, -0.55], [0.85, -0.55], [-0.85, 0.55], [0.85, 0.55]].forEach(o => nb(x + o[0] - 0.06, x + o[0] + 0.06, z + o[1] - 0.06, z + o[1] + 0.06));
-      gymSpot('curl', [x, z], Math.PI, 0, [x - 0.6, x + 0.6, z - 0.4, z + 0.4], { anchor: [x, z + 1.2] }); }
+      const sp = gymSpot('squat', [x, z - 0.15], Math.PI, 0, [x - 0.7, x + 0.7, z - 0.55, z + 0.4], { anchor: [x, z + 1.2] });
+      GYM.squats.push({ spot: sp, g: sqb, rest: [x, 1.45, z - 0.5] }); }
+    // deadlift platform
+    { const px = g0 - 6.5, pz = 6.6, mPlat = MC(0x9c6b3f, { roughness: 0.7 }), mBump = [MC(0xd6262f, { roughness: 0.6 }), MC(0x2f6fd6, { roughness: 0.6 })];
+      box(2.6, 0.04, 2.2, mRub, px, 0.02, pz).castShadow = false; box(1.4, 0.045, 2.2, mPlat, px, 0.025, pz).castShadow = false;
+      const dlb = new THREE.Group(); dlb.position.set(px, 0.22, pz + 0.32); scene.add(dlb);
+      { const rod = add(new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 2.0, 8), mChrome), 0, 0, 0, dlb); rod.rotation.z = Math.PI / 2;
+        [[-0.78, 0], [0.78, 0], [-0.86, 1], [0.86, 1]].forEach(o => { const pl = add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.07, 18), mBump[o[1]]), o[0], 0, 0, dlb); pl.rotation.z = Math.PI / 2; });
+        [-0.93, 0.93].forEach(o => { const c = add(new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.05, 10), mChrome), o, 0, 0, dlb); c.rotation.z = Math.PI / 2; }); }
+      // plate tree and chalk bowl
+      { const tx = px + 1.7, tz = pz - 0.4; box(0.5, 0.05, 0.5, mDark, tx, 0.025, tz); box(0.06, 1.0, 0.06, mChrome, tx, 0.5, tz);
+        [0.3, 0.55, 0.8].forEach((y, k) => { [-1, 1].forEach(s => { const pl = cyl(0.2 - k * 0.03, 0.2 - k * 0.03, 0.06, mBump[k % 2], tx + s * 0.09, y, tz, null, 16); pl.rotation.z = Math.PI / 2; }); });
+        nb(tx - 0.28, tx + 0.28, tz - 0.28, tz + 0.28); }
+      const chalk = new THREE.Group(); chalk.position.set(px - 1.7, 0, pz - 0.4); scene.add(chalk);
+      add(new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 0.8, 8), mDark), 0, 0.4, 0, chalk); add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.16, 0.12, 14), mChrome), 0, 0.86, 0, chalk); add(new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.03, 14), MC(0xf6f6f2, { roughness: 1 })), 0, 0.9, 0, chalk);
+      nb(px - 1.95, px - 1.45, pz - 0.65, pz - 0.15);
+      const sp = gymSpot('deadlift', [px, pz], 0, 0, [px - 0.9, px + 0.9, pz - 0.7, pz + 0.85], { anchor: [px, pz - 1.3] });
+      GYM.dls.push({ spot: sp, g: dlb, rest: [px, 0.22, pz + 0.32] });
+      GYM.chalk = chalk; GYM.dlPlat = [px, pz];
+      FURN_ITEMS.push(['chalk bowl', [chalk], (w, it) => { floatAt(it, '☁️'); sfx('pssht'); if (w === me) { me._chalk = elapsed + 90; toast('🤍 Chalked up! Better grip: your lifts go heavier for a while.'); } }]); }
+    // ---- gym extras: lockers, mirror, ring bell, water cooler, towels ----
+    { const doors = [];
+      for (let k = 0; k < 6; k++) { const x = g0 - 14.6, z = -9 + k * 0.62, hg = new THREE.Group(); hg.position.set(x + 0.236, 0.95, z - 0.28); scene.add(hg);
+        const dm = MC(k % 2 ? 0x4a73c8 : 0x3a80e6, { roughness: 0.45 }); add(new THREE.Mesh(new THREE.BoxGeometry(0.02, 1.8, 0.54), dm), 0, 0, 0.28, hg); add(new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.1, 0.04), MC(0xcccccc)), 0.01, 0.05, 0.47, hg);
+        [0.6, 0.66, 0.72].forEach(y => add(new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.015, 0.3), MC(0x1c2a44)), 0.003, y, 0.28, hg));
+        doors.push(hg); }
+      GYM.doors = doors;
+      doors.forEach((d, k) => FURN_ITEMS.push(['locker', [d], (w, it) => { if (d._open) return; d._open = elapsed; fxSound('clang');
+        if (w === me) { const loot = rnd([['🧦', 'a pair of gym socks'], ['🥤', 'a protein shake'], ['🎧', 'earbuds'], ['🧴', 'deodorant'], ['🍌', 'a banana'], ['🔑', 'your keys'], ['🩳', 'spare shorts']]);
+          toast('🔓 Locker ' + (k + 1) + ': you found ' + loot[1] + ' ' + loot[0]); floatAt(it, loot[0]); if (loot[0] === '🥤' && !me.held) giveItem(me, 'water'); } }])); }
+    { const mirG = scene.children.find(o => o.isMesh && o.geometry && o.geometry.parameters && o.geometry.parameters.width === 8 && o.geometry.parameters.height === 1.6 && Math.abs(o.position.x - (g0 - 9.3)) < 0.1);
+      if (mirG) FURN_ITEMS.push(['mirror', [mirG], (w, it) => { if (w !== me) return; react(me, 'flex', true); floatFx(me, rnd(['💪 Looking strong!', '😎 Gains!', '🔥 Beast mode', '✨ Glow up'])); toast('🪞 You flex in the mirror. Looking good!'); }]); }
+    if (GYM.cooler) FURN_ITEMS.push(['water cooler', GYM.cooler, (w, it) => { sfx('clink'); itemAnim(it, 'shake', 0.4, 0.3); if (w === me) { if (!me.held) giveItem(me, 'water'); toast('💧 Stay hydrated! Water helps you recover.'); } }]);
+    if (GYM.towels) FURN_ITEMS.push(['towel shelf', GYM.towels, (w, it) => { sfx('rustle'); floatAt(it, '🧺'); if (w === me) { floatFx(me, '😌'); me._fresh = elapsed + 30; toast('🧺 You wipe off the sweat. Fresh!'); } }]);
+
     { const rx = g0 + 10.5, rz = 2.2, mRope = MC(0xd6262f, { roughness: 0.6 }), mPost = MC(0xf4f4f4, { roughness: 0.4 });
       box(5.0, 0.06, 5.0, MC(0x2f6fd6, { roughness: 0.9 }), rx, 0.03, rz).castShadow = false;
       [[-2.4, -2.4], [2.4, -2.4], [-2.4, 2.4], [2.4, 2.4]].forEach(o => { cyl(0.08, 0.08, 1.4, mPost, rx + o[0], 0.7, rz + o[1], null, 8); nb(rx + o[0] - 0.08, rx + o[0] + 0.08, rz + o[1] - 0.08, rz + o[1] + 0.08); });
@@ -1746,7 +1787,9 @@ function main(){
       gymSpot('punch', [rx - 0.8, rz], Math.PI / 2, 0, [rx - 1.2, rx - 0.4, rz - 0.4, rz + 0.4]); gymSpot('punch', [rx + 0.8, rz], -Math.PI / 2, 0, [rx + 0.4, rx + 1.2, rz - 0.4, rz + 0.4]);
       Object.assign(RINGB, { x0: rx - 2.4, x1: rx + 2.4, z0: rz - 2.4, z1: rz + 2.4, cx: rx, cz: rz });
       nb(rx - 2.42, rx + 2.42, rz - 2.42, rz - 2.38); nb(rx - 2.42, rx - 2.38, rz - 2.4, rz + 2.4); nb(rx + 2.38, rx + 2.42, rz - 2.4, rz + 2.4); nb(rx - 2.42, rx - 0.8, rz + 2.38, rz + 2.42); nb(rx + 0.8, rx + 2.42, rz + 2.38, rz + 2.42);
-      { const bell = add(new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.14, 0.12, 14), MC(0xe0b030, { metalness: 0.7, roughness: 0.3 })), rx + 2.4, 1.48, rz + 2.4); bell.castShadow = false; }
+      { const bell = add(new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.14, 0.12, 14), MC(0xe0b030, { metalness: 0.7, roughness: 0.3 })), rx + 2.4, 1.48, rz + 2.4); bell.castShadow = false;
+      FURN_ITEMS.push(['ring bell', [bell], (w, it) => { tsound('ding'); setTimeout(() => tsound('ding'), 260); setTimeout(() => tsound('ding'), 520); itemAnim(it, 'shake', 0.6, 0.6); floatAt(it, '🔔');
+        if (w === me) { GYM.round = (GYM.round || 0) + 1; post(null, '🔔 Ding ding ding! Round ' + GYM.round + ', FIGHT!'); if (NET.on) netSend({ t: 'ev', k: 'gymbell', n: GYM.round }); if (RG.me) RG.me.hp = 100; renderRingBar(); } }]); GYM.bell = bell;  }
       wallSign(rx, -9.97, 2.2, '🥊 BOXING · step in to fight', '#14161c', '#ff4d4d'); }
     [[g0 + 7.6, 7.8], [g0 + 9.0, 7.8], [g0 + 10.4, 7.8], [g0 + 11.8, 7.8]].forEach((p, k) => { box(0.7, 0.015, 1.7, MC([0xc9a6ff, 0x7ec8a6, 0xffb6c8, 0xffd23f][k], { roughness: 1 }), p[0], 0.02, p[1]).castShadow = false; gymSpot('yoga', [p[0], p[1]], -Math.PI / 2, 0, [p[0] - 0.35, p[0] + 0.35, p[1] - 0.85, p[1] + 0.85]); });
     for (let k = 0; k < 6; k++) { const x = g0 - 14.6, z = -9 + k * 0.62; box(0.45, 1.9, 0.58, MC(k % 2 ? 0x3d63b8 : 0x2f6fd6, { roughness: 0.5 }), x, 0.95, z); box(0.02, 0.1, 0.04, MC(0xcccccc), x + 0.24, 1.0, z + 0.15); }
@@ -5525,6 +5568,7 @@ function main(){
       else if (m.k === 'bbpass') { const to = byPid(String(m.to || '')); if (to) matchPass(w, to); }
       else if (m.k === 'bbsteal') { if (!MATCH.fl) { MATCH.holder = pidOf(w); MATCH.lastEv = elapsed; } }
       else if (m.k === 'ko') ringKoNet(m, w);
+      else if (m.k === 'gymbell') { if (GYM.bell) { tsound('ding'); setTimeout(() => tsound('ding'), 260); floatFx(ptAt(GYM.bell.position.x, 1.7, GYM.bell.position.z), '🔔'); } post(null, '🔔 ' + (w ? w.name : 'Someone') + ' rang the bell! Round ' + (+m.n || 1) + ', FIGHT!'); if (RG.me) { RG.me.hp = 100; renderRingBar(); } }
       else if (m.k === 'hit' && MELEE[m.type]) { const tgt = m.to === NET.id ? me : m.to === 'dummy' ? DUMMY : peerW(m.to); if (tgt && tgt !== w) doMelee(w, tgt, m.type); }
       else if (m.k === 'carry' && ['pick', 'throw', 'drop', 'free'].indexOf(m.act) > -1) applyNetCarry(m, w);
       else if (m.k === 'bucket' && ['hold', 'place', 'take', 'pickup'].indexOf(m.act) > -1) applyNetBucket(m, w);
@@ -7040,9 +7084,10 @@ function main(){
   function gymPose(w, dt) {
     const s = w.at, V = w.v, A = V.arms, E = V.elbows, Lg = V.legs, K = V.knees;
     const on = !!(s && s.gym && !w.path.length && (s.sit > 0 ? w.mode === 'sit' : w.mode === 'stand'));
-    if (!on) { if (w._gym) { w._gym = null; dumbbells(w, false); w.v.elbows[0].rotation.z = 0; w.v.elbows[1].rotation.z = 0; V.body.rotation.z = 0; if (!w._lie) V.body.rotation.x = 0; A[0].rotation.z = 0; A[1].rotation.z = 0; Lg[0].rotation.z = 0; Lg[1].rotation.z = 0; } return; }
+    if (!on) { if (w._gym) { w._gym = null; dumbbells(w, false); w.v.elbows[0].rotation.z = 0; w.v.elbows[1].rotation.z = 0; V.body.rotation.z = 0; V.body.position.z = 0; V.body.position.x = 0; V.head.rotation.x = 0; if (!w._lie) V.body.rotation.x = 0; A[0].rotation.z = 0; A[1].rotation.z = 0; Lg[0].rotation.z = 0; Lg[1].rotation.z = 0; } return; }
     const kind = s.gym, t = elapsed + w.i;
-    if (w._gym !== kind) { if (w._gym === 'curl') dumbbells(w, false); w._gym = kind; w._gt = 0; w._sw = 1.5; w._reps = 0; dumbbells(w, kind === 'curl'); }
+    if (w._gym !== kind) { if (w._gym === 'curl') dumbbells(w, false); w._gym = kind; w._gt = 0; w._sw = 1.5; w._reps = 0; w._rep = null; V.body.position.z = 0; V.body.position.x = 0; dumbbells(w, kind === 'curl');
+      if (w === me) { const tip = { row: '🚣 Rowing! Watch the meters go up.', squat: '🏋️ Squats! Every 5 reps the bar gets heavier.', deadlift: '💀 Deadlifts! Every 5 reps the bar gets heavier. Chalk up first for extra weight.' }[kind]; if (tip) toast(tip); } }
     w._gt += dt;
     if (kind === 'run') {
       const p = Math.sin(t * 13);
@@ -7066,6 +7111,38 @@ function main(){
     } else if (kind === 'bench') {
       const c = Math.abs(Math.sin(t * 2.2));
       A[0].rotation.set(-1.57 - 0.05, 0, -0.35 + c * 0.3); A[1].rotation.set(-1.57 - 0.05, 0, 0.35 - c * 0.3); E[0].rotation.x = -1.2 + c * 1.1; E[1].rotation.x = -1.2 + c * 1.1;
+    } else if (kind === 'row') {
+      const c = (t * 0.55) % 1, drive = c < 0.4, p = drive ? c / 0.4 : (c - 0.4) / 0.6;
+      const s = drive ? 1 - Math.sin(p * Math.PI / 2) : (1 - Math.cos(p * Math.PI)) / 2;   // 1 = catch (forward), 0 = finish
+      const arm = drive ? Math.max(0, (p - 0.55) / 0.45) : Math.max(0, 1 - p / 0.3);
+      V.body.position.z = 0.24 * s; V.body.rotation.x = 0.22 * s - 0.16 * (1 - s);
+      Lg[0].rotation.x = Lg[1].rotation.x = -1.45 - 0.75 * s - V.body.rotation.x; K[0].rotation.x = K[1].rotation.x = 0.08 + 2.0 * s;
+      [0, 1].forEach(i => { A[i].rotation.x = -1.45 - V.body.rotation.x + arm * 0.9; A[i].rotation.z = (i ? -1 : 1) * 0.08; E[i].rotation.x = -arm * 1.9; });
+      V.head.rotation.x = -V.body.rotation.x * 0.7;
+      w._rowS = s;
+      const ph = Math.floor(t * 0.55); if (ph !== w._rep) { w._rep = ph; w._reps = (w._reps || 0) + 1; if (w._reps % 5 === 0) floatFx(w, (w._reps * 10) + ' m', 'rx'); }
+    } else if (kind === 'squat' || kind === 'deadlift') {
+      const dl = kind === 'deadlift', per = dl ? 3.4 : 2.8, c = ((w._gt + (dl ? 0 : 0.7)) % per) / per;
+      // k: 1 = bottom, 0 = top
+      let k;
+      if (dl) k = c < 0.3 ? 1 - Math.sin(c / 0.3 * Math.PI / 2) : c < 0.5 ? 0 : c < 0.78 ? (1 - Math.cos((c - 0.5) / 0.28 * Math.PI)) / 2 : 1;
+      else k = c < 0.4 ? (1 - Math.cos(c / 0.4 * Math.PI)) / 2 : c < 0.75 ? 1 - (1 - Math.cos((c - 0.4) / 0.35 * Math.PI)) / 2 : 0;
+      const phi = dl ? 1.0 * k : 0.32 * k, th = dl ? 0.75 * k : 1.05 * k;
+      const drop = HIP * (1 - Math.cos(th));
+      V.body.rotation.x = phi; V.body.position.y = HIP - drop - HIP * Math.cos(phi); V.body.position.z = -HIP * Math.sin(phi);
+      Lg[0].rotation.x = Lg[1].rotation.x = -phi - th; K[0].rotation.x = K[1].rotation.x = 2 * th; Lg[0].rotation.z = 0.12; Lg[1].rotation.z = -0.12;
+      if (dl) [0, 1].forEach(i => { A[i].rotation.set(-phi - 0.22 * (1 - k) - 0.05, 0, (i ? -1 : 1) * 0.06); E[i].rotation.x = 0; });
+      else [0, 1].forEach(i => { A[i].rotation.set(-0.35, 0, (i ? 1 : -1) * 2.0); E[i].rotation.x = 0; E[i].rotation.z = (i ? -1 : 1) * 1.9; });
+      V.head.rotation.x = -phi * 0.6;
+      const strain = dl && c < 0.3 && w._gt > 6 ? Math.sin(elapsed * 40) * 0.012 : 0; V.body.position.x = strain;
+      w._liftK = k;
+      const rep = Math.floor((w._gt + (dl ? 0 : 0.7)) / per);
+      if (rep !== w._rep && w._gt > 0.5) { w._rep = rep; w._reps = (w._reps || 0) + 1;
+        const set = Math.floor((w._reps - 1) / 5), kg = (dl ? 100 : 60) + set * (dl ? 20 : 10) + (w === me && me._chalk > elapsed ? 20 : 0);
+        if (w._reps % 5 === 0) { floatFx(w, '🏆 ' + kg + ' kg!', 'rx'); if (w === me) { fxSound('thud'); toast((dl ? '💀 Deadlift' : '🏋️ Squat') + ' set done: 5 × ' + kg + ' kg. Next set is heavier!'); } }
+        else floatFx(w, String(w._reps % 5) + (w._reps % 5 === 1 ? ' · ' + kg + ' kg' : ''), 'rx');
+        if (dl && w._reps > 1) setTimeout(() => { if (w._gym === 'deadlift') fxSound('thud'); }, 1700);
+      }
     } else if (kind === 'yoga') {
       const pose = Math.floor(w._gt / 4) % 3;
       if (pose === 0) { A[0].rotation.z = -2.9; A[1].rotation.z = 2.9; A[0].rotation.x = 0; A[1].rotation.x = 0; E[0].rotation.x = 0; E[1].rotation.x = 0; }
@@ -7077,7 +7154,7 @@ function main(){
     if (w._sw <= 0 && kind !== 'yoga') { w._sw = 2.5 + Math.random() * 2; floatFx(w, rnd(['💦', '💪', '🔥'])); }
     if (w === me && w._gt > 25 && !w._gymDone) {
       w._gymDone = true; const fx = me.fx || (me.fx = {}); fx.spd = 1.3; fx.spdUntil = Date.now() + 60000; me.bkey = '';
-      toast({ run: '🏃 Great run! You feel energized and walk faster for a minute.', bike: '🚴 Nice ride! You walk faster for a minute.', punch: '🥊 What a workout! You walk faster for a minute.', curl: '💪 Pumped! You walk faster for a minute.', bench: '🏋️ New personal best! You walk faster for a minute.', yoga: '🧘 Calm and focused. You walk faster for a minute.' }[kind]);
+      toast({ run: '🏃 Great run! You feel energized and walk faster for a minute.', bike: '🚴 Nice ride! You walk faster for a minute.', punch: '🥊 What a workout! You walk faster for a minute.', curl: '💪 Pumped! You walk faster for a minute.', bench: '🏋️ New personal best! You walk faster for a minute.', row: '🚣 Great row! You walk faster for a minute.', squat: '🦵 Legs of steel! You walk faster for a minute.', deadlift: '💀 Beast! You walk faster for a minute.', yoga: '🧘 Calm and focused. You walk faster for a minute.' }[kind]);
     }
   }
   const gymV1 = new THREE.Vector3(), gymV2 = new THREE.Vector3();
@@ -7091,6 +7168,24 @@ function main(){
       if (w && w._gym === 'bench' && w.v.hands) { w.v.root.updateMatrixWorld(true); w.v.hands[0].getWorldPosition(gymV1); w.v.hands[1].getWorldPosition(gymV2); B.g.position.set(B.x0 || 39.0, (gymV1.y + gymV2.y) / 2 - 0.02, (gymV1.z + gymV2.z) / 2); }
       else { B.g.position.y += (B.y0 - B.g.position.y) * Math.min(1, dt * 6); B.g.position.z += (B.z0 - B.g.position.z) * Math.min(1, dt * 6); }
     });
+    (GYM.rows || []).forEach(R => {
+      const w = R.spot.by && byId[R.spot.by], on = w && w._gym === 'row' && w.v.hands;
+      const s = on ? (w._rowS || 0) : 0;
+      R.seat.position.z = R.sz - 0.24 * s; R.post.position.z = R.sz - 0.24 * s;
+      if (on) { w.v.root.updateMatrixWorld(true); w.v.hands[0].getWorldPosition(gymV1); w.v.hands[1].getWorldPosition(gymV2); R.handle.position.set(R.x, (gymV1.y + gymV2.y) / 2, (gymV1.z + gymV2.z) / 2); R.fw.rotation.x += dt * (4 + (1 - s) * 10); }
+      else { R.handle.position.y += (R.hy - R.handle.position.y) * Math.min(1, dt * 6); R.handle.position.z += (R.hz - R.handle.position.z) * Math.min(1, dt * 6); }
+      const L2 = Math.max(0.05, Math.hypot(R.handle.position.z - R.fz, R.handle.position.y - 0.33)); R.cable.scale.z = L2; R.cable.position.set(R.x, (R.handle.position.y + 0.33) / 2, (R.handle.position.z + R.fz) / 2); R.cable.rotation.x = Math.atan2(-(R.handle.position.y - 0.33), R.handle.position.z - R.fz);
+    });
+    (GYM.squats || []).concat(GYM.dls || []).forEach(B => {
+      const kind = (GYM.dls || []).indexOf(B) > -1 ? 'deadlift' : 'squat', w = B.spot.by && byId[B.spot.by], on = w && w._gym === kind && w.v.hands;
+      if (on) {
+        w.v.root.updateMatrixWorld(true);
+        if (kind === 'squat') { gymV1.set(0, 1.21, -0.15); w.v.body.localToWorld(gymV1); B.g.position.copy(gymV1); }
+        else { w.v.hands[0].getWorldPosition(gymV1); w.v.hands[1].getWorldPosition(gymV2); B.g.position.set((gymV1.x + gymV2.x) / 2, Math.max(0.22, (gymV1.y + gymV2.y) / 2 - 0.03), (gymV1.z + gymV2.z) / 2); }
+        B.g.rotation.y = w.yaw;
+      } else { const r = B.rest, f = Math.min(1, dt * 6); B.g.position.x += (r[0] - B.g.position.x) * f; B.g.position.y += (r[1] - B.g.position.y) * f; B.g.position.z += (r[2] - B.g.position.z) * f; B.g.rotation.y *= 1 - f; }
+    });
+    (GYM.doors || []).forEach(d => { const o = d._open && elapsed - d._open < 2.4; d.rotation.y += ((o ? 1.6 : 0) - d.rotation.y) * Math.min(1, dt * 7); if (d._open && !o && Math.abs(d.rotation.y) < 0.05) { d._open = 0; } });
     if (me._gymDone && !(me.at && me.at.gym)) me._gymDone = false;
   }
 
