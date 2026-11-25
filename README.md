@@ -88,6 +88,17 @@ Paste an image (**Ctrl+V**) into the chat box or the bottom bar, or click **🖼
 
 Images are kept on the server in memory for a day (they disappear sooner if the free Render server restarts). No setting is needed. Only PNG, JPG, WebP and GIF files are accepted, and only images from your own office server are shown in the chat.
 
+### Voice through work networks (TURN)
+
+If the 🎧 Voice list shows **connecting…** for everyone even after they reload, your network (often a work laptop, VPN or office Wi-Fi) blocks direct voice. A TURN server relays the voice instead:
+
+1. Sign up free at [metered.ca](https://www.metered.ca/tools/openrelay/) (Open Relay: 20 GB a month free).
+2. In the Metered dashboard, open **TURN Server**, create a credential and copy the **credentials link**. It looks like `https://<yourapp>.metered.live/api/v1/turn/credentials?apiKey=<key>`.
+3. On Render, open your service → **Environment** → add **TURN_API_URL** with that link, and save. Render restarts.
+4. Everyone reloads the office (Ctrl+F5). The 🎧 Voice list shows **relay** next to people connected through TURN.
+
+You can also set **ICE_SERVERS** by hand (JSON list of STUN/TURN servers) instead.
+
 ## Room passcodes
 
 There are two ways to lock a room:

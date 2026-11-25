@@ -5976,7 +5976,13 @@ function main(){
   const VFIX = {};
   const lowerId = id => String(NET.id) < String(id);
   function vAsk(id) { if (NET.on) netSend({ t: 'rtc', to: id, data: { type: 'ask', sdp: '' } }); }
-  function vStart(id) { id = String(id); if (!id || id === String(NET.id)) return; const F = VFIX[id] || (VFIX[id] = { n: 0, t: 0 }); F.t = Date.now(); if (lowerId(id)) vOffer(id); else vAsk(id); }
+  function vStart(id) {
+    id = String(id); if (!id || id === String(NET.id)) return; const F = VFIX[id] || (VFIX[id] = { n: 0, t: 0 }); F.t = Date.now();
+    if (lowerId(id) || F.n >= 1) { vOffer(id); return; }
+    vAsk(id);
+    // people still on an older page never answer an 'ask', so call them ourselves if nothing arrives
+    setTimeout(() => { if (NET.on && peerW(id) && !VOICE.peers.has(id)) vOffer(id); }, 3500);
+  }
   function vRepair(id, force) {
     const F = VFIX[id] || (VFIX[id] = { n: 0, t: 0 }), now = Date.now();
     if (!force && now - F.t < Math.min(30000, 4000 * Math.max(1, F.n))) return;
@@ -6028,7 +6034,7 @@ function main(){
     el.innerHTML = '<div class="vlh">🎧 Voice <button id="vFix" title="Reconnect voice with everyone">🔄 Reconnect</button></div>' + meLine +
       (ppl.length ? rows : '<div class="vln">No one else is here yet.</div>') +
       (needPerm && (bad || HEARX.perm === 'prompt') ? '<div class="vln warn">If you can’t hear some people, allow the microphone once. You stay muted, but the browser can then connect voice with people on the same network. <button id="vAllow">🎧 Allow once, stay muted</button></div>' : '') +
-      (bad ? '<div class="vln warn">' + (hasTurn() ? 'Some connections are stuck. Press 🔄 Reconnect. If it keeps failing, your network is blocking voice. Try another network (phone hotspot or home Wi-Fi).' : 'Some connections can’t get through. Your network (often a work laptop, VPN or office Wi-Fi) is blocking direct voice. The server owner can fix this by adding a TURN server as ICE_SERVERS on Render.') + '</div>' : '');
+      (bad ? '<div class="vln warn">' + (hasTurn() ? 'Some connections are stuck. Ask the others to reload the page (Ctrl+F5), then press 🔄 Reconnect. If it keeps failing, your network is blocking voice: try another network (phone hotspot or home Wi-Fi).' : 'Some connections can’t get through. First ask the others to reload the page (Ctrl+F5) and press 🔄 Reconnect. If it’s still stuck, your network (often a work laptop, VPN or office Wi-Fi) is blocking direct voice, and the server owner needs to add a TURN server on Render (TURN_API_URL or ICE_SERVERS).') + '</div>' : '');
   }
   document.getElementById('ddMe').addEventListener('click', e => {
     if (e.target.closest && e.target.closest('#vAllow')) { allowOnce(); return; }
@@ -6038,7 +6044,11 @@ function main(){
     toast('🔄 Reconnecting voice with everyone…'); setTimeout(renderVoiceList, 400);
   });
   // the GitHub Pages copy doesn't get the server's TURN/STUN list in the page, so ask the server for it
-  if (ONLINE && API_BASE && !Array.isArray(window.VO_ICE)) { const probe = n => { try { fetch(API_BASE + '/api/voice-config').then(r => r.ok ? r.json() : null).then(d => { if (d && Array.isArray(d.ice) && d.ice.length) window.VO_ICE = d.ice; }).catch(() => { if (n < 4) setTimeout(() => probe(n + 1), 15000 * (n + 1)); }); } catch (e) {} }; probe(0); }
+  if (ONLINE && API_BASE) { const probe = n => { try { fetch(API_BASE + '/api/voice-config').then(r => r.ok ? r.json() : null).then(d => {
+      if (!d || !Array.isArray(d.ice) || !d.ice.length) return;
+      const had = hasTurn(); window.VO_ICE = d.ice;
+      if (hasTurn() && !had && NET.on) workers.forEach(w => { if (!w.remote || !w.netId) return; const P = VOICE.peers.get(String(w.netId)); if (!P || P.state !== 'connected') { closeVPeer(String(w.netId)); vRepair(String(w.netId), true); } });
+    }).catch(() => { if (n < 4) setTimeout(() => probe(n + 1), 15000 * (n + 1)); }); } catch (e) {} }; probe(0); setInterval(() => probe(9), 50 * 60 * 1000); }
   function voiceLine(w) {
     if (!ONLINE) return '';
     if (!VOICE.ok) return '<div class="vline">🎧 This browser can’t do voice chat</div>';

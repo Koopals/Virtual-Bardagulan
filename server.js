@@ -6,6 +6,7 @@
 //   OFFICE_PASSWORD   one passcode for every room
 //   ROOM_PASSWORDS    passcodes per room, as JSON, e.g. {"sjp":"blue-tiger"}  (wins over OFFICE_PASSWORD)
 //   ICE_SERVERS       STUN/TURN servers for voice, as JSON, e.g. [{"urls":"turn:turn.example.com:3478","username":"u","credential":"p"}]
+//   TURN_API_URL      or: a link that returns TURN servers (e.g. Metered Open Relay's credentials link); loaded hourly
 //   MAX_PER_ROOM      how many people fit in one room (default 40)
 //   YOUTUBE_API_KEY   optional: a YouTube Data API key, turns on song search in the Music menu
 //   (chat images need no setting: pasted images are kept in memory for a day)
@@ -28,6 +29,20 @@ function jsonEnv(key, fallback, check) {
   return fallback;
 }
 const ICE = jsonEnv('ICE_SERVERS', null, v => Array.isArray(v));
+// TURN_API_URL: a link that returns TURN servers as JSON (e.g. Metered Open Relay:
+// https://<yourapp>.metered.live/api/v1/turn/credentials?apiKey=<key>). Fetched at start and every hour.
+const TURN_API_URL = String(process.env.TURN_API_URL || '').trim();
+let turnIce = [];
+function loadTurn() {
+  if (!TURN_API_URL || !/^https:\/\//.test(TURN_API_URL)) return;
+  fetch(TURN_API_URL).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+    const list = Array.isArray(d) ? d : Array.isArray(d && d.iceServers) ? d.iceServers : [];
+    turnIce = list.filter(s => s && (typeof s.urls === 'string' || Array.isArray(s.urls))).slice(0, 12);
+    console.log('TURN servers loaded: ' + turnIce.length);
+  }).catch(e => console.warn('TURN_API_URL failed: ' + e));
+}
+loadTurn(); setInterval(loadTurn, 60 * 60 * 1000);
+const iceNow = () => { const base = ICE || [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }]; return turnIce.length ? base.concat(turnIce) : (ICE || []); };
 const ROOM_PASSWORDS = {};
 Object.entries(jsonEnv('ROOM_PASSWORDS', {}, v => v && typeof v === 'object' && !Array.isArray(v)))
   .forEach(([k, v]) => { ROOM_PASSWORDS[roomName(k)] = String(v == null ? '' : v); });
@@ -100,7 +115,7 @@ const server = http.createServer((req, res) => {
     ytSearch(q).then(items => send(200, { items: items })).catch(() => send(502, { error: 'search failed' }));
     return;
   }
-  if (url === '/api/voice-config') return send(200, { ice: ICE || [] });
+  if (url === '/api/voice-config') return send(200, { ice: iceNow() });
   if (url === '/api/img' && req.method === 'POST') {   // body: a data: URL (text/plain, so pages on other sites can send it without a preflight)
     const ip = String(req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || '').split(',')[0].trim();
     const now = Date.now(), list = (imgHits.get(ip) || []).filter(t => now - t < 60000);
@@ -164,5 +179,5 @@ setInterval(() => hub.sweep(), 10 * 60 * 1000);
 
 server.listen(PORT, () => {
   console.log('Virtual Office is running on http://localhost:' + PORT);
-  console.log('Office password: ' + (OFFICE_PASSWORD ? 'on' : 'off') + ' · room passwords: ' + Object.keys(ROOM_PASSWORDS).length + ' · TURN/STUN servers: ' + (ICE ? ICE.length : 'default') + ' · YouTube search: ' + (YT_KEY ? 'on' : 'off') + ' · chat images: on');
+  console.log('Office password: ' + (OFFICE_PASSWORD ? 'on' : 'off') + ' · room passwords: ' + Object.keys(ROOM_PASSWORDS).length + ' · TURN/STUN servers: ' + (ICE ? ICE.length : 'default') + (TURN_API_URL ? ' + TURN_API_URL' : '') + ' · YouTube search: ' + (YT_KEY ? 'on' : 'off') + ' · chat images: on');
 });
