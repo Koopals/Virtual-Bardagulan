@@ -80,6 +80,18 @@ function createHub(opts) {
       if (!m || typeof m !== 'object') return;
       const t = now();
 
+      if (m.t === 'va') {   // voice carried by the server, for people whose networks block direct voice
+        c.vtok = Math.min(40, (c.vtok == null ? 40 : c.vtok) + (t - (c.vlast || t)) / 50); c.vlast = t;   // about 20 packets a second
+        if (c.vtok < 1 || !c.room) return;
+        c.vtok -= 1;
+        const room = rooms.get(c.room); if (!room) return;
+        const d = typeof m.d === 'string' && m.d.length <= 4000 && /^[A-Za-z0-9+/=]+$/.test(m.d) ? m.d : null; if (!d) return;
+        const to = Array.isArray(m.to) ? m.to.slice(0, 40) : [];
+        const out = JSON.stringify({ t: 'va', from: c.id, d: d, s: (+m.s | 0) & 0xffff });
+        to.forEach(id => { const tgt = room.clients.get(String(id)); if (tgt && tgt !== c) { try { tgt.sock.send(out); } catch (e) {} } });
+        return;
+      }
+
       if (m.t === 'rtc') {   // voice call setup: passed straight to one person in the same room
         c.rtok = Math.min(200, c.rtok + (t - c.rlast) / 20); c.rlast = t;
         if (c.rtok < 1 || !c.room) return;

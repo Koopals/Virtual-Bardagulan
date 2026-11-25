@@ -175,7 +175,7 @@ input:focus,select:focus{outline:2px solid var(--page-accent);outline-offset:-1p
 /* voice + whisper + slap */
 .avbar{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--color-border)}
 .micsel{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px}.micsel[hidden]{display:none}.micsel label{font-weight:800;white-space:nowrap;color:var(--color-text-secondary)}.micsel select{flex:1;min-width:0;font-size:12px;padding:5px 6px;border-radius:8px}
-.micsel label{min-width:92px}.vlist{margin-top:8px;padding-top:8px;border-top:1px dashed var(--color-border);font-size:12px}.vlist:empty{display:none}.vlh{display:flex;align-items:center;justify-content:space-between;font-weight:800;margin-bottom:4px;color:var(--color-text-secondary)}.vlh button{font-size:11px;padding:3px 8px}.vlr{display:flex;justify-content:space-between;gap:8px;padding:3px 2px}.vlr b{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.vlr span{white-space:nowrap;color:var(--color-text-secondary)}.vlr.bad span{color:#b45309}.vln{font-size:11px;color:var(--color-text-secondary);line-height:1.4;padding:2px}.vln.warn{color:#92400e;background:#fff7e6;border-radius:8px;padding:6px 8px;margin-top:4px}.vln.warn button{display:block;margin-top:5px;font-size:11px;padding:4px 8px}
+.micsel label{min-width:92px}.vlist{margin-top:8px;padding-top:8px;border-top:1px dashed var(--color-border);font-size:12px}.vlist:empty{display:none}.vlh{display:flex;align-items:center;justify-content:space-between;font-weight:800;margin-bottom:4px;color:var(--color-text-secondary)}.vlh button{font-size:11px;padding:3px 8px}.vlr{display:flex;justify-content:space-between;gap:8px;padding:3px 2px}.vlr b{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.vlr span{white-space:nowrap;color:var(--color-text-secondary)}.vlr.bad span{color:#b45309}.vlr.srv span{color:#1e40af}.vln{font-size:11px;color:var(--color-text-secondary);line-height:1.4;padding:2px}.vln.warn{color:#92400e;background:#fff7e6;border-radius:8px;padding:6px 8px;margin-top:4px}.vln.warn button{display:block;margin-top:5px;font-size:11px;padding:4px 8px}
 .updbar{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:3800;display:flex;align-items:center;gap:8px;padding:8px 10px 8px 14px;border-radius:999px;background:#1e3a8a;color:#fff;font-size:13px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.28)}.updbar[hidden]{display:none}.updbar button{border-radius:999px;font-size:12px;padding:5px 12px;border:0;background:rgba(255,255,255,.18);color:#fff;font-weight:800}.updbar button.on{background:#fff;color:#1e3a8a}.updbar.snz{padding:0;background:transparent;box-shadow:none}.updbar.snz button{background:#1e3a8a;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .hearbtn{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:3700;padding:9px 16px;border-radius:999px;background:#22a35a;border:0;color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25)}.hearbtn[hidden]{display:none}
 .micnote{font-size:11px;color:var(--color-text-secondary);margin:3px 2px 0;line-height:1.35}.micnote:empty{display:none}
@@ -5566,6 +5566,7 @@ function main(){
       closeVPeer(String(m.id)); gamesPeerLeft(String(m.id)); removePeer(m.id); netStatus('on');
     } else if (m.t === 'state') { const w = peerW(m.id); if (w) applyPatch(w, m.patch); }
     else if (m.t === 'chat') { const w = peerW(m.from); if (w && m.text) post(w.id, String(m.text).slice(0, 300), { net: true, to: m.to ? 'me' : null, voice: !!m.voice, priv: !!m.priv, mid: m.mid ? String(m.mid).slice(0, 24) : null, re: reIn(m.re) }); }
+    else if (m.t === 'va') { if (typeof m.d === 'string') svReceive(String(m.from || ''), m.d, m.s); }
     else if (m.t === 'muf') { const w = peerW(m.from); if (w) muffled(w); }
     else if (m.t === 'ev' && m.k === 'game') gameNet(m);
     else if (m.t === 'ev') { const w0 = peerW(m.from); hush(w0, () => netEvent(w0, m)); }
@@ -5871,7 +5872,7 @@ function main(){
       if (VOICE.peers.get(id) !== P) return;
       const s = pc.connectionState; P.state = s;
       if (s === 'disconnected') P.discT = Date.now();
-      if (s === 'connected') { P.discT = 0; P.via = null; }
+      if (s === 'connected') { P.discT = 0; P.via = null; P.okT = Date.now(); }
       if (s === 'failed') { closeVPeer(id); setTimeout(() => { if (NET.on && peerW(id) && !VOICE.peers.has(id)) { const F = VFIX[id]; vRepair(id, !F || Date.now() - F.t > 2000); } }, 1200); }
       netStatus(NET.on ? 'on' : 'off');
       const w = peerW(id); if (w && card.dataset.id === w.id && !card.hidden && !cs.wsp && !cs.open) renderCard();
@@ -5922,6 +5923,7 @@ function main(){
   }
   function voiceTick(dt) {
     try { voiceWatch(dt); } catch (e) {}
+    try { svTick(); } catch (e) {}
     if (!VOICE.peers.size) return;
     VOICE.t += dt; if (VOICE.t < 0.25) return; VOICE.t = 0;
     const track = mic.on && mic.stream ? (mic.stream.getAudioTracks()[0] || null) : null;
@@ -5930,7 +5932,7 @@ function main(){
       const g = hearGain(w);
       const want = g > 0 ? track : null;    // your voice only goes to people who are in earshot
       if (P.sender && P.sent !== want) { P.sent = want; try { const r = P.sender.replaceTrack(want); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
-      const v = audio.speaker ? Math.max(0, Math.min(1, audio.vol * g)) : 0;   // your own mic doesn't matter here: muted or not, you hear people near you
+      const v = audio.speaker && !svRecent(id) ? Math.max(0, Math.min(1, audio.vol * g)) : 0;   // your own mic doesn't matter here: muted or not, you hear people near you
       if (Math.abs((P.el.volume || 0) - v) > 0.01) P.el.volume = v;
       if (P.el.muted === audio.speaker) P.el.muted = !audio.speaker;
       if (audio.speaker && P.el.paused && P.el.srcObject && (!P.playBlocked || (navigator.userActivation && navigator.userActivation.hasBeenActive))) vPlay(P);
@@ -5971,6 +5973,78 @@ function main(){
     } catch (e) { toast('The browser blocked the microphone. Click the lock icon in the address bar, set Microphone to Allow, then try again. You can stay muted.'); }
   }
   micPerm();
+
+  // ================= server voice: voice through the office server when a direct voice connection is blocked =================
+  // Everyone already reaches the Render server (that's how the office works), so when the direct browser-to-browser
+  // connection with someone isn't working, your voice is sent to them through the server instead. No TURN needed.
+  // 12 kHz, μ-law (clear speech, about 13 KB a second while you talk, nothing while you're quiet).
+  const SVX = { rate: 12000, cap: null, buf: [], acc: 0, seq: 0, rx: {}, hang: 0 };
+  function svRelayPeers() {
+    if (!NET.on) return [];
+    const now = Date.now(), out = [];
+    workers.forEach(w => {
+      if (!w.remote || !w.netId || hearGain(w) <= 0) return;
+      const P = VOICE.peers.get(String(w.netId));
+      const direct = P && P.state === 'connected' && now - (P.okT || 0) > 1500;
+      if (!direct) out.push(String(w.netId));
+    });
+    return out;
+  }
+  const MU = (() => { const enc = new Uint8Array(65536); for (let i = -32768; i < 32768; i++) { let s = i, sign = 0; if (s < 0) { s = -s; sign = 0x80; } s = Math.min(s, 32635) + 132; let e = 7; for (let m = 0x4000; (s & m) === 0 && e > 0; m >>= 1) e--; const man = (s >> (e + 3)) & 0x0f; enc[i & 0xffff] = ~(sign | (e << 4) | man) & 0xff; } const dec = new Float32Array(256); for (let u = 0; u < 256; u++) { const v = ~u & 0xff, sign = v & 0x80, e = (v >> 4) & 7, man = v & 0x0f; let s = ((man << 3) + 132) << e; s -= 132; dec[u] = (sign ? -s : s) / 32768; } return { enc: enc, dec: dec }; })();
+  function b64(u8) { let s = ''; for (let i = 0; i < u8.length; i += 4096) s += String.fromCharCode.apply(null, u8.subarray(i, i + 4096)); return btoa(s); }
+  function unb64(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function svStartCapture() {
+    const c = actx(); if (!c || !mic.stream || SVX.cap) return;
+    if (typeof c.createScriptProcessor !== 'function') return;
+    try {
+      const src = c.createMediaStreamSource(mic.stream), pr = c.createScriptProcessor(2048, 1, 1), z0 = c.createGain(); z0.gain.value = 0;
+      const ratio = c.sampleRate / SVX.rate;
+      pr.onaudioprocess = ev => {
+        const inp = ev.inputBuffer.getChannelData(0);
+        if (!mic.on || !NET.on) { SVX.buf.length = 0; return; }
+        let e = 0; for (let i = 0; i < inp.length; i += 8) e += inp[i] * inp[i];
+        const loud = Math.sqrt(e / (inp.length / 8)) > 0.012; if (loud) SVX.hang = 12; else if (SVX.hang > 0) SVX.hang--;
+        if (SVX.hang <= 0) { SVX.buf.length = 0; return; }
+        let p = SVX.acc; for (; p < inp.length; p += ratio) { const i0 = Math.floor(p), i1 = Math.min(inp.length - 1, i0 + 1), f = p - i0; SVX.buf.push(inp[i0] * (1 - f) + inp[i1] * f); }
+        SVX.acc = p - inp.length;
+        while (SVX.buf.length >= 1200) {
+          const chunk = SVX.buf.splice(0, 1200), to = svRelayPeers(); if (!to.length) continue;
+          const u = new Uint8Array(1200); for (let i = 0; i < 1200; i++) { const v = Math.max(-1, Math.min(1, chunk[i])); u[i] = MU.enc[((v * 32767) | 0) & 0xffff]; }
+          SVX.seq = (SVX.seq + 1) & 0xffff;
+          netSend({ t: 'va', to: to, d: b64(u), s: SVX.seq });
+        }
+      };
+      src.connect(pr); pr.connect(z0); z0.connect(c.destination);
+      SVX.cap = { src: src, pr: pr, z0: z0, stream: mic.stream };
+    } catch (e) { SVX.cap = null; }
+  }
+  function svStopCapture() { const C = SVX.cap; SVX.cap = null; SVX.buf.length = 0; if (!C) return; try { C.src.disconnect(); C.pr.disconnect(); C.z0.disconnect(); C.pr.onaudioprocess = null; } catch (e) {} }
+  function svCaptureTick() {
+    const want = mic.on && mic.stream && NET.on;
+    if (SVX.cap && (!want || SVX.cap.stream !== mic.stream)) svStopCapture();
+    if (want && !SVX.cap) svStartCapture();
+  }
+  function svReceive(from, d, s) {
+    const w = peerW(from); if (!w || !audio.speaker) return;
+    const c = actx(); if (!c || c.state !== 'running') return;
+    let u; try { u = unb64(d); } catch (e) { return; } if (!u.length || u.length > 3000) return;
+    const R = SVX.rx[from] || (SVX.rx[from] = { next: 0, g: null, last: 0 });
+    if (!R.g) { R.g = c.createGain(); R.g.connect(audio.gain); }
+    R.g.gain.value = Math.max(0, Math.min(1, hearGain(w))) * 1.0;
+    if (R.g.gain.value <= 0) return;
+    const ab = c.createBuffer(1, u.length, SVX.rate), ch = ab.getChannelData(0);
+    for (let i = 0; i < u.length; i++) ch[i] = MU.dec[u[i]];
+    const now = c.currentTime;
+    if (R.next < now + 0.04 || R.next > now + 0.8) R.next = now + 0.12;
+    const sN = c.createBufferSource(); sN.buffer = ab; sN.connect(R.g); sN.start(R.next); R.next += ab.duration;
+    R.last = Date.now();
+  }
+  function svTick() {
+    svCaptureTick();
+    const now = Date.now();
+    Object.keys(SVX.rx).forEach(id => { const R = SVX.rx[id], w = peerW(id); if (!w) { try { R.g && R.g.disconnect(); } catch (e) {} delete SVX.rx[id]; return; } if (R.g) R.g.gain.value = Math.max(0, Math.min(1, hearGain(w))); });
+  }
+  const svRecent = id => { const R = SVX.rx[String(id)]; return !!(R && Date.now() - R.last < 1200); };
   // ================= keep every voice connection alive =================
   // Only the person with the lower id starts a voice connection, so two people never call each other at the same moment
   // (that used to leave some pairs silent, e.g. after the server restarts). A watchdog repairs connections that get stuck,
@@ -6024,19 +6098,20 @@ function main(){
     let bad = 0;
     const rows = ppl.map(w => {
       const P = VOICE.peers.get(String(w.netId)); vType(P);
-      const st = !P ? 'none' : P.state, ok = st === 'connected';
-      if (!ok && (st === 'failed' || (P && Date.now() - (P.t0 || 0) > 15000) || (VFIX[w.netId] && VFIX[w.netId].n >= 2))) bad++;
-      const g = ok ? hearGain(w) : 0;
-      const s = ok ? (g > 0 ? '🔊 can hear' + (w.mic ? '' : ' · muted') : zoneAt(w.x, w.z) !== zoneAt(me.x, me.z) ? '🔇 other room' : inRoom(w) !== inRoom(me) ? '🔇 behind glass' : '🔇 too far') + (P.via === 'relay' ? ' · relay' : '')
-        : st === 'failed' ? '❌ blocked' : st === 'disconnected' ? '⚠️ dropped, fixing…' : '⏳ connecting…';
-      return '<div class="vlr' + (ok ? '' : ' bad') + '"><b>' + esc(w.name) + '</b><span>' + s + '</span></div>';
+      const st = !P ? 'none' : P.state, ok = st === 'connected' || ONLINE;   // if the direct link is blocked, voice goes through the server
+      const viaSrv = !(P && P.state === 'connected');
+      if (viaSrv && (st === 'failed' || (P && Date.now() - (P.t0 || 0) > 15000) || (VFIX[w.netId] && VFIX[w.netId].n >= 2))) bad++;
+      const g = hearGain(w);
+      const s = ok ? (g > 0 ? '🔊 can hear' + (w.mic ? '' : ' · muted') : zoneAt(w.x, w.z) !== zoneAt(me.x, me.z) ? '🔇 other room' : inRoom(w) !== inRoom(me) ? '🔇 behind glass' : '🔇 too far') + (viaSrv ? ' · via server' : P.via === 'relay' ? ' · relay' : '')
+        : '';
+      return '<div class="vlr' + (viaSrv ? ' srv' : '') + '"><b>' + esc(w.name) + '</b><span>' + s + '</span></div>';
     }).join('');
     const meLine = !audio.speaker ? '<div class="vln warn">🔈 Your speaker is off, so you hear no one. Turn it on to hear people near you.</div>' : !mic.on ? '<div class="vln">🔇 Your mic is muted: people can’t hear you, but you still hear them.</div>' : '';
     const needPerm = !mic.on && HEARX.perm && HEARX.perm !== 'granted' && ppl.length;
     el.innerHTML = '<div class="vlh">🎧 Voice <button id="vFix" title="Reconnect voice with everyone">🔄 Reconnect</button></div>' + meLine +
       (ppl.length ? rows : '<div class="vln">No one else is here yet.</div>') +
       (needPerm && (bad || HEARX.perm === 'prompt') ? '<div class="vln warn">If you can’t hear some people, allow the microphone once. You stay muted, but the browser can then connect voice with people on the same network. <button id="vAllow">🎧 Allow once, stay muted</button></div>' : '') +
-      (bad ? '<div class="vln warn">' + (hasTurn() ? 'Some connections are stuck. Ask the others to reload the page (Ctrl+F5), then press 🔄 Reconnect. If it keeps failing, your network is blocking voice: try another network (phone hotspot or home Wi-Fi).' : 'Some connections can’t get through. First ask the others to reload the page (Ctrl+F5) and press 🔄 Reconnect. If it’s still stuck, your network (often a work laptop, VPN or office Wi-Fi) is blocking direct voice, and the server owner needs to add a TURN server on Render (TURN_API_URL or ICE_SERVERS).') + '</div>' : '');
+      (bad ? '<div class="vln">🛰️ “via server” means your direct voice link with that person is blocked (common on work networks), so your voices travel through the office server instead. It works the same, just with a little delay.</div>' : '') + '';
   }
   document.getElementById('ddMe').addEventListener('click', e => {
     if (e.target.closest && e.target.closest('#vAllow')) { allowOnce(); return; }

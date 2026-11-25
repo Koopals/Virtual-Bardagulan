@@ -23,6 +23,7 @@ A pixel-hotel style virtual office that runs in the browser. Real people open th
 - **Choose your microphone:** open your avatar menu (top-right) and pick a mic under **🎙️ Microphone**, for example your headset instead of Krisp. The office remembers your choice, switches right away even while you're talking, and falls back to your default mic if the chosen one is unplugged. Mic names show after you turn your mic on once.
 - **Choose your speaker:** under **🔈 Speaker** in the same menu, pick where voice chat, office sounds and video files play (for example your headset instead of the Krisp speaker). YouTube and Spotify players always use your system default speaker. Works in Chrome and Edge.
 - **Automatic updates:** when you upload a new version and Render redeploys, every open office shows **🔄 The office was updated. Reloading in 15 s…** and reloads itself, putting each person back where they were with the same mic and speaker settings. It waits while someone is typing, watching a movie, sending an image or carrying someone. **Later** snoozes it for 10 minutes. Everyone needs to reload by hand once to get this feature.
+- **Voice through the server:** if your direct voice link with someone is blocked (common on work laptops, VPNs and office Wi-Fi), your voices travel through the office server instead, automatically. The 🎧 Voice list shows **via server** next to those people. It needs no setup; it adds a little delay and uses the server's bandwidth only while someone is talking. If you hear an echo, use a headset.
 - **Muting:** muting your mic only stops others hearing you. You still hear everyone near you until you turn **🔈 Speaker** off. If the browser blocks voice audio from starting, a green **🔊 Click to hear people near you** button appears. If you've never allowed the microphone and can't hear some people on the same network, press **🎧 Allow once, stay muted** in the Voice list: you stay muted, but voice can connect.
 - **🎧 Voice list:** the avatar menu also shows your voice connection with each person (can hear, too far, other room, connecting, blocked) and a **🔄 Reconnect** button. Voice connections now repair themselves when they drop or get stuck. If someone always shows **blocked**, your network (often a work laptop, VPN or office Wi-Fi) is blocking direct voice: add a TURN server as **ICE_SERVERS** on Render (see below), or try another network.
 - **Sound stays in the room:** you only hear voice chat and sound effects (slaps, splashes, bells, games) from people in the same room as you. The Harbour meeting room and the hallway count as separate rooms. Music is not affected and keeps playing wherever you are.
@@ -89,9 +90,9 @@ Paste an image (**Ctrl+V**) into the chat box or the bottom bar, or click **🖼
 
 Images are kept on the server in memory for a day (they disappear sooner if the free Render server restarts). No setting is needed. Only PNG, JPG, WebP and GIF files are accepted, and only images from your own office server are shown in the chat.
 
-### Voice through work networks (TURN)
+### Optional: a TURN server
 
-If the 🎧 Voice list shows **connecting…** for everyone even after they reload, your network (often a work laptop, VPN or office Wi-Fi) blocks direct voice. A TURN server relays the voice instead:
+Voice already falls back to going through the office server when direct voice is blocked, so you don't need this. A TURN server is an optional alternative relay with lower delay:
 
 1. Sign up free at [metered.ca](https://www.metered.ca/tools/openrelay/) (Open Relay: 20 GB a month free).
 2. In the Metered dashboard, open **TURN Server**, create a credential and copy the **credentials link**. It looks like `https://<yourapp>.metered.live/api/v1/turn/credentials?apiKey=<key>`.
