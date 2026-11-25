@@ -4,9 +4,13 @@
 // tested without a server.
 
 const STATE_KEYS = ['name', 'role', 'look', 'status', 'custom', 'mic', 'emote', 'held', 'talk', 'fx', 'desk', 'task', 'zone', 'mv'];
-const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score', 'next'];
+const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score', 'next', 'on', 'x', 'y', 'kk', 'd'];
 const GAME_TABLES = ['chess', 'checkers', 'reversi', 'connect4', 'ttt'];
 const newTable = () => ({ seats: [null, null], log: [] });
+const ARC_TABLES = ['pong', 'hockey', 'foos', 'darts', 'cycles'];
+const newArc = () => ({ seats: [null, null], st: '', watch: new Set() });   // game room arcade tables: seats, the last game state, who is watching
+const arcView = r => { const o = {}; ARC_TABLES.forEach(g => { const t = r.arc && r.arc[g]; if (t) o[g] = { seats: t.seats, st: t.seats[0] && t.seats[1] ? t.st : '' }; }); return o; };
+const newBill = () => ({ seats: [null, null], st: '', turn: 0, n: 0, shooter: null });   // the billiards table: seats, last settled position, whose turn
 // message id and the message being replied to (who wrote it, their name and a short quote)
 function chatExtra(m) {
   const x = {};
@@ -44,7 +48,7 @@ function createHub(opts) {
 
   const roomOf = name => {
     let r = rooms.get(name);
-    if (!r) { r = { clients: new Map(), music: null, games: {} }; GAME_TABLES.forEach(g => { r.games[g] = newTable(); }); rooms.set(name, r); }
+    if (!r) { r = { clients: new Map(), music: null, games: {}, bill: newBill(), arc: {} }; GAME_TABLES.forEach(g => { r.games[g] = newTable(); }); ARC_TABLES.forEach(g => { r.arc[g] = newArc(); }); rooms.set(name, r); }
     return r;
   };
   const send = (c, obj) => { try { c.sock.send(JSON.stringify(obj)); } catch (e) {} };
@@ -104,6 +108,25 @@ function createHub(opts) {
         return;
       }
 
+      if (m.t === 'ev' && m.k === 'arc' && (m.act === 'in' || m.act === 'st')) {   // game room arcade, live updates: their own allowance so they never crowd out chat and movement
+        c.atok = Math.min(80, (c.atok == null ? 80 : c.atok) + (t - (c.alast || t)) / 25); c.alast = t;   // about 40 a second
+        if (c.atok < 1 || !c.room) return;
+        c.atok -= 1;
+        const room = rooms.get(c.room); if (!room) return;
+        const table = String(m.table || ''), tb = room.arc && ARC_TABLES.indexOf(table) > -1 ? room.arc[table] : null; if (!tb) return;
+        if (m.act === 'in') {   // Player 2's controls go only to Player 1, who runs the game
+          if (tb.seats[1] !== c.id || !tb.seats[0]) return;
+          const host = room.clients.get(tb.seats[0]); if (!host) return;
+          const num = v => typeof v === 'number' && isFinite(v) ? Math.max(-1000, Math.min(100000, v)) : 0;
+          send(host, { t: 'ev', from: c.id, k: 'arc', table: table, act: 'in', x: num(m.x), y: num(m.y), kk: num(m.kk), d: num(m.d) });
+          return;
+        }
+        if (tb.seats[0] !== c.id || !tb.seats[1] || typeof m.url !== 'string' || m.url.length > 6000) return;   // the game itself, from Player 1 to the players and watchers
+        tb.st = m.url;
+        broadcast(room, { t: 'ev', from: c.id, k: 'arc', table: table, act: 'st', url: m.url }, c.id, x => tb.seats.indexOf(x.id) > -1 || tb.watch.has(x.id));
+        return;
+      }
+
       c.tokens = Math.min(60, c.tokens + (t - c.last) / 50); c.last = t;   // about 20 messages a second, bursts of 60
       if (c.tokens < 1) return;
       c.tokens -= 1;
@@ -132,7 +155,7 @@ function createHub(opts) {
         c.state = cleanState(m.state);
         const peers = [...room.clients.values()].map(p => ({ id: p.id, state: p.state }));
         room.clients.set(c.id, c);
-        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, movie: room.movie || null, games: room.games, token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
+        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, movie: room.movie || null, games: room.games, bill: room.bill || null, arc: arcView(room), token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
         broadcast(room, { t: 'join', id: c.id, state: c.state }, c.id);
         return;
       }
@@ -170,7 +193,38 @@ function createHub(opts) {
         for (const k of EV_KEYS) {
           if (!(k in m)) continue;
           const v = m[k];
-          ev[k] = (typeof v === 'number' && isFinite(v)) || typeof v === 'boolean' ? v : str(v, k === 'url' ? 1000 : 120);
+          ev[k] = (typeof v === 'number' && isFinite(v)) || typeof v === 'boolean' ? v : str(v, k === 'url' ? (m.k === 'arc' ? 6000 : 1000) : 120);
+        }
+        if (ev.k === 'arc') {   // game room arcade: Player 1 runs the game and sends it out; Player 2 sends their controls to Player 1
+          const tb = room.arc && room.arc[ev.table]; if (!tb) return;
+          if (ev.act === 'watch') { if (ev.on) { if (tb.watch.size < 60) tb.watch.add(c.id); } else tb.watch.delete(c.id); return; }
+          if (ev.act === 'seat') {
+            const i = ev.seat === 1 ? 1 : 0;
+            if (tb.seats[i] && tb.seats[i] !== c.id) { send(c, { t: 'ev', from: c.id, k: 'arc', table: ev.table, act: 'seatno' }); return; }
+            tb.seats = tb.seats.map(x => x === c.id ? null : x); tb.seats[i] = c.id; tb.st = '';
+            broadcast(room, ev); return;
+          }
+          if (ev.act === 'unseat') { if (tb.seats.indexOf(c.id) < 0) return; tb.seats = tb.seats.map(x => x === c.id ? null : x); tb.st = ''; broadcast(room, ev); return; }
+          if (tb.seats.indexOf(c.id) < 0) return;
+          if (ev.act === 'reset') { tb.st = ''; broadcast(room, ev); return; }
+          return;   // live game updates ('in' and 'st') are handled further up, with their own allowance
+        }
+        if (ev.k === 'bill') {   // online billiards: two seats; the player whose turn it is shoots, then sends where the balls stopped
+          const tb = room.bill || (room.bill = newBill());
+          const clear = () => { tb.st = ''; tb.turn = 0; tb.n = 0; tb.shooter = null; };
+          if (ev.act === 'seat') {
+            const i = ev.seat === 1 ? 1 : 0;
+            if (tb.seats[i] && tb.seats[i] !== c.id) { send(c, { t: 'ev', from: c.id, k: 'bill', act: 'seatno' }); return; }
+            tb.seats = tb.seats.map(x => x === c.id ? null : x); tb.seats[i] = c.id;
+            if (!tb.seats[1 - i]) clear();
+            broadcast(room, ev); return;
+          }
+          if (ev.act === 'unseat') { tb.seats = tb.seats.map(x => x === c.id ? null : x); if (!tb.seats[0] && !tb.seats[1]) clear(); broadcast(room, ev); return; }
+          if (tb.seats.indexOf(c.id) < 0) return;
+          if (ev.act === 'reset') { clear(); broadcast(room, ev); return; }
+          if (ev.act === 'shot') { if (!tb.seats[0] || !tb.seats[1] || tb.seats[tb.turn] !== c.id || ev.n !== tb.n || typeof ev.mv !== 'string') return; tb.n++; tb.shooter = c.id; broadcast(room, ev, c.id); return; }
+          if (ev.act === 'res') { if (tb.shooter !== c.id || typeof ev.url !== 'string') return; tb.st = ev.url; tb.turn = ev.seat === 1 ? 1 : 0; tb.shooter = null; broadcast(room, ev, c.id); return; }
+          return;
         }
         if (ev.k === 'game') {   // board games: the hub keeps seats and the move list so late joiners see the same board
           const tb = room.games[ev.table];
@@ -213,6 +267,8 @@ function createHub(opts) {
       if (!room) return;
       room.clients.delete(c.id);
       for (const g of GAME_TABLES) { const tb = room.games[g]; if (tb && tb.seats.indexOf(c.id) > -1) { tb.seats = tb.seats.map(x => x === c.id ? null : x); if (!tb.seats[0] && !tb.seats[1]) tb.log = []; } }
+      if (room.arc) ARC_TABLES.forEach(g => { const tb = room.arc[g]; if (!tb) return; tb.watch.delete(c.id); if (tb.seats.indexOf(c.id) > -1) { tb.seats = tb.seats.map(x => x === c.id ? null : x); tb.st = ''; } });
+      { const tb = room.bill; if (tb) { if (tb.shooter === c.id) tb.shooter = null; if (tb.seats.indexOf(c.id) > -1) { tb.seats = tb.seats.map(x => x === c.id ? null : x); if (!tb.seats[0] && !tb.seats[1]) { tb.st = ''; tb.turn = 0; tb.n = 0; } } } }
       broadcast(room, { t: 'leave', id: c.id });
       if (!room.clients.size) rooms.delete(name);
     }
