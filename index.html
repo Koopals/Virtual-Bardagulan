@@ -174,6 +174,8 @@ input:focus,select:focus{outline:2px solid var(--page-accent);outline-offset:-1p
 
 /* voice + whisper + slap */
 .avbar{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--color-border)}
+.micsel{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px}.micsel[hidden]{display:none}.micsel label{font-weight:800;white-space:nowrap;color:var(--color-text-secondary)}.micsel select{flex:1;min-width:0;font-size:12px;padding:5px 6px;border-radius:8px}
+.micnote{font-size:11px;color:var(--color-text-secondary);margin:3px 2px 0;line-height:1.35}.micnote:empty{display:none}
 .ic{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 11px;white-space:nowrap}
 .ic svg{width:15px;height:15px;flex:none}
 .ic.live{background:#22c55e;border-color:#22c55e;color:#fff}
@@ -529,6 +531,28 @@ body.habbo .wd-it{border:2px solid #111;box-shadow:inset 0 0 0 2px rgba(255,255,
 body.habbo .wd-it.on{border-color:#e8342e;box-shadow:inset 0 0 0 2px rgba(255,255,255,.5),0 0 0 3px #ffd23f}
 .su-ward{width:100%;padding:12px;font-size:15px;font-weight:900;border-radius:10px;margin:2px 0 10px}
 @media (max-width:760px){.ward{flex-direction:column}.wd-prev{flex:0 0 34vh;border-right:none;border-bottom:3px solid #111}.wd-prev canvas{height:calc(100% - 70px)}.wd-wear{display:none}.wd-head input{width:100%;max-width:none;order:9}.wd-grid{grid-template-columns:repeat(auto-fill,minmax(86px,1fr))}.wd-it{min-height:112px}}
+.gifb{font-weight:900;font-size:11px;letter-spacing:.04em;padding:0 9px!important;min-width:38px}
+.compose .gifb{background:var(--color-surface)!important;border-color:var(--color-border-light)!important;color:var(--color-text-primary)!important}
+.gifpk{position:fixed;z-index:3600;width:360px;max-width:calc(100vw - 20px);max-height:min(470px,calc(100vh - 90px));display:flex;flex-direction:column;background:var(--color-bg-secondary);border:1px solid var(--color-border-light);border-radius:14px;box-shadow:0 18px 50px rgba(8,10,24,.35);overflow:hidden}
+.gifpk[hidden]{display:none}
+.gifpk .gh{display:flex;gap:6px;align-items:center;padding:10px 10px 6px}
+.gifpk .gh input{flex:1;min-width:0}
+.gifpk .gch{display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;padding:0 10px 8px;scrollbar-width:thin}
+.gifpk .gch button{border-radius:999px;font-size:12px;padding:4px 10px;white-space:nowrap;flex:none}
+.gifpk .gg{flex:1;overflow:auto;padding:0 10px 8px;columns:2;column-gap:6px;min-height:120px}
+.gifpk .gg button{display:block;width:100%;padding:0;margin:0 0 6px;border-radius:8px;overflow:hidden;background:var(--color-surface);border:2px solid transparent;break-inside:avoid;line-height:0}
+.gifpk .gg button:hover,.gifpk .gg button:focus-visible{border-color:var(--page-accent)}
+.gifpk .gg img{width:100%;height:auto;display:block}
+.gifpk .gmsg{column-span:all;padding:18px 8px;text-align:center;font-size:13px;color:var(--color-text-secondary);line-height:1.45}
+.gifpk .gft{display:flex;gap:6px;align-items:center;padding:8px 10px;border-top:1px solid var(--color-border-light);font-size:11px;color:var(--color-text-secondary)}
+.gifpk .gft input{flex:1;min-width:0;font-size:12px;padding:5px 8px}
+.gifpk .gft .pw{white-space:nowrap;font-weight:800}
+.msg .mt.gifmt{padding:4px;background:var(--color-surface)!important;border-color:var(--color-border-light)!important;line-height:0}
+.msg .mt.gifmt .gifcap{display:block;line-height:1.3;font-size:12px;padding:3px 4px 2px;color:var(--color-text-primary)}
+img.gifm{display:block;max-width:220px;max-height:200px;width:auto;height:auto;border-radius:8px;background:var(--color-surface-active)}
+iframe.gifm{display:block;width:220px;height:200px;border:0;border-radius:8px;background:var(--color-surface-active)}
+.bub.speech img.gifb2,.hbc img.gifb2{display:inline-block;vertical-align:middle;max-height:64px;max-width:96px;border-radius:6px;margin-left:2px}
+.hbc .gifb2{max-height:56px}
 </style>
 </head>
 <body>
@@ -626,6 +650,8 @@ body.habbo .wd-it.on{border-color:#e8342e;box-shadow:inset 0 0 0 2px rgba(255,25
       <button id="spkBtn" class="ic" aria-pressed="true" title="Speaker">Speaker on</button>
       <input type="range" id="vol" min="0" max="100" value="80" aria-label="Speaker volume">
     </div>
+    <div class="micsel"><label for="micDev">🎙️ Microphone</label><select id="micDev" aria-label="Microphone"><option value="">System default</option></select></div>
+    <div class="micnote" id="micNote"></div>
     <div class="emo" id="emoBar"></div>
   </div>
   </div>
@@ -3284,12 +3310,12 @@ function main(){
     post(null, 'You unmuted your mic');
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('unsupported');
-      const s = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      const s = await openMic();
       if (!mic.on) { s.getTracks().forEach(t => t.stop()); return; }
       mic.stream = s;
       const c = actx();
       if (c) { const an = c.createAnalyser(); an.fftSize = 512; c.createMediaStreamSource(s).connect(an); mic.analyser = an; mic.data = new Uint8Array(an.fftSize); }
-      mic.real = true; renderAV(); if (!ONLINE) startSR();
+      mic.real = true; renderAV(); listMics(); if (!ONLINE) startSR();
       toast(ONLINE ? '🎙️ You’re live. People near you on the same side of the meeting room glass can hear you.' : 'Mic is live. Just talk, and your bubble lights up when you speak.');
     } catch (e) {
       mic.real = false; renderAV();
@@ -3346,6 +3372,56 @@ function main(){
   $('spkBtn').addEventListener('click', toggleSpeaker);
   $('vol').addEventListener('input', e => { audio.vol = (+e.target.value || 0) / 100; outGain(); });
   window.addEventListener('pagehide', () => { if (mic.stream) mic.stream.getTracks().forEach(t => t.stop()); });
+  // ================= choose which microphone to use =================
+  const MICDEV_KEY = 'virtualOffice.micDevice';
+  let micDev = ''; try { micDev = localStorage.getItem(MICDEV_KEY) || ''; } catch (e) {}
+  const md = () => navigator.mediaDevices;
+  async function openMic() {
+    const base = { echoCancellation: true, noiseSuppression: true };
+    if (micDev) {
+      try { return await md().getUserMedia({ audio: Object.assign({ deviceId: { exact: micDev } }, base) }); }
+      catch (e) {
+        if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) throw e;
+        toast('🎙️ Your chosen microphone isn’t available, so the office is using your default one. Pick another under 🎙️ Microphone.');
+        micDev = ''; try { localStorage.setItem(MICDEV_KEY, ''); } catch (_) {}
+      }
+    }
+    return md().getUserMedia({ audio: base });
+  }
+  function micLabel(s) { const t = s && s.getAudioTracks && s.getAudioTracks()[0]; return t && t.label ? t.label : ''; }
+  async function listMics() {
+    const sel = document.getElementById('micDev'), note = document.getElementById('micNote'); if (!sel) return;
+    if (!md() || !md().enumerateDevices) { const ms = sel.closest && sel.closest('.micsel'); if (ms) ms.hidden = true; return; }
+    let ds = []; try { ds = (await md().enumerateDevices()).filter(d => d.kind === 'audioinput'); } catch (e) {}
+    const named = ds.some(d => d.label);
+    const real = ds.filter(d => d.deviceId && d.deviceId !== 'default' && d.deviceId !== 'communications');
+    const def = ds.find(d => d.deviceId === 'default');
+    sel.innerHTML = '<option value="">' + esc('System default' + (def && def.label ? ' · ' + def.label.replace(/^Default\s*-\s*/i, '') : '')) + '</option>' +
+      real.map((d, i) => '<option value="' + esc(d.deviceId) + '">' + esc(d.label || 'Microphone ' + (i + 1)) + '</option>').join('');
+    sel.value = real.some(d => d.deviceId === micDev) ? micDev : '';
+    const using = mic.stream ? micLabel(mic.stream) : '';
+    if (note) note.textContent = !named ? 'Turn your mic on once and the browser shows the microphone names here.' : using ? 'Using: ' + using + (/krisp/i.test(using) ? '  (that’s Krisp, pick your real mic to skip it)' : '') : (/krisp/i.test(def && def.label || '') && !micDev ? 'Your system default is Krisp. Pick your real mic to skip it.' : '');
+  }
+  async function switchMic(id) {
+    micDev = id || ''; try { localStorage.setItem(MICDEV_KEY, micDev); } catch (e) {}
+    if (!mic.on || !mic.stream) { listMics(); toast('🎙️ Saved. The office uses this microphone next time you unmute.'); return; }
+    try {
+      const s = await openMic();
+      if (!mic.on) { s.getTracks().forEach(t => t.stop()); return; }
+      const old = mic.stream; mic.stream = s;
+      const c = actx();
+      if (c && c.createMediaStreamSource) { const an = c.createAnalyser(); an.fftSize = 512; c.createMediaStreamSource(s).connect(an); mic.analyser = an; mic.data = new Uint8Array(an.fftSize); }
+      if (old && old !== s) old.getTracks().forEach(t => t.stop());
+      if (typeof VOICE !== 'undefined') { VOICE.t = 1; voiceTick(0); }
+      toast('🎙️ Now using ' + (micLabel(s) || 'the selected microphone') + '.');
+    } catch (e) { toast('Couldn’t switch microphones. Check the browser allows the microphone, then try again.'); }
+    listMics();
+  }
+  document.getElementById('micDev').addEventListener('change', e => switchMic(e.target.value));
+  document.getElementById('micDev').addEventListener('focus', () => listMics());
+  try { if (md() && md().addEventListener) md().addEventListener('devicechange', () => listMics()); } catch (e) {}
+  listMics();
+
 
   // whisper
   function whisper(to, text, re) {
@@ -3444,7 +3520,7 @@ function main(){
   }
   function reHtml(re) {
     if (!re) return '';
-    return '<span class="rq" data-jump="' + esc(re.mid || '') + '" title="Show the original message"><b>↩ ' + esc(re.who === 'me' ? 'You' : re.n || 'Someone') + '</b>' + esc(snip(re.t, 80)) + '</span>';
+    return '<span class="rq" data-jump="' + esc(re.mid || '') + '" title="Show the original message"><b>↩ ' + esc(re.who === 'me' ? 'You' : re.n || 'Someone') + '</b>' + esc(snip(gifShort(re.t), 80)) + '</span>';
   }
   // reply data travelling over the network uses the author's network id
   function reOut(re) { if (!re) return undefined; const w = byId[re.who]; return { mid: re.mid, u: re.who === 'me' ? NET.id || '' : (w && w.netId) || '', n: re.n, t: snip(re.t, 90) }; }
@@ -3474,17 +3550,17 @@ function main(){
       d.className = 'msg' + (who === 'me' ? ' mine' : '') + (wh ? ' whisper' : '') + (priv ? ' room' : '') + (pinged || (who !== 'me' && mentionsMe(text)) ? ' ment' : '');
       d.dataset.mid = mid;
       const label = '<b>' + esc(who === 'me' ? 'You' : w.name) + '</b>' + (wh ? '<span class="wh">🤫 whisper ' + (who === 'me' ? 'to ' + esc(byId[o.to].name) : 'to you') + '</span>' : '') + (priv ? '<span class="rm">🔒 Harbour room</span>' : '') + (o.late ? '<span class="rm late">earlier</span>' : '');
-      d.innerHTML = '<span class="av sm" style="--c:' + w.color + '">' + esc(w.name[0]) + '</span><div class="mb"><div class="mh">' + label + fmtT(t0) + '<button class="rp" data-reply="' + mid + '" title="Reply" aria-label="Reply">↩</button></div>' + reHtml(o.re) + '<div class="mt">' + (voice ? '<span class="vc" title="Said out loud">🎙️</span>' : '') + fmtMsg(text) + '</div></div>';
+      d.innerHTML = '<span class="av sm" style="--c:' + w.color + '">' + esc(w.name[0]) + '</span><div class="mb"><div class="mh">' + label + fmtT(t0) + '<button class="rp" data-reply="' + mid + '" title="Reply" aria-label="Reply">↩</button></div>' + reHtml(o.re) + (gifOf(text) ? '<div class="mt gifmt">' + gifHTML(gifOf(text), 'gifm') + '</div></div>' : '<div class="mt">' + (voice ? '<span class="vc" title="Said out loud">🎙️</span>' : '') + fmtMsg(text) + '</div></div>');
       MSGS.set(mid, { who: who, name: who === 'me' ? me.name : w.name, text: text, el: d, wh: wh, to: o.to || null });
       if (MSGS.size > 300) MSGS.delete(MSGS.keys().next().value);
       w.speech = { text: text, until: Date.now() + 5500, whisper: wh, to: o.to || null };
       if (!o.late) hbChat(w, (o.re ? '↩ ' : '') + text, wh, o.to || null, (priv ? 'room' : '') + (pinged || (who !== 'me' && mentionsMe(text)) ? ' ment' : ''));
-      if (voice && who !== 'me') w.talkUntil = Date.now() + Math.min(6000, 900 + text.length * 55);
+      if (voice && who !== 'me' && !isGif(text)) w.talkUntil = Date.now() + Math.min(6000, 900 + text.length * 55);
       if (who !== 'me') {
-        if (o.late) { /* caught up later */ } else if (wh) say(w, text, true); else if (voice) say(w, text, false); else blip();
+        if (o.late) { /* caught up later */ } else if (isGif(text)) blip(); else if (wh) say(w, text, true); else if (voice) say(w, text, false); else blip();
         if (tab !== 'chat') {
           unread++; const u = $('unread'); u.textContent = unread > 99 ? '99+' : String(unread); u.hidden = false;
-          if (wh && o.to === 'me' && !pinged) toast('🤫 ' + w.name + ' whispered: “' + (text.length > 60 ? text.slice(0, 58) + '…' : text) + '”');
+          if (wh && o.to === 'me' && !pinged) toast('🤫 ' + w.name + (isGif(text) ? ' whispered you a GIF 🎞️' : ' whispered: “' + (text.length > 60 ? text.slice(0, 58) + '…' : text) + '”'));
         }
         if (pinged) pingMe(w, text, pinged);
       }
@@ -4603,7 +4679,7 @@ function main(){
     }
   }
   function renderDock() {
-    $('dock').innerHTML = '<input id="hbIn" maxlength="160" autocomplete="off" placeholder="Say something…" aria-label="Chat message">' + '<button data-dance="1" title="Dances" aria-label="Dances">💃</button><button data-instr="1" title="Instruments" aria-label="Instruments">🎸</button>' + REACTS.map(r => '<button data-rx="' + r[0] + '" title="' + r[2] + '" aria-label="' + r[2] + '">' + r[1] + '</button>').join('');
+    $('dock').innerHTML = '<input id="hbIn" maxlength="160" autocomplete="off" placeholder="Say something…" aria-label="Chat message">' + '<button class="gifb" data-gifopen="dock" title="Send a GIF" aria-label="Send a GIF">GIF</button>' + '<button data-dance="1" title="Dances" aria-label="Dances">💃</button><button data-instr="1" title="Instruments" aria-label="Instruments">🎸</button>' + REACTS.map(r => '<button data-rx="' + r[0] + '" title="' + r[2] + '" aria-label="' + r[2] + '">' + r[1] + '</button>').join('');
   }
 
   // ================= first-time setup =================
@@ -4711,7 +4787,7 @@ function main(){
     el.className = 'hbc' + (wh ? ' wh' : '') + (w === me ? ' mine' : '') + (kind ? ' ' + kind : '');
     el.style.setProperty('--sk', hex(w.look.skin)); el.style.setProperty('--hc', hex(w.look.hairColor));
     const pre = wh ? (w === me && to && byId[to] ? ' → ' + byId[to].name : ' whispers') : '';
-    el.innerHTML = '<span class="hh"></span>' + (kind && kind.indexOf('room') > -1 ? '<span class="lk">🔒</span>' : '') + '<span class="tx"><b>' + esc((w === me ? me.name : w.name) + pre) + ':</b> ' + esc(text) + '</span>';
+    el.innerHTML = '<span class="hh"></span>' + (kind && kind.indexOf('room') > -1 ? '<span class="lk">🔒</span>' : '') + '<span class="tx"><b>' + esc((w === me ? me.name : w.name) + pre) + ':</b> ' + (gifOf(text.replace(/^↩ /, '')) ? (text.indexOf('↩ ') === 0 ? '↩ ' : '') + gifHTML(gifOf(text.replace(/^↩ /, '')), 'gifb2') : esc(text)) + '</span>';
     bubLayer.appendChild(el);
     const p = screenPos(w), w0 = W(), h0 = H(), bw = el.offsetWidth || 180;
     const x = Math.max(8, Math.min(w0 - bw - 8, (p ? p.x : w0 / 2) - bw / 2));
@@ -6041,6 +6117,114 @@ function main(){
   function sendChat() { const text = chatIn.value.trim(); if (!text) return; chatIn.value = ''; mpClose(); const re = replyTo; clearReply(); sendText(text, { re: re }); }
   $('chatSend').addEventListener('click', sendChat);
 
+  // ================= 🎞️ GIFs from Tenor =================
+  // a GIF travels as a normal chat message: "[gif] <tenor link>", so whispers, replies and the meeting room all work as usual
+  function gifMediaOk(u) { return /^https:\/\/(?:media\d?|c)\.tenor\.com\/[A-Za-z0-9_-]{4,40}\/[A-Za-z0-9_.%-]{1,120}\.(?:gif|webp)$/.test(String(u || '')); }
+  function gifOf(text) {
+    let t = String(text || '').trim();
+    const tagged = /^\[gif\]\s+/i.test(t); if (tagged) t = t.replace(/^\[gif\]\s+/i, '');
+    t = t.split(/[?#]/)[0];
+    if (/\s/.test(t) || t.length > 280) return null;
+    if (gifMediaOk(t)) return { img: t };
+    const v = /^https:\/\/(?:www\.)?tenor\.com\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?view\/[A-Za-z0-9%_-]{1,160}-(\d{5,20})$/.exec(t); if (v) return { embed: 'https://tenor.com/embed/' + v[1], link: t };
+    return null;
+  }
+  function isGif(t) { return !!gifOf(t); }
+  function gifShort(t) { return isGif(t) ? '🎞️ GIF' : t; }
+  function gifHTML(g, cls) {
+    if (g.img) return '<img class="' + cls + '" src="' + esc(g.img) + '" alt="GIF" loading="lazy" referrerpolicy="no-referrer">';
+    if (cls === 'gifm') return '<iframe class="gifm" src="' + esc(g.embed) + '" title="GIF from Tenor" loading="lazy" sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer"></iframe>';
+    return '<span class="em">🎞️</span> GIF';
+  }
+  const GIFS = { on: !!window.VO_GIFS, q: '', items: null, busy: false, err: '', next: '', from: null, cache: {} };
+  const GIF_CHIPS = [['🔥', 'Trending', ''], ['😂', 'LOL', 'lol'], ['👍', 'Thumbs up', 'thumbs up'], ['👋', 'Hi', 'hello'], ['🎉', 'Party', 'party'], ['🙏', 'Thanks', 'thank you'], ['❤️', 'Love', 'love'], ['😢', 'Sad', 'sad'], ['😮', 'Wow', 'wow'], ['☕', 'Coffee', 'coffee'], ['🍕', 'Lunch', 'lunch time'], ['😴', 'Tired', 'tired'], ['🎄', 'Christmas', 'christmas'], ['🏆', 'Win', 'winning'], ['🤦', 'Facepalm', 'facepalm']];
+  const gifEl = document.createElement('div'); gifEl.className = 'gifpk'; gifEl.id = 'gifPick'; gifEl.hidden = true; gifEl.setAttribute('role', 'dialog'); gifEl.setAttribute('aria-label', 'Send a GIF'); document.body.appendChild(gifEl);
+  function gifRender() {
+    const busy = GIFS.busy, it = GIFS.items;
+    let grid = '';
+    if (busy && !it) grid = '<div class="gmsg">Finding GIFs…</div>';
+    else if (GIFS.err) grid = '<div class="gmsg">' + esc(GIFS.err) + '</div>';
+    else if (it && !it.length) grid = '<div class="gmsg">No GIFs found for “' + esc(GIFS.q) + '”. Try another word.</div>';
+    else if (it) grid = it.map((g, k) => '<button data-gpick="' + k + '" title="' + esc(g.title || 'GIF') + '"><img src="' + esc(g.prev) + '" alt="' + esc(g.title || 'GIF') + '" loading="lazy" referrerpolicy="no-referrer"' + (g.w && g.h ? ' width="' + g.w + '" height="' + g.h + '"' : '') + '></button>').join('') + (GIFS.next ? '<div class="gmsg" style="padding:6px"><button data-gmore="1">More GIFs</button></div>' : '');
+    const toWho = GIFS.from === 'chat' && toVal() ? '🤫 to ' + esc(byId[toVal()].name) : inRoom(me) ? '🔒 Harbour room only' : '';
+    gifEl.innerHTML = '<div class="gh"><input id="gifQ" type="search" placeholder="Search Tenor…" autocomplete="off" value="' + esc(GIFS.q) + '" aria-label="Search GIFs"><button data-gclose="1" aria-label="Close" title="Close">✕</button></div>' +
+      '<div class="gch">' + GIF_CHIPS.map(c => '<button data-gq="' + esc(c[2]) + '" class="' + (GIFS.q === c[2] ? 'on' : '') + '">' + c[0] + ' ' + esc(c[1]) + '</button>').join('') + '</div>' +
+      '<div class="gg" id="gifGrid">' + grid + '</div>' +
+      '<div class="gft"><input id="gifUrl" placeholder="…or paste a Tenor link" autocomplete="off" aria-label="Paste a Tenor link"><button data-gurl="1">Send</button><span class="pw">' + (toWho ? toWho + ' · ' : '') + 'Via Tenor</span></div>';
+    const q = $('gifQ'), u = $('gifUrl'); if (!q || !u) return;
+    q.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); gifSearch(q.value.trim()); } else if (e.key === 'Escape') gifClose(); });
+    q.addEventListener('input', () => { clearTimeout(GIFS.typeT); const v = q.value.trim(); GIFS.typeT = setTimeout(() => { if (v !== GIFS.q) gifSearch(v, true); }, 450); });
+    u.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); gifSendUrl(u.value); } else if (e.key === 'Escape') gifClose(); });
+  }
+  function gifPlace(anchor) {
+    const r = anchor && anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : null, vw = innerWidth, vh = innerHeight, w = Math.min(360, vw - 20);
+    let left = r ? r.right - w : (vw - w) / 2; left = Math.max(10, Math.min(vw - w - 10, left));
+    gifEl.style.left = left + 'px'; gifEl.style.bottom = Math.max(10, r ? vh - r.top + 8 : 80) + 'px'; gifEl.style.top = 'auto';
+  }
+  function gifOpen(from, anchor) {
+    if (!gifEl.hidden && GIFS.from === from) { gifClose(); return; }
+    GIFS.from = from; gifEl.hidden = false; gifPlace(anchor);
+    if (!GIFS.items && !GIFS.busy) gifSearch(GIFS.q, true); else gifRender();
+    setTimeout(() => { const q = $('gifQ'); if (q) q.focus(); }, 30);
+  }
+  function gifClose() { gifEl.hidden = true; }
+  function gifSearch(q, quiet, more) {
+    q = String(q || '').slice(0, 60); GIFS.q = q; GIFS.err = '';
+    if (!more) { GIFS.items = null; GIFS.next = ''; }
+    if (!ONLINE || !API_BASE) { GIFS.err = 'GIF search works when the office is connected to the server. You can still paste a Tenor link below.'; GIFS.busy = false; gifRender(); return; }
+    const key = q.toLowerCase() + '|' + (more ? GIFS.next : '');
+    const done = d => {
+      const list = (Array.isArray(d.items) ? d.items : []).map(g => ({ id: String(g.id || ''), url: String(g.url || ''), prev: String(g.prev || g.url || ''), w: +g.w || 0, h: +g.h || 0, title: String(g.title || '').slice(0, 80) }))
+        .filter(g => gifMediaOk(g.url) && gifMediaOk(g.prev));
+      GIFS.on = true; GIFS.busy = false; GIFS.items = more ? (GIFS.items || []).concat(list) : list; GIFS.next = String(d.next || '').slice(0, 40);
+      if (!gifEl.hidden) { const gg = $('gifGrid'), st = gg ? gg.scrollTop : 0; gifRender(); const g2 = $('gifGrid'); if (g2 && more) g2.scrollTop = st; }
+    };
+    if (GIFS.cache[key]) { done(GIFS.cache[key]); return; }
+    GIFS.busy = true; if (!more) gifRender();
+    fetch(API_BASE + '/api/gifs?q=' + encodeURIComponent(q) + (more && GIFS.next ? '&pos=' + encodeURIComponent(GIFS.next) : '')).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+      GIFS.cache[key] = d; if (GIFS.q === q) done(d);
+    }).catch(err => {
+      if (GIFS.q !== q) return;
+      GIFS.busy = false; if (!more) GIFS.items = null;
+      GIFS.err = err === 404 ? 'GIF search is off on the server. The server owner adds a free Tenor key to Render as TENOR_API_KEY. Until then, paste a Tenor link below.'
+        : err === 429 ? 'Too many GIF searches. Wait a minute and try again.'
+        : err === 502 ? 'Tenor turned down the search. The server owner can check Render → Logs (usually the key, or the Tenor API isn’t turned on for it).'
+        : typeof err === 'number' ? 'GIF search isn’t working right now (error ' + err + '). Try again in a minute.'
+        : NET.on ? 'The server didn’t answer the GIF search. Render is probably still running the old server.js: upload the new one to GitHub and let it redeploy.'
+        : 'The server is waking up. Try again in a few seconds.';
+      try { gifRender(); } catch (e) {}
+    }).catch(() => {});
+  }
+  function gifSend(url) {
+    if (!isGif(url)) { toast('That isn’t a Tenor GIF link.'); return; }
+    const re = replyTo; clearReply();
+    if (GIFS.from === 'dock' && toVal()) { const t = toVal(); chatTo.value = 'all'; sendText('[gif] ' + url, { re: re }); chatTo.value = t; updateCompose(); }
+    else sendText('[gif] ' + url, { re: re });
+    gifClose();
+  }
+  function gifSendUrl(v) {
+    v = String(v || '').trim();
+    if (!v) { toast('Paste a Tenor link first.'); return; }
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    v = v.replace(/^http:/i, 'https:').split(/[?#]/)[0];
+    if (/^https:\/\/tenor\.com\/[A-Za-z0-9]{3,12}\.gif$/i.test(v)) { toast('That’s a Tenor short link. Open it, then copy the full link from the address bar (tenor.com/view/…).'); return; }
+    if (!isGif(v)) { toast('Paste a Tenor link like tenor.com/view/… or a media.tenor.com/….gif link.'); return; }
+    gifSend(v);
+  }
+  gifEl.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.gclose) { gifClose(); return; }
+    if (b.dataset.gq != null) { gifSearch(b.dataset.gq); return; }
+    if (b.dataset.gmore) { gifSearch(GIFS.q, true, true); return; }
+    if (b.dataset.gurl) { gifSendUrl(($('gifUrl') || {}).value); return; }
+    if (b.dataset.gpick != null) { const g = GIFS.items && GIFS.items[+b.dataset.gpick]; if (g) { gifSend(g.url); if (API_BASE && g.id) try { fetch(API_BASE + '/api/gif-shared?id=' + encodeURIComponent(g.id) + '&q=' + encodeURIComponent(GIFS.q)).catch(() => {}); } catch (er) {} } }
+  });
+  window.addEventListener('pointerdown', e => { if (gifEl.hidden || !e.target || !e.target.closest) return; if (e.target.closest('#gifPick') || e.target.closest('[data-gifopen]')) return; gifClose(); }, true);
+  window.addEventListener('click', e => { const b = e.target && e.target.closest && e.target.closest('[data-gifopen]'); if (!b) return; e.preventDefault(); gifOpen(b.dataset.gifopen, b); });
+  window.addEventListener('resize', () => { if (!gifEl.hidden) { const a = document.querySelector('[data-gifopen="' + GIFS.from + '"]'); gifPlace(a); } });
+  { const sendB = $('chatSend'); if (sendB && !$('chatGif')) { const gb = document.createElement('button'); gb.id = 'chatGif'; gb.className = 'gifb'; gb.dataset.gifopen = 'chat'; gb.title = 'Send a GIF'; gb.setAttribute('aria-label', 'Send a GIF'); gb.textContent = 'GIF'; sendB.parentNode.insertBefore(gb, sendB); } }
+  if (ONLINE && API_BASE && !GIFS.on) { const probe = n => { try { fetch(API_BASE + '/api/gif-config').then(r => r.ok ? r.json() : null).then(d => { if (d && d.gifs) GIFS.on = true; }).catch(() => { if (n < 4) setTimeout(() => probe(n + 1), 20000 * (n + 1)); }); } catch (e) {} }; probe(0); }
+
   // ================= replies & mentions =================
   function setReply(mid) {
     const m = MSGS.get(mid); if (!m) return;
@@ -6676,7 +6860,7 @@ function main(){
       w.el.className = 'bub speech' + (wh ? ' whisper' : '') + (w.id === 'me' ? ' me' : '');
       const txt = w.speech.text.length > 80 ? w.speech.text.slice(0, 78) + '…' : w.speech.text;
       const pre = wh ? (w.speech.to && w.speech.to !== 'me' && byId[w.speech.to] ? '🤫 to ' + esc(byId[w.speech.to].name) + ': ' : '🤫 ') : '';
-      w.el.innerHTML = wave + nm + pre + esc(txt);
+      w.el.innerHTML = wave + nm + pre + (gifOf(w.speech.text) ? gifHTML(gifOf(w.speech.text), 'gifb2') : esc(txt));
     } else {
       w.el.className = 'bub' + (w.id === 'me' ? ' me' : '');
       const ic = em ? '<span class="em">' + em.emoji + '</span>' : (info.key === 'custom' || info.key === 'help' || info.key === 'call' ? '<span class="em">' + info.emoji + '</span>' : '<span class="sd"></span>');
