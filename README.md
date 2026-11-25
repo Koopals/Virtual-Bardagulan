@@ -21,6 +21,9 @@ A pixel-hotel style virtual office that runs in the browser. Real people open th
 - **Movie room:** click the big screen to put a movie on (paste a YouTube, Vimeo or video link). When something is showing, just **sit in any seat** and you join the movie: the view switches to first person, looking straight at the screen with the movie playing on it. You only need to go to the screen to start, change or stop a movie. Only people sitting in the seats see the movie up close and hear it; everyone else sees “Now showing” on the screen. Press **✕ Exit** or Esc to stop watching (you join again when you sit down again or a new movie starts). People who join later start at the same point in the movie.
 - **Band stage (Bar room):** a drum kit, keyboard, electric guitar with amp, and a DJ set. Click an instrument and your character walks over and plays it: drummers sit behind the kit with sticks, the keyboard player stands at the keys, the guitarist grabs the guitar off its stand, and the DJ works the decks with one hand on the headphones. Instruments are silent (just for show), so several people can 'jam' together without noise. The stage lights, LEDs, cymbals and turntables move while someone plays. Walk away to stop. You can also play 🥁 Drums, 🎹 Keys, 🤘 E-guitar or 🎧 DJ anywhere: open your avatar menu (top-right) and pick one; a small kit appears in front of you. The same instruments are also in the 🎸 button on the bottom emote bar (next to 💃). All instruments, including the 🎸 Guitar, are silent.
 - **Choose your microphone:** open your avatar menu (top-right) and pick a mic under **🎙️ Microphone**, for example your headset instead of Krisp. The office remembers your choice, switches right away even while you're talking, and falls back to your default mic if the chosen one is unplugged. Mic names show after you turn your mic on once.
+- **Choose your speaker:** under **🔈 Speaker** in the same menu, pick where voice chat, office sounds and video files play (for example your headset instead of the Krisp speaker). YouTube and Spotify players always use your system default speaker. Works in Chrome and Edge.
+- **Muting:** muting your mic only stops others hearing you. You still hear everyone near you until you turn **🔈 Speaker** off. If the browser blocks voice audio from starting, a green **🔊 Click to hear people near you** button appears. If you've never allowed the microphone and can't hear some people on the same network, press **🎧 Allow once, stay muted** in the Voice list: you stay muted, but voice can connect.
+- **🎧 Voice list:** the avatar menu also shows your voice connection with each person (can hear, too far, other room, connecting, blocked) and a **🔄 Reconnect** button. Voice connections now repair themselves when they drop or get stuck. If someone always shows **blocked**, your network (often a work laptop, VPN or office Wi-Fi) is blocking direct voice: add a TURN server as **ICE_SERVERS** on Render (see below), or try another network.
 - **Sound stays in the room:** you only hear voice chat and sound effects (slaps, splashes, bells, games) from people in the same room as you. The Harbour meeting room and the hallway count as separate rooms. Music is not affected and keeps playing wherever you are.
 - **No pop-up YouTube window:** music plays from the 🎵 Music menu (Pause/Play, Next, Stop, Save, volume). Press ⛶ Big screen there to watch the video in the middle of the screen; ✕ Close screen hides it and keeps the music playing.
 - **Billiards (Game room):** click the pool table to play 8-ball. Aim with the mouse, hold to set power, and release to shoot.
@@ -79,17 +82,11 @@ The 🔍 search in the 🎵 Music menu (YouTube and YouTube Music tabs) shows re
 
 The free daily quota allows about 100 searches; results are cached for 30 minutes. If a search fails, open **Logs** on Render: the server prints Google's reason (for example, the API isn't turned on or the key is wrong). YouTube Music has no separate key; the same key covers both tabs.
 
-## GIF search (optional)
+## Images in the chat
 
-The **GIF** button next to the chat box (and in the bottom bar) opens a Tenor GIF picker with trending GIFs, quick categories and search. Click a GIF to send it. It works with whispers, replies and the Harbour meeting room like any other message. Without a key you can still paste a Tenor link (`tenor.com/view/…` or `media.tenor.com/….gif`) into the picker or the chat box.
+Paste an image (**Ctrl+V**) into the chat box or the bottom bar, or click **🖼️** to pick a file. You see a preview, can add a caption, and press **Send**. Big pictures are shrunk to 1280 px before sending. It works with whispers, replies and the Harbour meeting room like any other message, and people can click an image to open it full size.
 
-To turn on search:
-
-1. In the same [Google Cloud](https://console.cloud.google.com) project you use for YouTube (or a new one), open **APIs & Services → Library**, search for **Tenor API**, and turn it on.
-2. Open **APIs & Services → Credentials**. Use your existing API key or create a new one. If the key has API restrictions, add **Tenor API** to its allowed list.
-3. On Render, open your service, go to **Environment**, add **TENOR_API_KEY** with that key, and save. Render restarts the server.
-
-The key stays on the server; browsers never see it. Results use Tenor's medium content filter and are cached for 20 minutes. If search fails, **Logs** on Render shows Tenor's reason.
+Images are kept on the server in memory for a day (they disappear sooner if the free Render server restarts). No setting is needed. Only PNG, JPG, WebP and GIF files are accepted, and only images from your own office server are shown in the chat.
 
 ## Room passcodes
 

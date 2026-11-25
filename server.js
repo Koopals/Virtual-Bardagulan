@@ -8,6 +8,7 @@
 //   ICE_SERVERS       STUN/TURN servers for voice, as JSON, e.g. [{"urls":"turn:turn.example.com:3478","username":"u","credential":"p"}]
 //   MAX_PER_ROOM      how many people fit in one room (default 40)
 //   YOUTUBE_API_KEY   optional: a YouTube Data API key, turns on song search in the Music menu
+//   (chat images need no setting: pasted images are kept in memory for a day)
 
 const http = require('http');
 const fs = require('fs');
@@ -54,6 +55,21 @@ async function ytSearch(q) {
   ytCache.set(key, { t: Date.now(), items: items }); if (ytCache.size > 500) ytCache.delete(ytCache.keys().next().value);
   return items;
 }
+// ---- images pasted into the chat: kept in memory for a day (they're gone after the server restarts) ----
+const imgStore = new Map(), imgHits = new Map();
+let imgBytes = 0;
+const IMG_MAX = 3 * 1024 * 1024, IMG_TOTAL = 80 * 1024 * 1024, IMG_TTL = 24 * 3600 * 1000;
+function imgType(b) {
+  if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
+  if (b.length > 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'image/png';
+  if (b.length > 12 && b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
+  if (b.length > 6 && b.toString('ascii', 0, 4) === 'GIF8') return 'image/gif';
+  return '';
+}
+function imgPrune() {
+  const now = Date.now();
+  for (const [k, v] of imgStore) { if (now - v.t > IMG_TTL || imgBytes > IMG_TOTAL) { imgStore.delete(k); imgBytes -= v.buf.length; } else if (imgBytes <= IMG_TOTAL) break; }
+}
 const passFor = room => Object.prototype.hasOwnProperty.call(ROOM_PASSWORDS, room) ? ROOM_PASSWORDS[room] : OFFICE_PASSWORD;
 
 const hash = s => crypto.createHash('sha256').update('virtual-office:' + s).digest('hex');
@@ -70,7 +86,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
     return res.end(page);
   }
-  // the page may live on GitHub Pages, so these two routes allow other sites to call them
+  // the page may live on GitHub Pages, so these routes allow other sites to call them
   const send = (code, obj) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify(obj)); };
   if (url === '/api/yt-config') return send(200, { search: !!YT_KEY });
   if (url === '/api/yt-search') {
@@ -83,6 +99,33 @@ const server = http.createServer((req, res) => {
     list.push(now); ytHits.set(ip, list); if (ytHits.size > 2000) ytHits.clear();
     ytSearch(q).then(items => send(200, { items: items })).catch(() => send(502, { error: 'search failed' }));
     return;
+  }
+  if (url === '/api/voice-config') return send(200, { ice: ICE || [] });
+  if (url === '/api/img' && req.method === 'POST') {   // body: a data: URL (text/plain, so pages on other sites can send it without a preflight)
+    const ip = String(req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || '').split(',')[0].trim();
+    const now = Date.now(), list = (imgHits.get(ip) || []).filter(t => now - t < 60000);
+    if (list.length >= 12) { req.resume(); return send(429, { error: 'slow down' }); }
+    list.push(now); imgHits.set(ip, list); if (imgHits.size > 2000) imgHits.clear();
+    let size = 0, parts = [], dead = false;
+    req.on('data', d => { if (dead) return; size += d.length; if (size > IMG_MAX * 1.4 + 200) { dead = true; send(413, { error: 'too big' }); req.destroy(); return; } parts.push(d); });
+    req.on('end', () => {
+      if (dead) return;
+      const m = /^data:image\/(?:png|jpeg|webp|gif);base64,([A-Za-z0-9+/=]+)$/.exec(Buffer.concat(parts).toString('ascii').trim());
+      if (!m) return send(400, { error: 'not an image' });
+      const buf = Buffer.from(m[1], 'base64'), type = imgType(buf);
+      if (!type) return send(400, { error: 'not an image' });
+      if (buf.length > IMG_MAX) return send(413, { error: 'too big' });
+      const id = crypto.randomBytes(12).toString('hex');
+      imgStore.set(id, { buf: buf, type: type, t: Date.now() }); imgBytes += buf.length; imgPrune();
+      send(200, { id: id });
+    });
+    return;
+  }
+  if (url.indexOf('/api/img/') === 0) {
+    const id = url.slice(9), it = /^[a-f0-9]{24}$/.test(id) ? imgStore.get(id) : null;
+    if (!it || Date.now() - it.t > IMG_TTL) { res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' }); return res.end('Image expired'); }
+    res.writeHead(200, { 'Content-Type': it.type, 'Content-Length': it.buf.length, 'Cache-Control': 'public, max-age=86400, immutable', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'", 'Content-Disposition': 'inline', 'Access-Control-Allow-Origin': '*' });
+    return res.end(it.buf);
   }
   if (url === '/health') {
     res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
@@ -121,5 +164,5 @@ setInterval(() => hub.sweep(), 10 * 60 * 1000);
 
 server.listen(PORT, () => {
   console.log('Virtual Office is running on http://localhost:' + PORT);
-  console.log('Office password: ' + (OFFICE_PASSWORD ? 'on' : 'off') + ' · room passwords: ' + Object.keys(ROOM_PASSWORDS).length + ' · TURN/STUN servers: ' + (ICE ? ICE.length : 'default') + ' · YouTube search: ' + (YT_KEY ? 'on' : 'off'));
+  console.log('Office password: ' + (OFFICE_PASSWORD ? 'on' : 'off') + ' · room passwords: ' + Object.keys(ROOM_PASSWORDS).length + ' · TURN/STUN servers: ' + (ICE ? ICE.length : 'default') + ' · YouTube search: ' + (YT_KEY ? 'on' : 'off') + ' · chat images: on');
 });
