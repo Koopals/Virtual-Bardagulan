@@ -92,8 +92,11 @@ const safeEqual = (a, b) => { const A = Buffer.from(String(a)), B = Buffer.from(
 
 // The page learns it is online because this server switches its VO_SERVER setting to 'same'
 // (whatever address index.html has, e.g. the Render address used by the GitHub Pages copy).
-const page = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8')
-  .replace(/^window\.VO_SERVER = '[^'\n]*';/m, () => "window.VO_SERVER = 'same'; window.VO_ICE = " + JSON.stringify(ICE).replace(/</g, '\\u003c') + '; window.VO_YTSEARCH = ' + (YT_KEY ? 'true' : 'false') + ';');
+// a short fingerprint of index.html: open offices compare it to know when a new version is online
+const PAGE_RAW = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+const BUILD = crypto.createHash('sha1').update(PAGE_RAW).digest('hex').slice(0, 12);
+const page = PAGE_RAW
+  .replace(/^window\.VO_SERVER = '[^'\n]*';/m, () => "window.VO_SERVER = 'same'; window.VO_ICE = " + JSON.stringify(ICE).replace(/</g, '\\u003c') + '; window.VO_YTSEARCH = ' + (YT_KEY ? 'true' : 'false') + '; window.VO_BUILD = "' + BUILD + '";');
 
 const server = http.createServer((req, res) => {
   const url = (req.url || '/').split('?')[0];
@@ -116,6 +119,7 @@ const server = http.createServer((req, res) => {
     return;
   }
   if (url === '/api/voice-config') return send(200, { ice: iceNow() });
+  if (url === '/api/version') return send(200, { v: BUILD });
   if (url === '/api/img' && req.method === 'POST') {   // body: a data: URL (text/plain, so pages on other sites can send it without a preflight)
     const ip = String(req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || '').split(',')[0].trim();
     const now = Date.now(), list = (imgHits.get(ip) || []).filter(t => now - t < 60000);
@@ -178,6 +182,6 @@ setInterval(() => {
 setInterval(() => hub.sweep(), 10 * 60 * 1000);
 
 server.listen(PORT, () => {
-  console.log('Virtual Office is running on http://localhost:' + PORT);
+  console.log('Virtual Office is running on http://localhost:' + PORT + ' · version ' + BUILD);
   console.log('Office password: ' + (OFFICE_PASSWORD ? 'on' : 'off') + ' · room passwords: ' + Object.keys(ROOM_PASSWORDS).length + ' · TURN/STUN servers: ' + (ICE ? ICE.length : 'default') + (TURN_API_URL ? ' + TURN_API_URL' : '') + ' · YouTube search: ' + (YT_KEY ? 'on' : 'off') + ' · chat images: on');
 });

@@ -176,6 +176,7 @@ input:focus,select:focus{outline:2px solid var(--page-accent);outline-offset:-1p
 .avbar{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--color-border)}
 .micsel{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px}.micsel[hidden]{display:none}.micsel label{font-weight:800;white-space:nowrap;color:var(--color-text-secondary)}.micsel select{flex:1;min-width:0;font-size:12px;padding:5px 6px;border-radius:8px}
 .micsel label{min-width:92px}.vlist{margin-top:8px;padding-top:8px;border-top:1px dashed var(--color-border);font-size:12px}.vlist:empty{display:none}.vlh{display:flex;align-items:center;justify-content:space-between;font-weight:800;margin-bottom:4px;color:var(--color-text-secondary)}.vlh button{font-size:11px;padding:3px 8px}.vlr{display:flex;justify-content:space-between;gap:8px;padding:3px 2px}.vlr b{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.vlr span{white-space:nowrap;color:var(--color-text-secondary)}.vlr.bad span{color:#b45309}.vln{font-size:11px;color:var(--color-text-secondary);line-height:1.4;padding:2px}.vln.warn{color:#92400e;background:#fff7e6;border-radius:8px;padding:6px 8px;margin-top:4px}.vln.warn button{display:block;margin-top:5px;font-size:11px;padding:4px 8px}
+.updbar{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:3800;display:flex;align-items:center;gap:8px;padding:8px 10px 8px 14px;border-radius:999px;background:#1e3a8a;color:#fff;font-size:13px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.28)}.updbar[hidden]{display:none}.updbar button{border-radius:999px;font-size:12px;padding:5px 12px;border:0;background:rgba(255,255,255,.18);color:#fff;font-weight:800}.updbar button.on{background:#fff;color:#1e3a8a}.updbar.snz{padding:0;background:transparent;box-shadow:none}.updbar.snz button{background:#1e3a8a;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .hearbtn{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:3700;padding:9px 16px;border-radius:999px;background:#22a35a;border:0;color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25)}.hearbtn[hidden]{display:none}
 .micnote{font-size:11px;color:var(--color-text-secondary);margin:3px 2px 0;line-height:1.35}.micnote:empty{display:none}
 .ic{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 11px;white-space:nowrap}
@@ -5554,6 +5555,7 @@ function main(){
       if (m.music) applyNetMusic(m.music, peerW(m.music.by));
       if (m.movie) applyNetMovie(m.movie, peerW(m.movie.by));
       loadGames(m.games, new Set(peers.map(p => String(p.id))));
+      setTimeout(checkVersion, 1500);
     } else if (m.t === 'join') {
       const w = addPeer(m.id, m.state);
       if (w && lowerId(w.netId)) { const nid = String(w.netId); setTimeout(() => { const P0 = VOICE.peers.get(nid); if (NET.on && peerW(nid) && (!P0 || P0.state !== 'connected')) vOffer(nid); }, 900); }
@@ -7061,7 +7063,74 @@ function main(){
   if (ONLINE) post(null, '🌐 This is the multiplayer office. Everyone you see here is a real person who opened the same link.');
   else post(null, '🔌 This office isn’t connected to a server yet, so you’re the only one here. Click “Connect to server” in the top-left panel and paste your Render address.');
   setHabbo(true, true);
+
+  // ================= live updates: when a new version is put online, open offices reload themselves =================
+  // The server tells pages which version of the office it has. When that changes (after a Render redeploy), every open
+  // office shows a short countdown and reloads, putting you back where you were with the same mic and speaker settings.
+  const UPD = { base: String(window.VO_BUILD || ''), ready: '', t: 0, later: 0, timer: 0 };
+  const RESUME_KEY = 'virtualOffice.resume';
+  function takeResume() { try { const s = sessionStorage.getItem(RESUME_KEY); sessionStorage.removeItem(RESUME_KEY); const r = s ? JSON.parse(s) : null; return r && Date.now() - (+r.t || 0) < 3 * 60 * 1000 ? r : null; } catch (e) { return null; } }
+  function saveResume() { try { sessionStorage.setItem(RESUME_KEY, JSON.stringify({ x: me.x, z: me.z, yaw: me.yaw, mic: !!mic.on, spk: !!audio.speaker, t: Date.now() })); } catch (e) {} }
+  function resumeAt(r) {
+    try {
+      const p = NAVG.snap(+r.x || 0, +r.z || 0); if (!p) return false;
+      placeAt(me, { area: 'free', pos: p, anchor: p.slice(), via: [], face: isFinite(+r.yaw) ? +r.yaw : 0, sit: 0, by: null });
+      me.v.root.position.set(p[0], 0, p[1]);
+      setZone(zoneAt(p[0], p[1]), true);
+      if (r.spk === false && audio.speaker) { audio.speaker = false; outGain(); renderAV(); }
+      if (r.mic && !mic.on) micOn();
+      return true;
+    } catch (e) { return false; }
+  }
+  const updBar = document.createElement('div'); updBar.className = 'updbar'; updBar.hidden = true; updBar.setAttribute('role', 'status'); document.body.appendChild(updBar);
+  function updBusy() {
+    const a = document.activeElement, typing = a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && String(a.value || '').trim().length > 0;
+    return typing || (typeof MV !== 'undefined' && MV.on) || (typeof IMG !== 'undefined' && !!IMG.pend) || !!me.carrying || !!me.carriedBy;
+  }
+  function doReload() {
+    if (!UPD.ready) return;
+    try { sessionStorage.setItem('virtualOffice.reloadedFor', UPD.ready); } catch (e) {}
+    saveResume(); try { saveProfile(); } catch (e) {}
+    try { const u = new URL(location.href); u.searchParams.set('v', UPD.ready.slice(0, 10)); location.replace(u.href); } catch (e) { location.reload(); }
+  }
+  function updRender() {
+    if (!UPD.ready) { updBar.hidden = true; return; }
+    const left = Math.max(0, Math.ceil((UPD.t - Date.now()) / 1000)), snoozed = UPD.later > Date.now();
+    updBar.innerHTML = snoozed ? '<button data-up="now" class="mini">🔄 Update ready · reload</button>'
+      : '<span>🔄 The office was updated. ' + (updBusy() ? 'Reloading when you’re done…' : 'Reloading in ' + left + ' s…') + '</span><button data-up="now" class="on">Reload now</button><button data-up="later">Later</button>';
+    updBar.classList.toggle('snz', snoozed); updBar.hidden = false;
+  }
+  function updTick() {
+    if (!UPD.ready) return;
+    if (UPD.later > Date.now()) { updRender(); return; }
+    if (UPD.later) { UPD.later = 0; UPD.t = Date.now() + 20000; }
+    if (updBusy()) UPD.t = Math.max(UPD.t, Date.now() + 5000);
+    updRender();
+    if (Date.now() >= UPD.t) doReload();
+  }
+  updBar.addEventListener('click', e => { const b = e.target.closest('[data-up]'); if (!b) return; if (b.dataset.up === 'now') doReload(); else { UPD.later = Date.now() + 10 * 60 * 1000; updRender(); toast('OK. The office will remind you again in 10 minutes. Click 🔄 Update ready any time.'); } });
+  function updFound(v) {
+    if (UPD.ready === v) return;
+    let again = false; try { again = sessionStorage.getItem('virtualOffice.reloadedFor') === v; } catch (e) {}
+    UPD.ready = v; UPD.t = Date.now() + 15000;
+    if (again) UPD.later = Date.now() + 365 * 24 * 3600 * 1000;   // already reloaded once for this version: just offer the button, never loop
+    if (!UPD.timer) UPD.timer = setInterval(updTick, 1000);
+    updRender();
+  }
+  function checkVersion() {
+    if (!ONLINE || !API_BASE) return;
+    try {
+      fetch(API_BASE + '/api/version', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(d => {
+        const v = d && /^[a-f0-9]{6,40}$/.test(String(d.v || '')) ? String(d.v) : ''; if (!v) return;
+        if (!UPD.base) { UPD.base = v; return; }
+        if (v !== UPD.base) updFound(v);
+      }).catch(() => {});
+    } catch (e) {}
+  }
+  if (ONLINE) { setTimeout(checkVersion, 4000); setInterval(checkVersion, 3 * 60 * 1000); }
+  const RESUME = needSetup ? null : takeResume();
   if (needSetup) openSetup(false);
+  else if (RESUME) { setTimeout(() => { if (!resumeAt(RESUME)) dropIn(me); toast('✨ The office is up to date. You’re right where you were.'); }, 350); if (ONLINE) setTimeout(netConnect, 300); }
   else { setTimeout(() => toast('Welcome back, ' + me.name + '! 👋'), 600); setTimeout(() => dropIn(me), 450); if (ONLINE) setTimeout(netConnect, 300); }
   cvs.style.cursor = 'grab';
 
