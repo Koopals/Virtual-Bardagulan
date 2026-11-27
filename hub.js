@@ -3,7 +3,7 @@
 // call setup, and checks room passcodes. It has no network code of its own, so it can be
 // tested without a server.
 
-const STATE_KEYS = ['name', 'role', 'look', 'status', 'custom', 'mic', 'emote', 'held', 'talk', 'fx', 'desk', 'task', 'zone', 'mv'];
+const STATE_KEYS = ['name', 'role', 'look', 'status', 'custom', 'mic', 'emote', 'held', 'talk', 'fx', 'desk', 'task', 'zone', 'mv', 'call'];
 const EV_KEYS = ['type', 'to', 'style', 'item', 'laptop', 'kind', 'key', 'id', 'list', 'title', 'src', 't0', 'room', 'url', 'table', 'act', 'mv', 'n', 'seat', 'made', 'pts', 'score', 'next', 'on', 'x', 'y', 'kk', 'd'];
 const GAME_TABLES = ['chess', 'checkers', 'reversi', 'connect4', 'ttt'];
 const newTable = () => ({ seats: [null, null], log: [] });
@@ -35,6 +35,7 @@ function cleanState(s) {
   if ('role' in out) out.role = str(out.role, 30);
   if (out.mv && out.mv.path && Array.isArray(out.mv.path)) out.mv.path = out.mv.path.slice(0, 200);
   if (out.zone !== undefined) out.zone = out.zone === 'room' ? 'room' : 'floor';
+  if (out.call !== undefined) out.call = typeof out.call === 'string' && /^[A-Za-z0-9]{1,40}$/.test(out.call) ? out.call : null;   // the 📞 talk someone is in
   let size = 0;
   try { size = JSON.stringify(out).length; } catch (e) { return {}; }
   return size > 20000 ? {} : out;
@@ -354,7 +355,7 @@ function createHub(opts) {
         }
         if (ev.k === 'music') room.music = ev.kind === 'stop' ? null : Object.assign({}, ev, { by: c.id });
         if (ev.k === 'movie') room.movie = ev.kind === 'stop' ? null : Object.assign({}, ev, { by: c.id });
-        if (ev.k === 'dance' && ev.to) {   // dance invites go to one person
+        if ((ev.k === 'dance' || ev.k === 'call') && ev.to) {   // dance invites and 📞 talk requests go to one person
           const tgt = room.clients.get(String(ev.to));
           if (tgt) send(tgt, ev);
           return;

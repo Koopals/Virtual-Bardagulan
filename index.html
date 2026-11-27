@@ -324,6 +324,105 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .thfx{position:absolute;bottom:14px;font-size:38px;line-height:1;pointer-events:none;z-index:3;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
 .thfx.me{font-size:46px}.thfx i{font-style:normal;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.55);border-radius:6px;padding:1px 6px;margin-top:2px;white-space:nowrap}
 .thtop{flex-wrap:wrap;row-gap:4px}
+.ssview{position:fixed;inset:0;z-index:140;background:#000;display:block}
+.ssview[hidden]{display:none}
+.ssview video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.ssbar{position:absolute;top:10px;right:12px;display:flex;align-items:center;gap:8px;padding:5px 6px 5px 12px;border-radius:999px;background:rgba(15,18,34,.72);color:#fff;font-size:13px;opacity:.35;transition:opacity .2s}
+.ssview:hover .ssbar{opacity:1}
+.ssbar button{padding:4px 11px;font-size:12px;font-weight:800;border-radius:999px;background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3);color:#fff}
+.ssmsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cfd6ff;font-size:18px;font-weight:700}
+.ssmsg[hidden]{display:none}
+.callbar button.ssing{background:#e0242d;border-color:#e0242d}.callbar button.ssv{background:#2563eb;border-color:#2563eb}
+.ctk.ssb{background:#eff6ff;border-color:#93c5fd;color:#1e3a8a}.ctk.ssb:hover{background:#dbeafe}.ctk.ssb.on{background:#e0242d;border-color:#e0242d;color:#fff}
+.ctk{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;margin:-4px 0 10px;padding:8px 11px;border-radius:10px;background:#e8f8ee;border:1px solid #86d9a5;color:#166534;text-align:left}
+.ctk b{font-size:13px}.ctk span{font-size:11px;font-weight:600;opacity:.8}
+.ctk:hover{background:#d3f2df}.ctk.on{background:#e0242d;border-color:#e0242d;color:#fff}.ctk.wait{background:#fff7d6;border-color:#f3cf5a;color:#7a5a00}
+.ctk[disabled]{opacity:.55;cursor:not-allowed}.ctk.join{background:#eef2ff;border-color:#a5b4fc;color:#3730a3}.ctk.join:hover{background:#e0e7ff}
+.tkb{margin-left:auto;padding:3px 9px;font-size:11.5px;font-weight:800;border-radius:999px;background:#e8f8ee;border:1px solid #86d9a5;color:#166534;flex:none}
+.tkb:hover{background:#d3f2df}.tkb.join{background:#eef2ff;border-color:#a5b4fc;color:#3730a3}.tkb[disabled]{opacity:.5;cursor:not-allowed}.tkb.on{background:#e0242d;border-color:#e0242d;color:#fff}.tkb.wait{background:#fff7d6;border-color:#f3cf5a;color:#7a5a00}
+.person .pn{align-items:center}
+.callbar{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:96;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;border-radius:999px;background:#171b2d;color:#f4f5fb;font-size:13px;box-shadow:0 6px 20px rgba(8,10,24,.35);white-space:nowrap}
+.callbar[hidden]{display:none}.callbar.on{background:#0f5132}
+.callbar button{padding:4px 11px;font-size:12px;font-weight:800;border-radius:999px;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff}
+.callbar button.end{background:#e0242d;border-color:#e0242d}.callbar button.off{background:#8a6d00;border-color:#8a6d00}
+.cbd{width:9px;height:9px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;animation:cbp 1.4s ease-in-out infinite}
+@keyframes cbp{50%{opacity:.35}}
+.callinv{position:fixed;top:62px;left:50%;transform:translateX(-50%);z-index:121;width:min(320px,calc(100vw - 24px));background:#171b2d;color:#f4f5fb;border-radius:16px;padding:14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.callinv[hidden]{display:none}.cih{font-size:15px;margin:0 0 4px}.cis{font-size:12.5px;color:#aab3d9;margin:0 0 10px}
+.callinv .acts{display:flex;gap:8px}.callinv button.on{background:#22c55e;border-color:#22c55e;color:#fff;font-weight:800}
+.focuschip{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:59;padding:5px 12px;border-radius:999px;background:#312e81;color:#e0e7ff;font-size:12.5px;font-weight:800;box-shadow:0 4px 14px rgba(8,10,24,.3);pointer-events:auto}
+.focuschip[hidden]{display:none}
+.rmwrap{position:fixed;inset:0;z-index:110;display:flex;align-items:center;justify-content:center;background:rgba(8,10,18,.5)}
+.rmwrap[hidden]{display:none}
+.rmbox{width:min(820px,calc(100vw - 24px));height:min(560px,calc(100vh - 30px));display:flex;flex-direction:column;background:#2b2d33;color:#f2f3f5;border:3px solid #111;border-radius:10px;box-shadow:0 0 0 2px #4a4d55 inset,0 14px 40px rgba(0,0,0,.55);overflow:hidden}
+.rmh{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#3a3d45;border-bottom:3px solid #111;font-size:15px}.rmh b{font-size:16px}.rmh span{flex:1;color:#c7cad1;font-size:12.5px}
+.rmh button{border:0;background:transparent;color:#c7cad1;font-size:22px;line-height:1;padding:0 6px}
+.rmb{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.rml{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:5px;background:#24262b;border-right:3px solid #111}
+.rmr{display:flex;align-items:center;gap:10px;text-align:left;padding:7px 9px;border-radius:6px;background:#33363d;border:2px solid #1b1c20;color:#f2f3f5;box-shadow:none;min-width:0}
+.rmr:hover{background:#3d4048}
+.rmr.sel{background:#3c8527;border-color:#5fc23f;box-shadow:0 0 0 2px #1c3d12 inset}
+.rmt{flex:none;width:38px;height:38px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:21px;background:color-mix(in srgb,var(--c) 55%,#1b1c20);border:2px solid color-mix(in srgb,var(--c) 70%,#000);box-shadow:0 -3px 0 rgba(0,0,0,.25) inset}
+.rmn{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.rmn b{font-size:13.5px}
+.rmn i{font-style:normal;font-size:11.5px;color:#c7cad1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmr.sel .rmn i{color:#e6ffd9}
+.rmc{flex:none;font-size:12px;color:#9a9ea8;font-weight:700}.rmc.on{color:#9cff7a}
+.rmd{overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.rmbig{flex:none;width:100%;height:150px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:84px;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 70%,#fff 10%),color-mix(in srgb,var(--c) 45%,#111));border:3px solid #111;box-shadow:0 -6px 0 rgba(0,0,0,.25) inset}
+.rmdn{font-size:19px;font-weight:800;margin-top:4px}
+.rmdl{font-size:13px;color:#d6d8de}.rmdl b{color:#9cff7a}.rmdl.live{color:#ffd23f;font-weight:700}
+.rmgo{margin:6px 0 2px;padding:10px 14px;font-size:14.5px;font-weight:800;background:#3c8527;border:2px solid #111;color:#fff;border-radius:6px;box-shadow:0 -4px 0 #285a1a inset}
+.rmgo:hover{background:#4a9e31}
+.rmdd{font-size:12.5px;color:#c7cad1;line-height:1.45}
+.rmwl{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9a9ea8;margin-top:8px}
+.rmwho{display:flex;flex-wrap:wrap;gap:5px}
+.rmwho button{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;font-size:12px;background:#33363d;border:1px solid #1b1c20;color:#f2f3f5;border-radius:999px}
+.rmwho .av.sm{width:20px;height:20px;font-size:10px}.rme{font-size:12px}.rmmore{font-size:12px;color:#9a9ea8;align-self:center}
+@media (max-width:640px){.rmb{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}.rml{border-right:0;border-bottom:3px solid #111}.rmbig{height:90px;font-size:54px}}
+#rooms{display:flex;flex-direction:column;gap:3px}
+#rooms button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:4px 7px;font-size:12.5px}
+#rooms .rmt{width:24px;height:24px;font-size:14px;border-radius:5px;border-width:1px;box-shadow:none}
+#rooms .rsn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+#rooms .rsc{flex:none;font-size:11px;font-weight:700;opacity:.75}
+#rooms .rlive{font-style:normal;color:#e0242d}
+#rooms button.rsall{justify-content:center;font-weight:700}
+.thhands{flex:none;max-height:38%;overflow:auto;padding:8px 10px;border-bottom:1px solid #262c4a;background:#121631}
+.thhands[hidden]{display:none}
+.thhh{display:flex;align-items:center;gap:7px;font-size:12.5px}.thhh b{flex:1}
+.thhc{background:#ffd23f;color:#1d2233;font-weight:800;font-size:11px;border-radius:999px;padding:0 7px}
+.thhands button{padding:3px 8px;font-size:11.5px;background:#22284a;border-color:#39407a;color:#fff;border-radius:8px}
+.thhands button.on{background:#ffd23f;border-color:#ffd23f;color:#1d2233;font-weight:800}
+.thhands .thup{background:#ffd23f!important;border-color:#ffd23f!important;color:#1d2233!important}.thhands .thfl{background:#22c55e!important;border-color:#22c55e!important}
+.thhf{display:flex;align-items:center;gap:6px;margin:7px 0 0;color:#7cff9b;font-weight:700;font-size:12px}.thhf button{margin-left:auto}
+.thhl{list-style:none;margin:7px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.thhl li{display:flex;align-items:center;gap:7px;font-size:12.5px;background:rgba(255,255,255,.04);border-radius:8px;padding:4px 6px}
+.thhl li.me{background:rgba(255,210,63,.14)}
+.thhn{flex:none;width:20px;height:20px;border-radius:50%;background:#ffd23f;color:#1d2233;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center}
+.thhw{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thhe{color:#8f98c4;font-size:12px;margin-top:5px}
+.thbody{flex:1;min-height:0;display:flex}
+.thbody .thscr{flex:1;min-width:0}
+.thchat{flex:none;width:320px;display:flex;flex-direction:column;background:#0f1222;border-left:1px solid #262c4a;color:#e8ecff;min-height:0}
+.thview.chatoff .thchat{display:none}
+.thch{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid #262c4a;font-size:13px}.thch b{flex:1}
+.thch button{padding:2px 8px;font-size:13px;background:transparent;border-color:transparent;color:#aab3d9}
+.thchq{background:#ffd23f;color:#1d2233;font-weight:800;font-size:11px;border-radius:999px;padding:1px 8px}.thchq:empty{display:none}
+.thcl{flex:1;min-height:0;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:7px}
+.thce{color:#8f98c4;font-size:12px;text-align:center;margin-top:12px}
+.thcm{display:flex;gap:7px;align-items:flex-start;font-size:12.5px;line-height:1.35}
+.thcm .av.sm{flex:none;width:22px;height:22px;font-size:11px}
+.thcm>div{min-width:0;flex:1}
+.thcn{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}.thcn b{color:#fff}.thcn span{margin-left:auto;color:#7d86b3;font-size:10.5px}
+.thcn i{font-style:normal;font-size:10.5px;color:#c4b5fd}.thcn i.qb{color:#1d2233;background:#ffd23f;border-radius:5px;padding:0 5px;font-weight:800}
+.thct{color:#dfe4ff;overflow-wrap:anywhere}
+.thcm.q{background:rgba(255,210,63,.12);border:1px solid rgba(255,210,63,.45);border-radius:9px;padding:5px 6px}
+.thcm.mine .thct{color:#bfe3ff}.thcm.wh{opacity:.85}
+.thci{display:flex;gap:6px;padding:8px;border-top:1px solid #262c4a}
+.thci input{flex:1;min-width:0;background:#171b2d;border:1px solid #39407a;color:#fff;border-radius:9px;padding:7px 9px;font-size:13px}
+.thci button{padding:6px 11px;background:#8b5cf6;border-color:#8b5cf6;color:#fff;font-weight:800}
+#thChT{position:relative}.thchn{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;border-radius:8px;background:#e0242d;color:#fff;font-size:10px;font-weight:800;line-height:16px;padding:0 3px}
+.thchn[hidden]{display:none}
+@media (max-width:900px){.thchat{width:230px}}
 .thview{position:fixed;left:0;right:var(--panel-w);top:0;height:80vh;height:80dvh;z-index:95;background:#05060a;display:flex;flex-direction:column;box-shadow:0 4px 18px rgba(0,0,0,.45)}
 .thview.off{top:auto;bottom:0;left:0;right:auto;width:2px;height:2px;opacity:.01;pointer-events:none;overflow:hidden;box-shadow:none}
 .thtop{display:flex;align-items:center;gap:10px;padding:7px 12px;background:#101321;color:#eef1ff;font-size:13px;flex:none;min-width:0}
@@ -619,7 +718,6 @@ img.imgm{display:block;max-width:220px;max-height:200px;width:auto;height:auto;b
     <button data-z="court">🏀 Court</button>
     <button data-z="sleep">😴 Sleep</button>
     <button data-z="bar">🍻 Bar</button>
-    <button data-z="movie">🎬 Movies</button>
     <button data-z="town">🏛️ Town hall</button>
     <button data-z="gym">💪 Gym</button>
     <button data-z="beach">🏖️ Beach</button>
@@ -678,6 +776,7 @@ img.imgm{display:block;max-width:220px;max-height:200px;width:auto;height:auto;b
 <nav class="topbar" id="topbar" aria-label="Menus">
   <button class="tb tbme" data-dd="me" title="You: status, mic and actions" aria-haspopup="true" aria-expanded="false"><span class="tbav" id="tbAv">?</span><span class="tbst" id="tbSt">💻</span></button>
   <button class="tb" id="tbMic" title="Mic (M)" aria-pressed="false">🎤<span class="tbslash"></span></button>
+  <button class="tb" id="tbRooms" title="Rooms" aria-haspopup="dialog">🚪</button>
   <button class="tb" data-dd="team" title="Team" aria-haspopup="true" aria-expanded="false">👥<span class="rdot" id="bTeam" hidden></span></button>
   <button class="tb" data-dd="tasks" title="Tasks" aria-haspopup="true" aria-expanded="false">✅<span class="rdot" id="bTasks" hidden></span></button>
   <button class="tb" data-dd="music" title="Music" aria-haspopup="true" aria-expanded="false">🎵<span class="rdot" id="bMusic" hidden></span></button>
@@ -3355,7 +3454,7 @@ function main(){
     if (audio.ctx.state === 'suspended') { try { audio.ctx.resume(); } catch (e) {} }
     return audio.ctx;
   }
-  function outGain() { if (audio.gain) audio.gain.gain.value = audio.speaker ? audio.vol : 0; }
+  function outGain() { if (audio.gain) audio.gain.gain.value = audio.speaker ? audio.vol : 0; try { if (typeof thAudioSync === 'function') thAudioSync(); } catch (e) {} }
   window.addEventListener('pointerdown', () => { try { actx(); } catch (e) {} try { if (typeof VOICE !== 'undefined' && audio.speaker && typeof vPlay === 'function') VOICE.peers.forEach(vPlay); } catch (e) {} }, true);
   function blip() {
     if (!audio.speaker || !audio.ctx) return;
@@ -3689,6 +3788,7 @@ function main(){
       d.innerHTML = '<span class="av sm" style="--c:' + w.color + '">' + esc(w.name[0]) + '</span><div class="mb"><div class="mh">' + label + fmtT(t0) + '<button class="rp" data-reply="' + mid + '" title="Reply" aria-label="Reply">↩</button></div>' + reHtml(o.re) + (imgOf(text) ? '<div class="mt imgmt">' + imgHTML(imgOf(text), 'imgm') + '</div></div>' : '<div class="mt">' + (voice ? '<span class="vc" title="Said out loud">🎙️</span>' : '') + fmtMsg(text) + '</div></div>');
       MSGS.set(mid, { who: who, name: who === 'me' ? me.name : w.name, text: text, el: d, wh: wh, to: o.to || null });
       if (MSGS.size > 300) MSGS.delete(MSGS.keys().next().value);
+      if (!o.late) { try { thChatAdd(who, who === 'me' ? me.name : w.name, text, wh); } catch (e) {} }
       w.speech = { text: text, until: Date.now() + 5500, whisper: wh, to: o.to || null };
       if (!o.late) hbChat(w, (o.re ? '↩ ' : '') + text, wh, o.to || null, (priv ? 'room' : '') + (pinged || (who !== 'me' && mentionsMe(text)) ? ' ment' : ''));
       if (voice && who !== 'me' && !isImg(text)) w.talkUntil = Date.now() + Math.min(6000, 900 + text.length * 55);
@@ -5679,7 +5779,7 @@ function main(){
     const t = currentTask(me), f = me.fx || {};
     return { name: me.name, role: me.role, look: me.look, status: me.status, custom: me.status === 'custom' ? me.custom : null, mic: !!me.mic, emote: e,
       held: me.held ? me.held.id : null, talk: !!mic.talking, fx: { s: Math.round(baseSpd(me) * 100) / 100, t: !!(f.tipsy && f.tipsy > Date.now()), d: drunkLv(me) },
-      desk: me.desk ? me.desk.id : null, task: t ? { title: t.title, p: Math.round(t.progress) } : null, zone: inRoom(me) ? 'room' : 'floor' };
+      desk: me.desk ? me.desk.id : null, task: t ? { title: t.title, p: Math.round(t.progress) } : null, zone: inRoom(me) ? 'room' : 'floor', call: (typeof CALL !== 'undefined' && CALL.id) || null };
   }
   const r2 = v => Math.round(v * 100) / 100;
   function moveSig() { const a = me.at; if (!a) return ''; return JSON.stringify([a.pos, a.face == null ? null : r2(a.face), a.sit || 0, a.type === 'desk' ? a.id : 0, me.path.length ? 1 : 0]); }
@@ -5713,7 +5813,7 @@ function main(){
     ws.onmessage = ev => { let m; try { m = JSON.parse(ev.data); } catch (e) { return; } try { netHandle(m); } catch (e) { if (window.console) console.warn('Virtual Office:', e); } };
     ws.onclose = () => {
       const was = NET.on; NET.ws = null; NET.on = false;
-      closeAllVoice(); thNetDown(); hallNetDown();
+      closeAllVoice(); thNetDown(); hallNetDown(); callNetDown();
       workers.filter(w => w.remote).map(w => w.netId).forEach(removePeer);
       if (NET.full) { netStatus('full'); return; }
       if (NET.locked) { netStatus('locked'); return; }
@@ -5751,7 +5851,7 @@ function main(){
       netStatus('on');
     } else if (m.t === 'leave') {
       const w = peerW(m.id); if (w) post(null, w.name + ' left the office');
-      closeVPeer(String(m.id)); gamesPeerLeft(String(m.id)); billPeerLeft(String(m.id)); arcPeerLeft(String(m.id)); thPeerLeft(String(m.id)); removePeer(m.id); netStatus('on');
+      closeVPeer(String(m.id)); gamesPeerLeft(String(m.id)); billPeerLeft(String(m.id)); arcPeerLeft(String(m.id)); thPeerLeft(String(m.id)); callPeerLeft(String(m.id)); removePeer(m.id); netStatus('on');
     } else if (m.t === 'state') { const w = peerW(m.id); if (w) applyPatch(w, m.patch); }
     else if (m.t === 'chat') { const w = peerW(m.from); if (w && m.text) post(w.id, String(m.text).slice(0, 300), { net: true, to: m.to ? 'me' : null, voice: !!m.voice, priv: !!m.priv, mid: m.mid ? String(m.mid).slice(0, 24) : null, re: reIn(m.re) }); }
     else if (m.t === 'va') { if (typeof m.d === 'string') svReceive(String(m.from || ''), m.d, m.s); }
@@ -5763,7 +5863,7 @@ function main(){
     else if (m.t === 'ev' && m.k === 'hall') hallNet(m);
     else if (m.t === 'snap') thSnapIn(m.d);
     else if (m.t === 'ev') { const w0 = peerW(m.from); hush(w0, () => netEvent(w0, m)); }
-    else if (m.t === 'rtc') { if (m.data && m.data.scr) thRtc(String(m.from || ''), m.data); else onRtc(String(m.from || ''), m.data); }
+    else if (m.t === 'rtc') { if (m.data && m.data.scr) thRtc(String(m.from || ''), m.data); else if (m.data && m.data.ss) ssRtc(String(m.from || ''), m.data); else onRtc(String(m.from || ''), m.data); }
     else if (m.t === 'token' && m.token) saveToken(String(m.token));
     else if (m.t === 'auth') onAuth(m);
     else if (m.t === 'locked') {
@@ -5842,6 +5942,7 @@ function main(){
       if (p.status && STATUS[p.status]) w.status = p.status;
       if ('custom' in p && p.custom && typeof p.custom === 'object') w.custom = { emoji: String(p.custom.emoji || '😀').slice(0, 4), text: String(p.custom.text || '').slice(0, 28), place: 'desk' };
       if ('mic' in p) w.mic = !!p.mic;
+      if ('call' in p) { const c = p.call ? String(p.call).slice(0, 40) : null; if (c !== w.callId) { w.callId = c; w.bkey = ''; } }
       if ('talk' in p) w.netTalk = !!p.talk;
       if ('task' in p) w.netTask = p.task && p.task.title ? { title: String(p.task.title).slice(0, 60), p: Math.max(0, Math.min(100, +p.task.p || 0)) } : null;
       if (p.fx && typeof p.fx === 'object') {
@@ -5878,6 +5979,7 @@ function main(){
     try {
       if (m.k === 'react' && RX[m.type]) react(w, m.type, true);
       else if (m.k === 'slap') { const tgt = m.to === NET.id ? me : peerW(m.to); if (tgt && tgt !== w) doMelee(w, tgt, 'slap'); }
+      else if (m.k === 'call') callNet(w, m);
       else if (m.k === 'dance' && m.style === 'sweet') { if (!me.carriedBy && !me.flying) { me.path = []; me.pendAtk = null; me.tyaw = Math.atan2(w.x - me.x, w.z - me.z); if (me.emote && me.emote.type !== 'dance') setEmote(me, null); toast('💞 ' + w.name + ' asked you for a sweet dance!'); startDance(me, 'sweet', 40); } }
       else if (m.k === 'dance' && DN[m.style]) { toast('💃 ' + w.name + ' pulled you into the ' + DN[m.style].name + '!'); startDance(me, m.style); }
       else if (m.k === 'touch') {
@@ -6108,10 +6210,267 @@ function main(){
       }
     } catch (e) { closeVPeer(from); }
   }
+  // ================= 🎧 focus at your desk + 📞 private talks (2 or more people) =================
+  // Sitting at your desk in the office = focus mode: you don't hear the office and the office doesn't hear you.
+  // Stand up or walk around and you hear people near you again. 📞 Talk (Team list or a person's card) starts a private talk.
+  // Everyone in a talk shares a talk id (sent with their state), hears only the others in it, and anyone else can ask to join.
+  const CALL = { id: null, out: null, outKind: 'talk', outKey: '', outT: 0, inv: null, invKind: 'talk', invKey: '', invT: 0, t0: 0, micWas: false, focus: false, focusTold: 0, aloneT: 0 };
+  function isFocus(w) { return !!(w && typeof w.x === 'number' && w.mode === 'sit' && !w.path.length && w.at && w.at.type === 'desk' && zoneAt(w.x, w.z) === 'office' && !inRoom(w)); }
+  const callOf = w => !w ? null : w === me ? CALL.id : (w.callId || null);
+  function callGain(w) {   // null = talks don't apply; 1/0 = hear / don't hear
+    const mine = CALL.id, theirs = callOf(w);
+    if (mine) return theirs === mine ? 1 : 0;
+    if (theirs) return 0;
+    return null;
+  }
+  const callW = id => peerW(String(id || ''));
+  const callName = id => { const w = callW(id); return w ? w.name : 'Someone'; };
+  const mates = key => key ? workers.filter(w => w.remote && w.netId && w.callId === key) : [];   // the other people in a talk
+  const namesOf = list => { const n = list.map(w => w.name); return n.length <= 2 ? n.join(' and ') : n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1]; };
+  const newKey = () => 'c' + String(NET.id || 'x').slice(0, 12) + Date.now().toString(36);
+  function callSend(act, to, key) { if (!NET.on) { toast('📞 Connecting to the server… try again in a moment.'); return false; } const m = { t: 'ev', k: 'call', act: act, to: String(to) }; if (key) m.key = String(key); netSend(m); return true; }
+  // press the button next to someone: talk, join their talk, cancel a request or leave
+  function callAsk(id) {
+    id = String(id || ''); const w = callW(id); if (!w) return;
+    if (!ONLINE) { toast('📞 Talking works in the online office.'); return; }
+    if (CALL.id && w.callId === CALL.id) { callEnd(true); return; }
+    if (CALL.out === id) { callSend('cancel', id); CALL.out = null; renderTeam(); callUI(); toast('📞 Request cancelled.'); return; }
+    if (CALL.id) { toast('📞 You’re already in a talk with ' + namesOf(mates(CALL.id)) + '. Leave it first.'); return; }
+    if (CALL.out) callSend('cancel', CALL.out);
+    const join = !!w.callId, key = join ? w.callId : newKey();   // a new talk: you pick its id, they reply with it
+    if (!callSend(join ? 'join' : 'ask', id, key)) return;
+    CALL.out = id; CALL.outKind = join ? 'join' : 'talk'; CALL.outKey = key; CALL.outT = Date.now(); renderTeam(); callUI();
+    toast(join ? '📞 Asking to join the conversation with ' + namesOf(mates(w.callId)) + '…' : '📞 Calling ' + w.name + '…');
+  }
+  function callStart(key, fromId, joined) {
+    CALL.id = String(key).slice(0, 40); CALL.out = null; CALL.inv = null; CALL.t0 = Date.now(); CALL.aloneT = 0; callInvEl.hidden = true;
+    const fw = callW(fromId); if (fw) fw.callId = CALL.id;   // they just told us they're in this talk: don't wait for their next update
+    CALL.micWas = !!mic.on; if (!mic.on) { try { micOn(); } catch (e) {} }
+    const others = mates(CALL.id);
+    toast(joined ? '📞 You joined the conversation with ' + namesOf(others) + '.' : '📞 You’re talking with ' + (others.length ? namesOf(others) : callName(fromId)) + '. Only people in this talk can hear you.');
+    try { tsound('chime'); } catch (e) {}
+    VOICE.t = 1; netFlush(); renderTeam(); callUI();
+  }
+  function callEnd(tell, why) {
+    const key = CALL.id; if (!key) return;
+    const was = mates(key);
+    if (tell) was.forEach(w => callSend('end', w.netId, key));
+    if (was.length === 1) was[0].callId = null;   // a talk of two ends for both: don't wait for their update
+    CALL.id = null; CALL.t0 = 0; CALL.aloneT = 0;
+    if (SS.local) ssStop(true); if (SS.from) ssClearView();
+    if (!CALL.micWas && mic.on) { try { micOff(); } catch (e) {} }
+    toast(why || '📞 You left the talk. ' + (isFocus(me) ? 'Back to focus 🎧' : 'You can hear people near you again.'));
+    VOICE.t = 1; netFlush(); renderTeam(); callUI();
+  }
+  // requests: someone wants to talk to you, or to join your talk
+  const callInvEl = document.createElement('div'); callInvEl.className = 'callinv'; callInvEl.hidden = true; document.body.appendChild(callInvEl);
+  function callInvite(id, kind, key) {
+    CALL.inv = String(id); CALL.invKind = kind; CALL.invKey = key || ''; CALL.invT = Date.now();
+    const others = mates(CALL.id).filter(w => String(w.netId) !== String(id));
+    callInvEl.innerHTML = kind === 'join'
+      ? '<div class="cih">➕ <b>' + esc(callName(id)) + '</b> wants to join your conversation</div><div class="cis">' + (others.length ? 'You’re talking with ' + esc(namesOf(others)) + '. ' : '') + 'If you let them in, everyone in the talk hears each other.</div><div class="acts"><button data-call="yes" class="on">Let them join</button><button data-call="no">Not now</button></div>'
+      : '<div class="cih">📞 <b>' + esc(callName(id)) + '</b> wants to talk</div><div class="cis">Just the two of you. Nobody else hears.</div><div class="acts"><button data-call="yes" class="on">Talk</button><button data-call="no">Not now</button></div>';
+    callInvEl.hidden = false; try { tsound('ding'); setTimeout(() => tsound('ding'), 400); } catch (e) {}
+  }
+  callInvEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-call]'); if (!b) return; const id = CALL.inv, kind = CALL.invKind, key = CALL.invKey; callInvEl.hidden = true; CALL.inv = null; if (!id) return;
+    if (b.dataset.call !== 'yes') { callSend('no', id); return; }
+    if (kind === 'join') { if (!CALL.id) { callSend('no', id); return; } callSend('ok', id, CALL.id); const w = callW(id); if (w) w.callId = CALL.id; post(null, '📞 ' + callName(id) + ' joined your talk.'); VOICE.t = 1; renderTeam(); callUI(); return; }
+    if (CALL.id) callEnd(true);
+    const k = key || newKey(); if (callSend('ok', id, k)) callStart(k, id);
+  });
+  function callNet(w, m) {
+    const id = String(m.from || (w && w.netId) || ''), a = m.act, key = m.key ? String(m.key).slice(0, 40) : '';
+    if (!id || (m.to && String(m.to) !== String(NET.id))) return;
+    if (a === 'ask') { if (CALL.id || CALL.inv) { callSend('busy', id); return; } if (CALL.out === id) { const k = CALL.outKey < (key || '~') ? CALL.outKey : key; callSend('ok', id, k); callStart(k, id); return; } callInvite(id, 'talk', key || newKey()); }
+    else if (a === 'join') { if (!CALL.id || key !== CALL.id) { callSend('no', id); return; } if (CALL.inv) { callSend('busy', id); return; } callInvite(id, 'join', key); }
+    else if (a === 'ok') {
+      if (CALL.out === id && !CALL.id && (key || CALL.outKey)) callStart(key || CALL.outKey, id, CALL.outKind === 'join');
+      else callSend('end', id, key);
+    }
+    else if (a === 'no') { if (CALL.out === id) { CALL.out = null; toast('📞 ' + callName(id) + (CALL.outKind === 'join' ? ' didn’t let you join right now.' : ' can’t talk right now.')); } }
+    else if (a === 'busy') { if (CALL.out === id) { CALL.out = null; toast('📞 ' + callName(id) + ' is busy right now. Try again in a moment.'); } }
+    else if (a === 'cancel') { if (CALL.inv === id) { CALL.inv = null; callInvEl.hidden = true; } }
+    else if (a === 'end') { if (CALL.id && key === CALL.id && w) { w.callId = null; const left = mates(CALL.id); if (!left.length) callEnd(false, '📞 ' + callName(id) + ' left, so the talk ended.'); else toast('📞 ' + callName(id) + ' left the talk.'); } }
+    renderTeam(); callUI();
+  }
+  function callPeerLeft(id) {
+    id = String(id || '');
+    if (CALL.out === id) CALL.out = null;
+    if (CALL.inv === id) { CALL.inv = null; callInvEl.hidden = true; }
+    if (CALL.id) setTimeout(() => { if (CALL.id && !mates(CALL.id).length) callEnd(false, '📞 Everyone else left, so the talk ended.'); }, 50);
+  }
+  function callNetDown() { if (CALL.id) callEnd(false, '📞 Connection lost, so the talk ended.'); CALL.out = null; CALL.inv = null; callInvEl.hidden = true; }
+  // the bar while you're in a talk, and the focus chip while you're at your desk
+  const callBar = document.createElement('div'); callBar.className = 'callbar'; callBar.hidden = true; document.body.appendChild(callBar);
+  const focusChip = document.createElement('div'); focusChip.className = 'focuschip'; focusChip.hidden = true; focusChip.title = 'You’re seated at your desk: the office is quiet for you. Stand up to hear people near you.'; focusChip.textContent = '🎧 Focus'; document.body.appendChild(focusChip);
+  callBar.addEventListener('click', e => { const b = e.target.closest('[data-cb]'); if (!b) return; if (b.dataset.cb === 'end') callEnd(true); else if (b.dataset.cb === 'mic') toggleMic(); else if (b.dataset.cb === 'share') ssStart(); else if (b.dataset.cb === 'view') ssShow(); else if (b.dataset.cb === 'cancel' && CALL.out) { callSend('cancel', CALL.out); CALL.out = null; renderTeam(); callUI(); } });
+  function callUI() {
+    { const wc = typeof card !== 'undefined' ? byId[card.dataset.id] : null, sig = [CALL.id, CALL.out, wc && wc.callId, wc && mates(wc.callId).length, !!(typeof SS !== 'undefined' && SS.local)].join('|'); if (wc && wc.remote && !card.hidden && !cs.wsp && !cs.open && !cs.look && card._callSig !== sig) { card._callSig = sig; renderCard(); } else if (typeof card !== 'undefined') card._callSig = sig; }
+    if (CALL.id) {
+      const s = Math.floor((Date.now() - CALL.t0) / 1000), tm = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'), others = mates(CALL.id);
+      callBar.hidden = false; callBar.className = 'callbar on';
+      callBar.innerHTML = '<span class="cbd"></span><span>📞 ' + (others.length > 1 ? 'Group talk' : 'Talking') + ' with <b>' + esc(others.length ? namesOf(others) : '…') + '</b> · ' + tm + '</span><button data-cb="mic" class="' + (mic.on ? '' : 'off') + '" title="Mic (M)">' + (mic.on ? '🎤 Mic on' : '🔇 Muted') + '</button>' +
+        (SS.from && SS.hidden ? '<button data-cb="view" class="ssv">👁️ View ' + esc(callName(SS.from)) + '’s screen</button>' : '') +
+        '<button data-cb="share" class="' + (SS.local ? 'ssing' : '') + '" title="Share your screen with the people in this talk">' + (SS.local ? '■ Stop sharing' : '🖥️ Share screen') + '</button><button data-cb="end" class="end">■ ' + (others.length > 1 ? 'Leave' : 'End') + '</button>';
+    } else if (CALL.out) { callBar.hidden = false; callBar.className = 'callbar'; callBar.innerHTML = '<span>📞 ' + (CALL.outKind === 'join' ? 'Asking to join' : 'Calling') + ' <b>' + esc(callName(CALL.out)) + '</b>…</span><button data-cb="cancel">Cancel</button>'; }
+    else callBar.hidden = true;
+    focusChip.hidden = !(ONLINE && CALL.focus && !CALL.id);
+  }
+  function callTick() {
+    const f = isFocus(me);
+    if (f !== CALL.focus) {
+      CALL.focus = f;
+      if (ONLINE && Date.now() - CALL.focusTold > 4000) { CALL.focusTold = Date.now(); if (f || !CALL.id) toast(f ? '🎧 Focus mode: seated at your desk, you don’t hear the office and it doesn’t hear you. Stand up to join in, or 📞 Talk to someone from the 👥 Team list.' : '🔊 You can hear people near you again.'); }
+      VOICE.t = 1; renderTeam();
+    }
+    if (CALL.id) {   // everyone else has gone (their state no longer shows this talk): end it
+      if (mates(CALL.id).length) CALL.aloneT = 0;
+      else if (Date.now() - CALL.t0 > 6000) { if (!CALL.aloneT) CALL.aloneT = Date.now(); else if (Date.now() - CALL.aloneT > 4000) callEnd(false, '📞 Everyone else left, so the talk ended.'); }
+    }
+    if (CALL.out && Date.now() - CALL.outT > 30000) { callSend('cancel', CALL.out); toast('📞 ' + callName(CALL.out) + ' didn’t answer.'); CALL.out = null; renderTeam(); }
+    if (CALL.inv && Date.now() - CALL.invT > 30000) { callSend('no', CALL.inv); CALL.inv = null; callInvEl.hidden = true; }
+    const ts = workers.map(w => (w.callId || '') + (w === me ? CALL.id : '')).join(','); if (ts !== CALL.ts) { CALL.ts = ts; renderTeam(); }
+    callUI();
+  }
+  setInterval(() => { try { callTick(); } catch (e) {} }, 500);
+  // what a person's button says, for the 👥 Team list and the person card
+  function callState(w) {
+    const id = String(w.netId), key = w.callId || null;
+    if (CALL.id && key === CALL.id) return { k: 'in', n: mates(CALL.id).length };
+    if (CALL.out === id) return { k: 'wait', join: CALL.outKind === 'join' };
+    if (key) return { k: 'join', with: mates(key).filter(x => x !== w) };
+    if (CALL.id) return { k: 'busy' };
+    return { k: 'talk' };
+  }
+  function callBtn(w) {
+    if (!ONLINE || !w.remote || !w.netId) return '';
+    const id = esc(String(w.netId)), s = callState(w);
+    if (s.k === 'in') return '<button class="tkb on" data-call-id="' + id + '">■ ' + (s.n > 1 ? 'Leave talk' : 'End talk') + '</button>';
+    if (s.k === 'wait') return '<button class="tkb wait" data-call-id="' + id + '">📞 ' + (s.join ? 'Asking…' : 'Calling…') + ' ✕</button>';
+    if (s.k === 'join') return '<button class="tkb join" data-call-id="' + id + '" title="Ask to join their conversation">➕ Join conversation</button>';
+    return '<button class="tkb" data-call-id="' + id + '"' + (s.k === 'busy' ? ' disabled title="You’re already in a talk"' : '') + '>📞 Talk</button>';
+  }
+  function callPill(w) {   // the line under a name: who they're talking with
+    if (!ONLINE) return '';
+    const key = callOf(w); if (!key) return '';
+    const others = (w === me ? mates(key) : mates(key).filter(x => x !== w).concat(CALL.id === key ? [me] : [])).map(x => x === me ? 'you' : x.name);
+    return ' <span class="pill" style="--c:#22c55e">📞 ' + (others.length ? 'Talking with ' + esc(others.length <= 2 ? others.join(' and ') : others.slice(0, -1).join(', ') + ' and ' + others[others.length - 1]) : 'In a talk') + '</span>';
+  }
+
+  // ================= 🖥️ screen sharing inside a 📞 talk (for getting help) =================
+  // The sharer sends their screen straight to each person in the talk. Viewers see it fill 100% of the window.
+  const SS = { local: null, pcs: new Map(), from: null, pc: null, stream: null, hidden: false, after: null, t: 0 };
+  const ssView = document.createElement('div'); ssView.id = 'ssView'; ssView.className = 'ssview'; ssView.hidden = true;
+  ssView.innerHTML = '<video id="ssVid" autoplay playsinline></video><div class="ssbar"><span>🖥️ <b id="ssWho"></b>’s screen</span><button id="ssFs" title="Full screen">⛶ Full screen</button><button id="ssX" title="Hide (Esc)">✕ Hide</button></div><div class="ssmsg" id="ssMsg">⏳ Connecting to the screen…</div><button id="ssHear" class="thhear" hidden>🔊 Click to hear the shared screen</button>';
+  document.body.appendChild(ssView);
+  const ssVid = $('ssVid'); try { sinkEl(ssVid, spkId()); } catch (e) {}
+  function ssShow() {
+    if (!SS.from) return;
+    SS.hidden = false; ssView.hidden = false; $('ssWho').textContent = callName(SS.from);
+    $('ssMsg').hidden = !!ssVid.srcObject; closeCard(); if (typeof closeDD === 'function') closeDD();
+    callUI();
+  }
+  function ssHide() { SS.hidden = true; ssView.hidden = true; try { if (document.fullscreenElement === ssView) document.exitFullscreen(); } catch (e) {} callUI(); }
+  function ssClearView() { SS.from = null; SS.stream = null; try { ssVid.srcObject = null; } catch (e) {} if (SS.pc) { try { SS.pc.close(); } catch (e) {} SS.pc = null; } ssView.hidden = true; try { if (document.fullscreenElement === ssView) document.exitFullscreen(); } catch (e) {} callUI(); }
+  $('ssX').addEventListener('click', ssHide);
+  $('ssFs').addEventListener('click', () => { try { if (document.fullscreenElement) document.exitFullscreen(); else if (ssView.requestFullscreen) ssView.requestFullscreen(); } catch (e) {} });
+  $('ssHear').addEventListener('click', () => { $('ssHear').hidden = true; try { const p = ssVid.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape' && !ssView.hidden) ssHide(); });
+  // ---- sharing my screen ----
+  async function ssStart() {
+    if (!ONLINE) { toast('🖥️ Screen sharing works in the online office.'); return; }
+    if (!CALL.id) { toast('🖥️ Start a 📞 Talk first, then share your screen with the people in it.'); return; }
+    if (SS.local) { ssStop(); return; }
+    const md = navigator.mediaDevices;
+    if (!md || typeof md.getDisplayMedia !== 'function') { toast('🖥️ This browser can’t share the screen. Use Chrome or Edge on a computer.'); return; }
+    let s;
+    try { s = await md.getDisplayMedia({ video: { frameRate: { ideal: 15, max: 30 }, width: { max: 1920 }, height: { max: 1080 } }, audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, selfBrowserSurface: 'exclude', surfaceSwitching: 'include', systemAudio: 'include' }); }
+    catch (e) { toast(e && e.name === 'NotAllowedError' ? '🖥️ Screen sharing was cancelled.' : '🖥️ Couldn’t share the screen (' + ((e && e.name) || 'error') + ').'); return; }
+    const vt = s && s.getVideoTracks()[0]; if (!vt) { try { s.getTracks().forEach(t => t.stop()); } catch (e) {} return; }
+    if (!CALL.id) { s.getTracks().forEach(t => t.stop()); return; }
+    try { vt.contentHint = 'detail'; } catch (e) {}
+    SS.local = s; vt.addEventListener('ended', () => { if (SS.local === s) ssStop(); });
+    mates(CALL.id).forEach(w => ssOffer(String(w.netId)));
+    toast('🖥️ You’re sharing your screen with ' + namesOf(mates(CALL.id)) + '. Press ■ Stop sharing when you’re done.');
+    callUI();
+  }
+  function ssStop(quiet) {
+    const s = SS.local; SS.local = null;
+    if (s) { try { s.getTracks().forEach(t => t.stop()); } catch (e) {} }
+    SS.pcs.forEach((pc, id) => { try { pc.close(); } catch (e) {} if (NET.on) netSend({ t: 'rtc', to: id, data: { ss: 1, type: 'stop', sdp: '' } }); });
+    SS.pcs.clear(); if (s && !quiet) toast('🖥️ You stopped sharing your screen.');
+    callUI();
+  }
+  async function ssOffer(id) {
+    if (!SS.local || SS.pcs.has(id) || typeof RTCPeerConnection === 'undefined') return;
+    const pc = new RTCPeerConnection({ iceServers: iceServers() }); SS.pcs.set(id, pc);
+    try {
+      const v = SS.local.getVideoTracks()[0], a = SS.local.getAudioTracks()[0];
+      const vs = pc.addTransceiver('video', { direction: 'sendonly' }).sender, as = pc.addTransceiver('audio', { direction: 'sendonly' }).sender;
+      if (v) { const r = vs.replaceTrack(v); if (r && r.catch) r.catch(() => {}); } if (a) { const r = as.replaceTrack(a); if (r && r.catch) r.catch(() => {}); }
+      pc.onconnectionstatechange = () => { if (SS.pcs.get(id) !== pc) return; if (pc.connectionState === 'failed') { SS.pcs.delete(id); try { pc.close(); } catch (e) {} setTimeout(() => { if (SS.local && CALL.id && callW(id) && callW(id).callId === CALL.id) ssOffer(id); }, 2000); } };
+      await pc.setLocalDescription(await pc.createOffer());
+      try { const p = vs.getParameters(); if (!p.encodings || !p.encodings.length) p.encodings = [{}]; p.encodings[0].maxBitrate = 3000000; const r = vs.setParameters(p); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+      await iceDone(pc);
+      if (SS.pcs.get(id) !== pc) return;
+      netSend({ t: 'rtc', to: id, data: { ss: 1, type: 'offer', sdp: pc.localDescription.sdp } });
+    } catch (e) { SS.pcs.delete(id); try { pc.close(); } catch (er) {} }
+  }
+  // ---- receiving someone's screen ----
+  async function ssRtc(from, data) {
+    if (!from || !data) return;
+    if (data.type === 'stop') { if (SS.from === from) { ssClearView(); toast('🖥️ ' + callName(from) + ' stopped sharing their screen.'); } return; }
+    if (typeof data.sdp !== 'string' || data.sdp.length > 20000) return;
+    if (data.type === 'answer') { const pc = SS.pcs.get(from); if (pc && pc.signalingState === 'have-local-offer') { try { await pc.setRemoteDescription({ type: 'answer', sdp: data.sdp }); } catch (e) {} } return; }
+    if (data.type !== 'offer') return;
+    const w = callW(from); if (!w || !CALL.id || w.callId !== CALL.id) return;   // only from people in my talk
+    if (SS.pc) { try { SS.pc.close(); } catch (e) {} }
+    const pc = new RTCPeerConnection({ iceServers: iceServers() }), ms = new MediaStream();
+    SS.pc = pc; SS.from = from; SS.stream = ms; try { ssVid.srcObject = null; } catch (e) {}
+    pc.ontrack = e => {
+      if (SS.pc !== pc) return; const tr = e.track;
+      ms.getTracks().filter(t => t.kind === tr.kind && t !== tr).forEach(t => ms.removeTrack(t)); if (ms.getTracks().indexOf(tr) < 0) ms.addTrack(tr);
+      try { ssVid.srcObject = ms; ssVid.muted = !audio.speaker; ssVid.volume = Math.max(0, Math.min(1, audio.vol)); const p = ssVid.play(); if (p && p.catch) p.catch(() => { $('ssHear').hidden = false; }); } catch (er) {}
+      $('ssMsg').hidden = true;
+    };
+    try {
+      await pc.setRemoteDescription({ type: 'offer', sdp: data.sdp });
+      await pc.setLocalDescription(await pc.createAnswer());
+      await iceDone(pc);
+      if (SS.pc !== pc) return;
+      netSend({ t: 'rtc', to: from, data: { ss: 1, type: 'answer', sdp: pc.localDescription.sdp } });
+    } catch (e) { if (SS.pc === pc) ssClearView(); return; }
+    toast('🖥️ ' + callName(from) + ' is sharing their screen with you.'); try { tsound('chime'); } catch (e) {}
+    ssShow();
+  }
+  function ssTick() {
+    if (SS.local) {
+      if (!CALL.id) { ssStop(true); toast('🖥️ The talk ended, so screen sharing stopped.'); return; }
+      const ids = new Set(mates(CALL.id).map(w => String(w.netId)));
+      ids.forEach(id => { if (!SS.pcs.has(id)) ssOffer(id); });   // someone joined the talk: send them the screen too
+      SS.pcs.forEach((pc, id) => { if (!ids.has(id)) { try { pc.close(); } catch (e) {} SS.pcs.delete(id); } });
+    }
+    if (SS.from && (!CALL.id || !callW(SS.from) || callW(SS.from).callId !== CALL.id)) { ssClearView(); }
+    if (SS.after && CALL.id && callW(SS.after) && callW(SS.after).callId === CALL.id) { SS.after = null; ssStart(); }   // 🖥️ Share my screen from a card: share once the talk starts
+    else if (SS.after && !CALL.out && !CALL.id) SS.after = null;
+    if (ssVid.srcObject) { const m = !audio.speaker; if (ssVid.muted !== m) ssVid.muted = m; }
+  }
+  setInterval(() => { try { ssTick(); } catch (e) {} }, 700);
+  function ssShareWith(w) {   // from a person's card: start a talk if needed, then share
+    if (!w || !w.remote || !w.netId) return;
+    const id = String(w.netId);
+    if (CALL.id && w.callId === CALL.id) { ssStart(); return; }
+    if (CALL.id) { toast('🖥️ You’re in a talk with ' + namesOf(mates(CALL.id)) + '. Share your screen there, or leave it first.'); return; }
+    SS.after = id; if (CALL.out !== id) callAsk(id); toast('🖥️ When ' + w.name + ' accepts the talk, pick the screen or window to share.');
+  }
+
   // How loud someone is: full volume up close, fading out by 10 tiles, silent through the meeting room glass.
   function hearGain(w, send) {   // send: true when deciding whether my voice goes to w
+    { const cg = callGain(w); if (cg !== null) return cg; }   // on a 📞 talk: only the two of you
     if (inRoom(w) !== inRoom(me)) return 0;
     if (zoneAt(w.x, w.z) !== zoneAt(me.x, me.z)) return 0;
+    if (isFocus(me) || isFocus(w)) return 0;   // 🎧 seated at a desk in the office: focus, no office voices either way
     if (zoneAt(me.x, me.z) === 'town') { try { if (hallMuted(send ? myNid() : String(w.netId || ''))) return 0; } catch (e) {} return 1; }   // in the town hall everyone hears everyone at full volume (unless the presenter turned on quiet mode)
     const d = Math.hypot(w.x - me.x, w.z - me.z);
     return d <= 3 ? 1 : d >= HEAR ? 0 : Math.max(0.12, 1 - (d - 3) / (HEAR - 3));
@@ -6326,6 +6685,11 @@ function main(){
     if (!VOICE.ok) return '<div class="vline">🎧 This browser can’t do voice chat</div>';
     const P = VOICE.peers.get(w.netId);
     if (!P) return '<div class="vline">🎧 No voice connection</div>';
+    if (CALL.id && w.callId === CALL.id) return '<div class="vline">📞 In your talk: only people in it hear each other</div>';
+    if (CALL.id) return '<div class="vline">📞 You’re in a talk with ' + esc(namesOf(mates(CALL.id))) + '</div>';
+    if (w.callId) return '<div class="vline">📞 In a private talk: press ➕ Join conversation to ask to join</div>';
+    if (isFocus(me)) return '<div class="vline">🎧 You’re focusing at your desk. Stand up to hear people, or use 📞 Talk in the Team list</div>';
+    if (isFocus(w)) return '<div class="vline">🎧 Focusing at their desk: use 📞 Talk in the Team list to reach them</div>';
     if (P.state !== 'connected') return '<div class="vline">🎧 Connecting voice…</div>';
     const g = hearGain(w);
     return '<div class="vline">' + (zoneAt(w.x, w.z) !== zoneAt(me.x, me.z) ? '🔇 In another room' : inRoom(w) !== inRoom(me) ? '🔇 Behind the meeting room glass' : g > 0 ? '🔊 In earshot: you can hear each other' : '🔇 Too far away to hear') + (w.mic ? '' : ' · they’re muted') + '</div>';
@@ -6420,14 +6784,16 @@ function main(){
     workers.forEach(w => {
       const info = stInfo(w), t = taskOf(w);
       const paused = info.key === 'break' || info.key === 'lunch' || info.key === 'meeting';
-      h += '<div class="person" data-id="' + w.id + '"><span class="av" style="--c:' + w.color + '">' + esc(w.name[0]) + '</span><div class="pm"><div class="pn"><b>' + esc(w.name) + (w.id === 'me' ? ' (you)' : '') + micTag(w) + '</b><span>' + esc(w.role) + '</span></div>' + pills(info) +
+      const foc = ONLINE && isFocus(w) && !callOf(w);
+      h += '<div class="person" data-id="' + w.id + '"><span class="av" style="--c:' + w.color + '">' + esc(w.name[0]) + '</span><div class="pm"><div class="pn"><b>' + esc(w.name) + (w.id === 'me' ? ' (you)' : '') + micTag(w) + '</b><span>' + esc(w.role) + '</span>' + callBtn(w) + '</div>' + pills(info) +
+        (foc ? ' <span class="pill" style="--c:#6366f1">🎧 Focusing</span>' : '') + callPill(w) +
         (w.emote ? ' <span class="pill" style="--c:' + emInfo(w.emote).color + '">' + emInfo(w.emote).emoji + ' ' + esc(emInfo(w.emote).label) + '</span>' : '') +
         '<div class="wk">' + (t ? (paused ? 'Paused: ' : 'Working on: ') + esc(t.title) + ' · ' + Math.round(t.progress) + '%' : 'No open tasks') + '</div>' +
         (t ? '<div class="bar"><i style="width:' + t.progress + '%"></i></div>' : '') + '</div></div>';
     });
     pTeam.innerHTML = h;
   }
-  pTeam.addEventListener('click', e => { const r = e.target.closest('[data-id]'); if (!r) return; openCard(r.dataset.id); flyToWorker(byId[r.dataset.id]); });
+  pTeam.addEventListener('click', e => { const cb = e.target.closest('[data-call-id]'); if (cb) { callAsk(cb.dataset.callId); return; } const r = e.target.closest('[data-id]'); if (!r) return; openCard(r.dataset.id); flyToWorker(byId[r.dataset.id]); });
 
   const countsEl = document.getElementById('counts');
   function renderCounts() {
@@ -6781,9 +7147,23 @@ function main(){
     if (custom) { const i = card.querySelector('#cText'); if (i) i.focus(); }
   }
   function fbtn(attr, ico, label, cls) { return '<button ' + attr + (cls ? ' class="' + cls + '"' : '') + ' title="' + esc(label) + '"><span class="fi">' + ico + '</span><span class="fl">' + esc(label) + '</span></button>'; }
+  // 📞 Talk on the person card: one wide button under the other actions
+  function cardTalk(w) {
+    if (!ONLINE || !w.remote || !w.netId || typeof CALL === 'undefined') return '';
+    const s = callState(w);
+    let lbl, sub, cls = '';
+    if (s.k === 'in') { cls = ' on'; lbl = s.n > 1 ? '■ Leave the group talk' : '■ End talk with ' + esc(w.name); sub = 'Only people in this talk can hear each other'; }
+    else if (s.k === 'wait') { cls = ' wait'; lbl = (s.join ? '➕ Asking to join… ' : '📞 Calling ' + esc(w.name) + '… ') + '(click to cancel)'; sub = 'Waiting for them to answer'; }
+    else if (s.k === 'join') { cls = ' join'; lbl = '➕ Join conversation'; sub = esc(w.name) + ' is talking with ' + esc(s.with.length ? namesOf(s.with) : 'someone') + '. They’ll be asked to let you in'; }
+    else if (s.k === 'busy') { lbl = '📞 Talk (you’re in a talk with ' + esc(namesOf(mates(CALL.id))) + ')'; sub = 'Leave your talk first'; }
+    else { lbl = '📞 Talk privately with ' + esc(w.name); sub = isFocus(w) ? '🎧 They’re focusing at their desk: a talk still reaches them' : 'Just the two of you, even while seated at your desks'; }
+    const shareOk = s.k === 'in' || s.k === 'talk';
+    const sh = !shareOk ? '' : '<button class="ctk ssb' + (s.k === 'in' && SS.local ? ' on' : '') + '" data-act="sshare"><b>' + (s.k === 'in' && SS.local ? '■ Stop sharing my screen' : '🖥️ Share my screen with ' + esc(w.name)) + '</b><span>' + (s.k === 'in' ? 'Everyone in your talk sees it full screen' : 'Starts a talk first, then shares, so they can help you') + '</span></button>';
+    return '<button class="ctk' + cls + '" data-act="talk"' + (s.k === 'busy' ? ' disabled' : '') + '><b>' + lbl + '</b><span>' + sub + '</span></button>' + sh;
+  }
   function whisperBlock(w) {
     if (w.id === 'me') return '';
-    let s = '<div class="pacts"><button class="wsp' + (cs.wsp ? ' cur' : '') + '" data-act="wsp">🤫 Whisper</button><button class="slp' + (cs.atk ? ' cur' : '') + '" data-act="atkm">🥊 Fight</button><button class="dnc" data-act="dtog">💃 Dance</button><button class="swt" data-act="sweet" title="Slow dance together">💞 Sweet</button></div>';
+    let s = '<div class="pacts"><button class="wsp' + (cs.wsp ? ' cur' : '') + '" data-act="wsp">🤫 Whisper</button><button class="slp' + (cs.atk ? ' cur' : '') + '" data-act="atkm">🥊 Fight</button><button class="dnc" data-act="dtog">💃 Dance</button><button class="swt" data-act="sweet" title="Slow dance together">💞 Sweet</button></div>' + cardTalk(w);
     if (cs.atk) s += '<div class="lbl">🤲 Carry</div><div class="fgrid cry">' + fbtn('data-act="carry"', '🤲', me.carrying === w ? 'Carrying' : 'Pick up', me.carrying === w ? 'cur' : '') + (me.carrying === w ? fbtn('data-act="cthrow"', '🚀', 'Throw') + fbtn('data-act="cdrop"', '⬇️', 'Put down') : '') + '</div>' +
       '<div class="lbl">🥊 Fight</div><div class="fgrid mel">' + Object.keys(MELEE).map(k => fbtn('data-act="atk" data-o="' + k + '"', MELEE[k][0], MELEE[k][1])).join('') + '</div>' +
       '<div class="lbl">🎯 Throw something</div><div class="fgrid thr">' + Object.keys(THROWS).filter(k => !POWERS[k]).map(k => fbtn('data-act="atk" data-o="' + k + '"', THROWS[k][0], THROWS[k][1])).join('') + '</div>' +
@@ -6894,6 +7274,8 @@ function main(){
     else if (act === 'emo2') { if (b.dataset.k === 'sit') { toggleSit(); renderCard(); } else if (b.dataset.k === 'lie') { toggleLie(); renderCard(); } else if (b.dataset.k === 'dance') danceButton(); else if (INST[b.dataset.k]) menuInstr(b.dataset.k); else setEmote(me, b.dataset.k); }
     else if (act === 'dtog') danceWith(w);
     else if (act === 'sweet') { sweetDance(w); closeCard(); }
+    else if (act === 'talk') { if (w.remote && w.netId) { callAsk(String(w.netId)); renderCard(); } }
+    else if (act === 'sshare') { if (SS.local && w.callId && w.callId === CALL.id) ssStop(); else ssShareWith(w); renderCard(); }
     else if (act === 'look' && !w.remote) { cs.look = true; renderCard(); flyToWorker(w); }
     else if (act === 'lk') { setLookField(w.look, b.dataset.f, b.dataset.v); applyLook(w); }
     else if (act === 'lkt') { toggleLookExtra(w.look, b.dataset.f); applyLook(w); }
@@ -6942,7 +7324,7 @@ function main(){
     document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.v === key));
   }
   const OFFICE_VIEWS = { workspace: 1, meeting: 1, lounge: 1, kitchen: 1 };
-  const ROOM_OF_VIEW = { games: 'game', pool: 'pool', sleep: 'sleep', court: 'court', party: 'bar', movie: 'movie', hall: 'hall', gym: 'gym', beach: 'beach' };
+  const ROOM_OF_VIEW = { games: 'game', pool: 'pool', sleep: 'sleep', court: 'court', party: 'bar', hall: 'hall', gym: 'gym', beach: 'beach' };
   function fly(key) {
     if (key === 'overview') { flyV(zoneView(ZS.cur), 'overview'); return; }
     if (ROOM_OF_VIEW[key]) { goZone(ROOM_OF_VIEW[key]); return; }
@@ -6992,6 +7374,7 @@ function main(){
     if (setupOpen) return;
     if (gameKey(e)) return;
     if (arcKey(e)) return;
+    if (rmKey(e)) return;
     const k = e.key.toLowerCase(); keys[k] = true;
     if (k === 'm' && !e.repeat && !walking) toggleMic();
     if (!e.repeat && !walking && !e.ctrlKey && !e.metaKey) { if (k === 'q') rotateCam(-1); else if (k === 'e') rotateCam(1); else if (k === 't') cycleTilt(); else if (k === 'r') resetCam(); }
@@ -7346,7 +7729,8 @@ function main(){
   function saveResume() { try { sessionStorage.setItem(RESUME_KEY, JSON.stringify({ x: me.x, z: me.z, yaw: me.yaw, mic: !!mic.on, spk: !!audio.speaker, t: Date.now() })); } catch (e) {} }
   function resumeAt(r) {
     try {
-      const p = NAVG.snap(+r.x || 0, +r.z || 0); if (!p) return false;
+      let p = NAVG.snap(+r.x || 0, +r.z || 0); if (!p) return false;
+      if (zoneAt(p[0], p[1]) === 'movie') p = NAVG.snap(-1.4, 11.4);   // the movie room has been removed: back to the hallway
       placeAt(me, { area: 'free', pos: p, anchor: p.slice(), via: [], face: isFinite(+r.yaw) ? +r.yaw : 0, sit: 0, by: null });
       me.v.root.position.set(p[0], 0, p[1]);
       setZone(zoneAt(p[0], p[1]), true);
@@ -11584,6 +11968,7 @@ function main(){
     return true;
   }
   function applyNetMovie(m, w) {
+    return;   // the movie room has been removed, so movies from older pages are ignored
     NET.rx = true;
     try { if (m.kind === 'stop') setMovie('', '', w ? w.id : null); else if (m.url) setMovie(String(m.url), String(m.title || ''), w ? w.id : null, +m.t0 || Date.now()); }
     finally { NET.rx = false; }
@@ -11649,6 +12034,7 @@ function main(){
   }
   function startWatch() {
     if (setupOpen) return;
+    if (true) { toast('🎬 The movie room has closed. Share a screen in the 🏛️ Town hall instead.'); return; }
     MV.auto = false; MV.skip = null;
     if (zoneAt(me.x, me.z) !== 'movie') { goZone('movie', () => startWatch()); return; }
     if (!seatForMovie(true)) { if (MV.pendSeat) { toast('🍿 Taking an open seat…'); return; } }
@@ -11843,15 +12229,14 @@ function main(){
   const SD = (x) => ({ d: [x, 20], ax: 'z', p: [x, 19.25] });
   const RD = id => ({ d: [SLOT[id].x0, 6.5], ax: 'x', p: [SLOT[id].x0 + 0.85, 6.5] });
   const DOORS = [
-    { a: 'hall', b: 'game', A: SD(-13.2), B: RD('game'), col: 0xb18cff },
-    { a: 'hall', b: 'pool', A: SD(-9.9), B: RD('pool'), col: 0x5fd0ff },
-    { a: 'hall', b: 'court', A: SD(-6.6), B: RD('court'), col: 0xffa04a },
-    { a: 'hall', b: 'sleep', A: SD(-3.3), B: RD('sleep'), col: 0x8fa2ff },
-    { a: 'hall', b: 'town', A: SD(0), B: RD('town'), col: 0xffd23f },
-    { a: 'hall', b: 'bar', A: SD(3.3), B: RD('bar'), col: 0xff6fd0 },
-    { a: 'hall', b: 'movie', A: SD(6.6), B: RD('movie'), col: 0xffb02e },
-    { a: 'hall', b: 'gym', A: SD(9.9), B: RD('gym'), col: 0x7cff6b },
-    { a: 'hall', b: 'beach', A: SD(13.2), B: { d: [46.4, 5], ax: 'x', p: [47.2, 5] }, col: 0x4fd6c8 },
+    { a: 'hall', b: 'game', A: SD(-12.6), B: RD('game'), col: 0xb18cff },
+    { a: 'hall', b: 'pool', A: SD(-9.0), B: RD('pool'), col: 0x5fd0ff },
+    { a: 'hall', b: 'court', A: SD(-5.4), B: RD('court'), col: 0xffa04a },
+    { a: 'hall', b: 'sleep', A: SD(-1.8), B: RD('sleep'), col: 0x8fa2ff },
+    { a: 'hall', b: 'town', A: SD(1.8), B: RD('town'), col: 0xffd23f },
+    { a: 'hall', b: 'bar', A: SD(5.4), B: RD('bar'), col: 0xff6fd0 },
+    { a: 'hall', b: 'gym', A: SD(9.0), B: RD('gym'), col: 0x7cff6b },
+    { a: 'hall', b: 'beach', A: SD(12.6), B: { d: [46.4, 5], ax: 'x', p: [47.2, 5] }, col: 0x4fd6c8 },
     { a: 'gym', b: 'beach', A: { d: [SLOT.gym.x1 - 4, -10], ax: 'z', p: [SLOT.gym.x1 - 4, -9.15] }, B: { d: [45, 0], ax: 'x', p: [45.95, 0] }, col: 0x4fd6c8 }
   ];
   partWall(15, -1.5, 15, 1.5);
@@ -11922,7 +12307,7 @@ function main(){
     const art = (seed) => canvasTex(160, 120, (c, w, h) => { const P = [['#ff7a6b', '#ffd23f', '#3aa7a0', '#2b2d33'], ['#8f6fe0', '#ffb6c8', '#b8e3ff', '#1d2233'], ['#4f9a5a', '#d9a440', '#e36f9a', '#f4f4f4']][seed]; c.fillStyle = P[3]; c.fillRect(0, 0, w, h); for (let k = 0; k < 7; k++) { c.fillStyle = P[k % 3]; c.globalAlpha = 0.85; if (k % 2) { c.beginPath(); c.arc(20 + (k * 47 + seed * 31) % 130, 18 + (k * 29 + seed * 17) % 90, 10 + (k * 7) % 22, 0, Math.PI * 2); c.fill(); } else c.fillRect((k * 37 + seed * 13) % 120, (k * 23) % 80, 20 + (k * 11) % 40, 12 + (k * 13) % 30); } c.globalAlpha = 1; });
     [[11.6, 0], [13.8, 1]].forEach(a2 => { const pic = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.05), new THREE.MeshStandardMaterial({ map: art(a2[1]), roughness: 0.6 })); pic.position.set(-14.97, 1.85, a2[0]); pic.rotation.y = Math.PI / 2; scene.add(pic); box(0.04, 1.15, 1.5, mFrame, -14.99, 1.85, a2[0]); });
     { const dt = canvasTex(512, 384, (c, w, h) => { c.fillStyle = '#1d2233'; c.fillRect(0, 0, w, h); c.strokeStyle = '#d9b46a'; c.lineWidth = 8; c.strokeRect(6, 6, w - 12, h - 12); c.fillStyle = '#ffd23f'; c.font = 'bold 40px Segoe UI, Arial, sans-serif'; c.textAlign = 'left'; c.fillText('DIRECTORY', 28, 56);
-        c.fillStyle = '#ffffff'; c.font = '25px Segoe UI, Arial, sans-serif'; ['🎲 Game room', '🏊 Pool', '🏀 Court', '😴 Sleeping', '🍻 Bar', '🎬 Movies', '💪 Gym', '🏖️ Beach'].forEach((t, k) => c.fillText(t, 28 + (k % 2) * 240, 110 + Math.floor(k / 2) * 66)); });
+        c.fillStyle = '#ffffff'; c.font = '25px Segoe UI, Arial, sans-serif'; ['🎲 Game room', '🏊 Pool', '🏀 Court', '😴 Sleeping', '🍻 Bar', '🏛️ Town hall', '💪 Gym', '🏖️ Beach'].forEach((t, k) => c.fillText(t, 28 + (k % 2) * 240, 110 + Math.floor(k / 2) * 66)); });
       const ds = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 1.72), new THREE.MeshBasicMaterial({ map: dt, toneMapped: false })); ds.position.set(-14.96, 1.95, 17.6); ds.rotation.y = Math.PI / 2; scene.add(ds); }
     // wall sconces
     [12.7, 16.1, 19.0].forEach(zz => { box(0.06, 0.2, 0.12, mDark, -14.97, 2.3, zz); cyl(0.07, 0.1, 0.16, M(0xfff1d6, { emissive: 0x553300 }), -14.88, 2.45, zz, null, 10); });
@@ -11959,6 +12344,7 @@ function main(){
   const doorSide = (D, z) => { const S = sideOf(D, z); return S ? S.p : null; };
 
   // ---- which room each piece of scenery belongs to (as render layers) ----
+  let MOVIE_REMOVED = 0;
   const zBox = new THREE.Box3();
   function zonesOfBox(b) {
     const out = [], e = 0.02;
@@ -11981,6 +12367,13 @@ function main(){
   }
   scene.updateMatrixWorld(true);
   scene.children.slice().forEach(classify);
+  // the movie room has been removed: take its scenery and lights out of the building
+  { const mb = ZBY.movie.bit, dead = [];
+    scene.traverse(o => { if (o !== scene && o.layers.mask === mb && o.parent && o.parent.layers.mask !== mb) dead.push(o); });
+    dead.forEach(o => { if (o.parent) o.parent.remove(o); });
+    scene.children.filter(o => o.isLight && o.position && zoneAt(o.position.x, o.position.z) === 'movie').forEach(o => scene.remove(o));
+    try { if (movieLight.parent) movieLight.parent.remove(movieLight); } catch (e) {}
+    MOVIE_REMOVED = dead.length; }
 
   // ---- the current room ----
   function groupRect(id) { const g = GRP(id); if (g === 'main') return [-15, 15, -10, 20]; const z = ZBY[id]; return z.view || z.fl; }
@@ -12046,6 +12439,7 @@ function main(){
   }
   const ENTRY = { office: { p: [-1.4, 8.4], from: [-1.4, 10] }, hall: { p: [-1.4, 11.4], from: [-1.4, 10] } };
   function goZone(id, then) {
+    if (id === 'movie') id = 'hall';   // the movie room has been removed
     if (!ZBY[id] || id === 'void') return;
     if (GRP(id) === GRP(ZS.cur)) { setZone(ZS.cur, false, true); if (then) then(); return; }
     me.travel = null; me.travelDoor = null;
@@ -12105,8 +12499,10 @@ function main(){
   const thView = document.createElement('div'); thView.id = 'thView'; thView.className = 'thview off';
   thView.innerHTML = '<div class="thtop"><span class="thlive">● LIVE</span><b id="thWho"></b><span id="thTtl" class="thttl"></span><span id="thFloor" class="thfloor"></span><span class="thsp"></span><span id="thQa" class="thqa2"></span>' +
     '<label class="thvol" title="Volume of the shared tab">🔊<input type="range" id="thVol" min="0" max="100"><span id="thVolPct"></span></label>' +
-    '<button id="thFs" title="Full screen">⛶</button><button id="thStop2" class="thstop" hidden>■ Stop sharing</button><button id="thExit" title="Back to the room (Esc)">⤡ Exit view</button></div>' +
-    '<div class="thscr" id="thScr"><video id="thVid" autoplay playsinline></video><img id="thImg" alt="" hidden><div id="thMsg" class="thmsg" hidden></div><button id="thHear" class="thhear" hidden>🔊 Click to hear the presentation</button></div>';
+    '<button id="thChT" title="Show or hide the chat">💬<span id="thChN" class="thchn" hidden></span></button><button id="thFs" title="Full screen">⛶</button><button id="thStop2" class="thstop" hidden>■ Stop sharing</button><button id="thExit" title="Back to the room (Esc)">⤡ Exit view</button></div>' +
+    '<div class="thbody"><div class="thscr" id="thScr"><video id="thVid" autoplay playsinline></video><img id="thImg" alt="" hidden><div id="thMsg" class="thmsg" hidden></div><button id="thHear" class="thhear" hidden>🔊 Click to hear the presentation</button></div>' +
+    '<aside class="thchat" id="thChat"><div class="thch"><b>💬 Chat</b><span id="thChQ" class="thchq"></span><button id="thChX" title="Hide chat" aria-label="Hide chat">⟩</button></div><div class="thhands" id="thHands"></div><div class="thcl" id="thChL"></div>' +
+    '<div class="thci"><input id="thChIn" maxlength="300" autocomplete="off" placeholder="Ask a question or say something…" aria-label="Chat message"><button id="thChGo" aria-label="Send">➤</button></div></aside></div>';
   document.body.appendChild(thView);
   const thVid = $('thVid'), thImg = $('thImg');
   try { sinkEl(thVid, spkId()); } catch (e) {}
@@ -12133,9 +12529,32 @@ function main(){
     if (key.indexOf('idle') === 0) thIdle(TH.by ? '⏳ Connecting to ' + thName(TH.by) + '’s presentation…' : '');
     TOWN.mat.map = map; TOWN.mat.needsUpdate = true;
   }
+  // The shared tab's sound goes through a Web Audio volume control (Chrome can ignore .volume on live streams).
+  // The video stays attached and muted so Chrome keeps decoding the stream; if Web Audio isn't ready yet, the video plays the sound itself.
+  const THA = { src: null, g: null, tid: '' };
+  function thAudioOff() { try { THA.src && THA.src.disconnect(); } catch (e) {} try { THA.g && THA.g.disconnect(); } catch (e) {} THA.src = null; THA.g = null; THA.tid = ''; }
+  function thAudioSync() {
+    const s = thVid.srcObject, local = !!TH.local;
+    const at = s && s.getAudioTracks ? (s.getAudioTracks()[0] || null) : null;
+    const want = at && at.readyState !== 'ended' && (!local || TH.selfAudio) ? at : null;   // presenting: only if Chrome stopped the tab playing it by itself
+    const c = audio.ctx, ready = !!(c && c.state === 'running' && typeof c.createMediaStreamSource === 'function');
+    const need = want ? want.id : '';
+    if (THA.tid !== need || (need && !THA.g && ready)) {
+      thAudioOff();
+      if (want && ready) { try { THA.src = c.createMediaStreamSource(new MediaStream([want])); THA.g = c.createGain(); THA.src.connect(THA.g); THA.g.connect(c.destination); THA.tid = need; } catch (e) { thAudioOff(); THA.tid = need; } }
+      else THA.tid = need;
+    }
+    const v = Math.max(0, Math.min(1, TH.vol / 100));
+    if (THA.g) { try { THA.g.gain.value = audio.speaker ? v : 0; } catch (e) {} }
+    const m = !!THA.g || (local && !TH.selfAudio) || !audio.speaker;
+    if (thVid.muted !== m) thVid.muted = m;
+    if (Math.abs((thVid.volume || 0) - v) > 0.005) { try { thVid.volume = v; } catch (e) {} }
+    const sl = document.getElementById('thVol');
+    if (sl) { const off = local && !TH.selfAudio; sl.disabled = off; sl.parentNode && (sl.parentNode.title = off ? 'Your shared tab plays its own sound: change the volume in that tab' : 'Volume of the shared screen'); }
+  }
   function thSetSrc(s, local) {
     if (thVid.srcObject !== s) { try { thVid.srcObject = s || null; } catch (e) {} }
-    thVid.muted = !!local || !audio.speaker; thVid.volume = TH.vol / 100;
+    thAudioSync();
     if (s) { try { const p = thVid.play(); if (p && p.catch) p.catch(() => { if (!local) $('thHear').hidden = false; }); } catch (e) {} }
     else $('thHear').hidden = true;
     TH.srcKey = ''; thScreen();
@@ -12152,24 +12571,25 @@ function main(){
     let s;
     try {
       s = await md.getDisplayMedia({ video: { frameRate: { ideal: 15, max: 24 }, width: { max: 1920 }, height: { max: 1080 } },
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, preferCurrentTab: false, selfBrowserSurface: 'exclude', surfaceSwitching: 'include', systemAudio: 'include' });
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, suppressLocalAudioPlayback: true }, preferCurrentTab: false, selfBrowserSurface: 'exclude', surfaceSwitching: 'include', systemAudio: 'include' });
     } catch (e) { toast(e && e.name === 'NotAllowedError' ? '🏛️ Sharing was cancelled.' : '🏛️ Couldn’t start sharing (' + ((e && e.name) || 'error') + ').'); return; }
     const vt = s && s.getVideoTracks()[0];
     if (!vt) { try { s.getTracks().forEach(t => t.stop()); } catch (e) {} return; }
     if (TH.by && TH.by !== myNid() && HALL.next !== myNid()) { s.getTracks().forEach(t => t.stop()); toast('🏛️ ' + thName(TH.by) + ' started presenting first.'); return; }
     try { vt.contentHint = 'detail'; } catch (e) {}
     const lb = String(vt.label || '');
+    { const at0 = s.getAudioTracks()[0]; let st = {}; try { st = at0 && at0.getSettings ? at0.getSettings() : {}; } catch (e) {} TH.selfAudio = !!(at0 && st.suppressLocalAudioPlayback === true); }   // the tab is silent on its own: you hear it here, at the slider's volume
     TH.local = s; TH.title = /:\/\/|^(screen|window|web-contents|tab)[:-]/i.test(lb) ? '' : lb.slice(0, 80);
     vt.addEventListener('ended', () => { if (TH.local === s) thStopShare(); });
     netSend({ t: 'ev', k: 'th', act: 'start', title: TH.title });
     TH.by = myNid(); TH.gen++; TH.autoGen = TH.gen;
     thSetSrc(s, true);
-    toast(s.getAudioTracks().length ? '🎧 You’re presenting. Tip: wear headphones so your mic doesn’t pick up the tab’s sound.' : '🔇 You’re presenting without sound. To share sound, pick a Chrome tab and turn on “Also share tab audio”.');
+    toast(s.getAudioTracks().length ? (TH.selfAudio ? '🎧 You’re presenting with sound. You hear the tab here: use 🔊 in the top bar to set its volume. Tip: wear headphones so your mic doesn’t pick it up.' : '🎧 You’re presenting. Your tab plays its own sound, so set its volume in that tab. Tip: wear headphones so your mic doesn’t pick it up.') : '🔇 You’re presenting without sound. To share sound, pick a Chrome tab and turn on “Also share tab audio”.');
     if (inTown() && TOWN.podium && !me.carriedBy && !me.flying) { const p = TOWN.podium; sendMeTo({ area: 'town', pos: p.slice(), anchor: p.slice(), via: [], face: 0, sit: 0, by: null }); }
     thEnterView();
   }
   function thStopShare() {
-    const s = TH.local; TH.local = null;
+    const s = TH.local; TH.local = null; TH.selfAudio = false;
     if (s) { try { s.getTracks().forEach(t => t.stop()); } catch (e) {} }
     if (TH.by === myNid()) { netSend({ t: 'ev', k: 'th', act: 'stop' }); post(null, '🏛️ You stopped presenting.'); }
     thEnd();
@@ -12254,6 +12674,69 @@ function main(){
     else if (data.type === 'answer') { const K = TH.kids.get(from); if (K && K.pc.signalingState === 'have-local-offer') { try { await K.pc.setRemoteDescription({ type: 'answer', sdp: data.sdp }); } catch (e) { thDropKid(from); } } }
   }
   // ---- the low-bandwidth fallback: a still picture once a second through the server ----
+
+  // ---- chat beside the shared screen, so the presenter and audience can see questions as they come in ----
+  const TCH = { list: [], open: true, unread: 0, q: 0 };
+  try { if (localStorage.getItem('virtualOffice.thChat') === '0') TCH.open = false; } catch (e) {}
+  const isQ = t => /\?|^\s*(q|question)\s*[:.-]/i.test(String(t || ''));
+  function thChatRow(m) {
+    const d = document.createElement('div');
+    d.className = 'thcm' + (m.who === 'me' ? ' mine' : '') + (m.wh ? ' wh' : '') + (m.q ? ' q' : '');
+    const w = m.who === 'me' ? me : byId[m.who];
+    d.innerHTML = '<span class="av sm" style="--c:' + esc((w && w.color) || '#888') + '">' + esc(String(m.name || '?')[0]) + '</span><div><div class="thcn"><b>' + esc(m.who === 'me' ? 'You' : m.name) + '</b>' + (m.wh ? '<i>🤫 whisper</i>' : '') + (m.q ? '<i class="qb">❓ Question</i>' : '') + '<span>' + esc(m.tm) + '</span></div><div class="thct">' + (m.img ? '🖼️ sent an image' : fmtMsg(m.text)) + '</div></div>';
+    return d;
+  }
+  function thChatAdd(who, name, text, wh) {
+    const m = { who: who, name: name, text: String(text || ''), wh: !!wh, img: isImg(text), tm: fmtT(new Date()) };
+    m.q = !m.img && who !== 'me' && isQ(m.text);
+    TCH.list.push(m); if (TCH.list.length > 120) TCH.list.shift();
+    if (m.q) TCH.q++;
+    if (!TH.view) return;
+    const L = $('thChL'); if (!L) return;
+    const near = L.scrollHeight - L.scrollTop - L.clientHeight < 80;
+    L.appendChild(thChatRow(m)); while (L.children.length > 120) L.removeChild(L.firstChild);
+    if (near || who === 'me') L.scrollTop = L.scrollHeight;
+    if (!TCH.open && who !== 'me') { TCH.unread++; }
+    if (m.q && who !== 'me' && TH.by === myNid()) { try { tsound('ding'); } catch (e) {} }
+    thChatUI();
+  }
+  function thChatFill() {
+    const L = $('thChL'); if (!L) return;
+    L.innerHTML = '';
+    if (!TCH.list.length) { const e = document.createElement('div'); e.className = 'thce'; e.textContent = 'No messages yet. Questions (anything with a ?) are highlighted.'; L.appendChild(e); }
+    TCH.list.slice(-60).forEach(m => L.appendChild(thChatRow(m)));
+    L.scrollTop = L.scrollHeight;
+  }
+  function thChatUI() {
+    if (TCH.open) thView.classList.remove('chatoff'); else thView.classList.add('chatoff');
+    thHandsRender();
+    const n = $('thChN'); if (n) { n.hidden = TCH.open || !TCH.unread; n.textContent = TCH.unread > 9 ? '9+' : String(TCH.unread); }
+    const q = $('thChQ'); if (q) q.textContent = TCH.q ? '❓ ' + TCH.q : '';
+  }
+  // the raised hands, in order, pinned above the chat
+  function thHandsRender() {
+    const el = $('thHands'); if (!el) return;
+    if (!ONLINE) { el.innerHTML = ''; el.hidden = true; return; }
+    el.hidden = false;
+    const mine = myNid(), host = hallHost(), i = HALL.hands.indexOf(mine);
+    let h = '<div class="thhh"><b>✋ Raised hands</b><span class="thhc">' + HALL.hands.length + '</span>' +
+      (TH.by === mine ? '' : HALL.floor === mine ? '<button data-thx="yield" class="thfl">🎤 Done talking</button>' : i > -1 ? '<button data-thx="lower" class="thup">Lower my hand (#' + (i + 1) + ')</button>' : '<button data-thx="hand" class="on">✋ Raise hand</button>') + '</div>';
+    if (HALL.floor) h += '<div class="thhf">🎤 ' + esc(thName(HALL.floor)) + (HALL.floor === mine ? ' have' : ' has') + ' the floor' + (host ? '<button data-thx="floor" data-v="">End</button>' : '') + '</div>';
+    if (HALL.hands.length) h += '<ol class="thhl">' + HALL.hands.map((id, k) => '<li class="' + (id === mine ? 'me' : '') + '"><span class="thhn">' + (k + 1) + '</span><span class="thhw">' + esc(thName(id)) + '</span>' +
+      (host ? '<button data-thx="floor" data-v="' + esc(id) + '" title="Let them speak">🎤</button><button data-thx="lower" data-v="' + esc(id) + '" title="Lower their hand">✕</button>' : '') + '</li>').join('') + '</ol>';
+    else h += '<div class="thhe">No hands up.</div>';
+    el.innerHTML = h;
+  }
+  function thChatSend() {
+    const i = $('thChIn'), t = String(i.value || '').trim(); if (!t) return;
+    i.value = '';
+    const keep = chatTo.value; chatTo.value = 'all';   // the town hall chat goes to everyone, not to a whisper target picked in the main chat
+    try { sendText(t); } finally { chatTo.value = keep; }
+  }
+  $('thChIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); thChatSend(); } else if (e.key === 'Escape') { e.preventDefault(); $('thChIn').blur(); } });
+  $('thChGo').addEventListener('click', thChatSend);
+  const thChTog = () => { TCH.open = !TCH.open; if (TCH.open) { TCH.unread = 0; thChatFill(); } try { localStorage.setItem('virtualOffice.thChat', TCH.open ? '1' : '0'); } catch (e) {} thChatUI(); };
+  $('thChT').addEventListener('click', thChTog); $('thChX').addEventListener('click', thChTog);
   const thSnapCv = document.createElement('canvas');
   function thSendSnap() {
     TH.snapT = Date.now();
@@ -12320,6 +12803,7 @@ function main(){
     TH.view = true; TH.fov0 = persp.fov || 46;
     closeCard(); closePantry(); closeBar(); if (typeof closeDD === 'function') closeDD(); hideDoorTip();
     document.body.classList.add('thv'); thView.classList.remove('off');
+    TCH.unread = 0; thChatFill(); thChatUI();
     thUI(true);
   }
   function thExitView() {
@@ -12341,13 +12825,13 @@ function main(){
   }
   function thUI(force) {
     const here = inTown() && !setupOpen, live = !!TH.by, mine = !!TH.local && TH.by === myNid();
-    const sig = [here, live, TH.by, TH.title, mine, TH.view, ONLINE, NET.on, TH.snap, !!thVid.srcObject, HALL.hands.join(','), HALL.floor, HALL.quiet, HALL.next, HALL.qOpen].join('|');
+    const sig = [here, live, TH.by, TH.title, mine, TH.view, ONLINE, NET.on, TH.snap, !!thVid.srcObject, me.mode === 'sit' && !me.path.length, HALL.hands.join(','), HALL.floor, HALL.quiet, HALL.next, HALL.qOpen].join('|');
     if (!force && sig === TH.sig) return; TH.sig = sig;
     thBar.hidden = !here || TH.view;
     if (!thBar.hidden) {
       let h;
       if (!ONLINE) h = '<span>🏛️ <b>Town hall</b> · presenting works in the online office</span>';
-      else if (live) h = '<span class="thdot"></span><span><b>' + esc(thName(TH.by)) + '</b> ' + (mine ? 'are' : 'is') + ' presenting' + (TH.title ? ' · ' + esc(TH.title) : '') + '</span><button data-th="watch" class="on">⤢ Watch</button>' + (mine ? '<button data-th="stop" class="thstop">■ Stop sharing</button>' : '');
+      else if (live) h = '<span class="thdot"></span><span><b>' + esc(thName(TH.by)) + '</b> ' + (mine ? 'are' : 'is') + ' presenting' + (TH.title ? ' · ' + esc(TH.title) : '') + '</span>' + (!mine && !(me.mode === 'sit' && !me.path.length) ? '<button data-th="sit" class="on">🪑 Sit & watch</button>' : '') + '<button data-th="watch"' + (mine || (me.mode === 'sit' && !me.path.length) ? ' class="on"' : '') + '>⤢ Watch</button>' + (mine ? '<button data-th="stop" class="thstop">■ Stop sharing</button>' : '');
       else h = '<span>🏛️ <b>Town hall</b> · nobody is presenting</span><button data-th="present" class="on">🖥️ Present a tab</button>';
       if (HALL.floor) h += '<span class="thfloor">' + esc(hallFloorTxt()) + '</span>';
       if (HALL.quiet && live) h += '<span class="thquiet" title="Quiet audience">🤫</span>';
@@ -12364,6 +12848,7 @@ function main(){
     else if (!thVid.srcObject) { msg.hidden = false; msg.textContent = '⏳ Connecting to ' + thName(TH.by) + '’s screen…'; }
     else msg.hidden = true;
     thVid.hidden = !!TH.snap;
+    try { thHandsRender(); } catch (e) {}
   }
   // ---- every frame / every half second ----
   function thTick(dt) {
@@ -12381,19 +12866,30 @@ function main(){
     }
     TH.kids.forEach((K, id) => { if ((K.state === 'new' || K.state === 'connecting') && now - K.t0 > 25000) thDropKid(id); });
     if (TH.local && TH.snapN > 0 && now - TH.snapT > 1000) thSendSnap();
-    if (TH.by && here && !TH.view && TH.autoGen !== TH.gen) { TH.autoGen = TH.gen; thEnterView(); }
+    const seated = here && me.mode === 'sit' && !me.path.length;   // sitting down in the town hall opens the shared screen
+    if (TH.skipAt && (!seated || me.at !== TH.skipAt)) TH.skipAt = null;
+    if (TH.by && seated && !TH.view && !TH.skipAt) thEnterView();
+    else if (TH.by && here && !seated && !TH.view && TH.autoGen !== TH.gen && TH.by !== myNid()) { TH.autoGen = TH.gen; toast('🏛️ ' + thName(TH.by) + ' is presenting. Take a seat to watch (or press 🪑 Sit & watch).'); }
     if (TH.view && !here) thExitView();
-    if (thVid.srcObject) { const m = !!TH.local || !audio.speaker; if (thVid.muted !== m) thVid.muted = m; if (Math.abs(thVid.volume - TH.vol / 100) > 0.01) thVid.volume = TH.vol / 100; }
+    if (thVid.srcObject || THA.g) thAudioSync();
     thScreen(); hallTick(); thUI(false);
   }
-  thBar.addEventListener('click', e => { const b = e.target.closest('[data-th]'); if (!b) return; const a = b.dataset.th; if (a === 'present') thPresent(); else if (a === 'watch') thEnterView(); else if (a === 'stop') thStopShare(); });
-  $('thExit').addEventListener('click', thExitView);
+  thBar.addEventListener('click', e => { const b = e.target.closest('[data-th]'); if (!b) return; const a = b.dataset.th; if (a === 'present') thPresent(); else if (a === 'sit') thSitWatch(); else if (a === 'watch') thEnterView(); else if (a === 'stop') thStopShare(); });
+  function thSitWatch() {
+    const free = TOWN.seats.filter(s => !s.by || s.by === 'me');
+    if (!free.length) { toast('🏛️ All 50 seats are taken. Press ⤢ Watch to watch standing.'); return; }
+    free.sort((a, b) => Math.hypot(a.pos[0] - me.x, a.pos[1] - me.z) - Math.hypot(b.pos[0] - me.x, b.pos[1] - me.z));
+    TH.skipAt = null; sitAt(free[0]); toast('🪑 Taking a seat… the screen opens when you sit down.');
+  }
+  function thUserExit() { if (me.mode === 'sit') TH.skipAt = me.at || true; thExitView(); }   // closed by you: it won't pop back open until you stand up or change seats
+  $('thExit').addEventListener('click', thUserExit);
   $('thStop2').addEventListener('click', thStopShare);
   $('thFs').addEventListener('click', () => { try { if (document.fullscreenElement) document.exitFullscreen(); else if (thView.requestFullscreen) thView.requestFullscreen(); } catch (e) {} });
-  $('thVol').addEventListener('input', e => { TH.vol = Math.max(0, Math.min(100, +e.target.value || 0)); $('thVolPct').textContent = TH.vol + '%'; thVid.volume = TH.vol / 100; try { localStorage.setItem('virtualOffice.thVol', String(TH.vol)); } catch (er) {} });
+  const thVolSet = e => { TH.vol = Math.max(0, Math.min(100, +e.target.value || 0)); $('thVolPct').textContent = TH.vol + '%'; try { actx(); } catch (er) {} thAudioSync(); try { localStorage.setItem('virtualOffice.thVol', String(TH.vol)); } catch (er) {} };
+  $('thVol').addEventListener('input', thVolSet); $('thVol').addEventListener('change', thVolSet);
   $('thVol').addEventListener('keydown', e => e.stopPropagation());
   $('thHear').addEventListener('click', () => { $('thHear').hidden = true; try { const p = thVid.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} });
-  window.addEventListener('keydown', e => { if (e.key === 'Escape' && TH.view) thExitView(); });
+  window.addEventListener('keydown', e => { if (e.key === 'Escape' && TH.view) thUserExit(); });
   function thScreenClick() {
     if (TH.by) { thEnterView(); return; }
     if (!ONLINE) { toast('🏛️ Presenting works in the online office (open the office link).'); return; }
@@ -12523,7 +13019,93 @@ function main(){
     if (HALL.qOpen && thQ.classList.contains('inview') !== !!TH.view) hallQRender();
   }
 
-  $('rooms').addEventListener('click', e => { const b = e.target.closest('[data-z]'); if (b) goZone(b.dataset.z); });
+  // ================= 🚪 rooms list: every room in one list, details on the right (like a game's server list) =================
+  const ROOM_LIST = [
+    ['office', '🏢', 'Office', '#3b82f6', 'Desks, the Harbour meeting room, the lounge and the pantry.'],
+    ['hall', '🚪', 'Hallway', '#b7791f', 'The lobby: sofas, a vending machine, a water cooler and a door to every room.'],
+    ['town', '🏛️', 'Town hall', '#d4a017', '50 seats and a giant screen. Share a tab to present; take a seat to watch.'],
+    ['game', '🎲', 'Game room', '#8b5cf6', 'Billiards, ping-pong, air hockey, foosball, darts, arcade games and board games.'],
+    ['pool', '🏊', 'Pool', '#0ea5e9', 'A big pool with a water slide, diving boards, a hot tub and loungers.'],
+    ['court', '🏀', 'Basketball court', '#f97316', 'A full court. Two or more people start a team match, first to 21.'],
+    ['sleep', '😴', 'Sleeping quarters', '#6366f1', 'Beds, a reading nook and some quiet.'],
+    ['bar', '🍻', 'Bar', '#ec4899', 'Drinks, a band stage, DJ decks, karaoke and disco lights.'],
+    ['gym', '💪', 'Gym', '#22c55e', 'Treadmills, bikes, weights, a boxing ring and yoga mats.'],
+    ['beach', '🏖️', 'Beach', '#14b8a6', 'Sand, the sea, a tiki bar, a bonfire and a lifeguard tower.']
+  ];
+  const RMS = { open: false, sel: 'office', t: 0, sig: '' };
+  const rmPeople = id => workers.filter(w => typeof w.x === 'number' && zoneAt(w.x, w.z) === id);
+  function rmLive(id) {
+    try {
+      if (id === 'town') return TH.by ? '🔴 LIVE · ' + thName(TH.by) + (TH.by === myNid() ? ' are' : ' is') + ' presenting' + (HALL.hands.length ? ' · ✋ ' + HALL.hands.length : '') : '';
+      if (id === 'court') return MATCH.on ? '🏀 Match on · ' + MATCH.score[0] + ' – ' + MATCH.score[1] : '';
+      if (id === 'game') {
+        let n = ARC_IDS.filter(g => aFull(g)).length + (BL.seats[0] && BL.seats[1] ? 1 : 0);
+        GAME_IDS.forEach(g => { const T2 = GMS.tb[g]; if (T2 && T2.seats[0] && T2.seats[1]) n++; });
+        return n ? '🎮 ' + n + (n === 1 ? ' match' : ' matches') + ' being played' : '';
+      }
+    } catch (e) {}
+    return '';
+  }
+  const rmBox = document.createElement('div'); rmBox.id = 'rmBox'; rmBox.className = 'rmwrap'; rmBox.hidden = true;
+  rmBox.innerHTML = '<div class="rmbox" role="dialog" aria-label="Rooms"><div class="rmh"><b>🚪 Rooms</b><span id="rmTot"></span><button data-rm="close" aria-label="Close">×</button></div><div class="rmb"><div class="rml" id="rmL" role="listbox" aria-label="Rooms"></div><div class="rmd" id="rmD"></div></div></div>';
+  document.body.appendChild(rmBox);
+  function rmRender() {
+    if (!RMS.open) return;
+    const cur = zoneAt(me.x, me.z), all = ROOM_LIST.map(r => ({ r: r, ppl: rmPeople(r[0]), live: rmLive(r[0]) }));
+    const sig = JSON.stringify([RMS.sel, cur, all.map(a => [a.ppl.map(w => w.id + (w.status || '')).join(','), a.live])]);
+    if (sig === RMS.sig) return; RMS.sig = sig;
+    const tot = workers.length; $('rmTot').textContent = '👤 ' + tot + (tot === 1 ? ' person' : ' people') + ' in the office';
+    $('rmL').innerHTML = all.map(a => { const r = a.r, id = r[0];
+      return '<button class="rmr' + (id === RMS.sel ? ' sel' : '') + '" data-rm="sel" data-v="' + id + '" role="option" aria-selected="' + (id === RMS.sel) + '">' +
+        '<span class="rmt" style="--c:' + r[3] + '">' + r[1] + '</span><span class="rmn"><b>' + esc(r[2]) + '</b><i>' + esc(a.live || (id === cur ? '📍 You’re here' : r[4])) + '</i></span>' +
+        '<span class="rmc' + (a.ppl.length ? ' on' : '') + '">👤 ' + a.ppl.length + '</span></button>'; }).join('');
+    const a = all.find(x => x.r[0] === RMS.sel) || all[0], r = a.r, here = r[0] === cur;
+    const who = a.ppl.slice().sort((p, q) => (p === me ? -1 : q === me ? 1 : String(p.name).localeCompare(String(q.name))));
+    $('rmD').innerHTML = '<div class="rmbig" style="--c:' + r[3] + '">' + r[1] + '</div><div class="rmdn">' + esc(r[2]) + '</div>' +
+      '<div class="rmdl">Inside: <b>👤 ' + a.ppl.length + '</b>' + (here ? ' · 📍 You’re here' : '') + '</div>' + (a.live ? '<div class="rmdl live">' + esc(a.live) + '</div>' : '') +
+      '<button class="rmgo" data-rm="go" data-v="' + r[0] + '">' + (here ? '👁️ Show the whole room' : '🚪 Go to ' + esc(r[2])) + '</button>' +
+      '<div class="rmdd">' + esc(r[4]) + '</div><div class="rmwl">Who’s here</div>' +
+      (who.length ? '<div class="rmwho">' + who.slice(0, 40).map(w => '<button data-rm="who" data-v="' + esc(w.id) + '" title="' + esc(stInfo(w).label) + '"><span class="av sm" style="--c:' + w.color + '">' + esc(String(w.name)[0]) + '</span>' + esc(w === me ? 'You' : w.name) + '<span class="rme">' + stInfo(w).emoji + '</span></button>').join('') + (who.length > 40 ? '<span class="rmmore">+' + (who.length - 40) + ' more</span>' : '') + '</div>' : '<div class="rmdd">Nobody is here right now.</div>');
+  }
+  function openRooms(sel) {
+    if (setupOpen) return;
+    closeCard(); closePantry(); if (typeof closeDD === 'function') closeDD();
+    RMS.open = true; RMS.sel = ROOM_LIST.some(r => r[0] === sel) ? sel : zoneAt(me.x, me.z) === 'void' ? 'office' : zoneAt(me.x, me.z); RMS.sig = '';
+    rmBox.hidden = false; rmRender();
+    const b = $('tbRooms'); if (b) b.classList.add('open');
+  }
+  function closeRooms() { RMS.open = false; rmBox.hidden = true; const b = $('tbRooms'); if (b) b.classList.remove('open'); }
+  function rmGo(id) { closeRooms(); if (id === zoneAt(me.x, me.z)) setZone(ZS.cur, false, true); else goZone(id); }
+  rmBox.addEventListener('click', e => {
+    if (e.target === rmBox) { closeRooms(); return; }
+    const b = e.target.closest('[data-rm]'); if (!b) return; const a = b.dataset.rm, v = b.dataset.v;
+    if (a === 'close') closeRooms();
+    else if (a === 'sel') { if (RMS.sel === v && RMS.lastSel && Date.now() - RMS.lastSel < 450) { rmGo(v); return; } RMS.sel = v; RMS.lastSel = Date.now(); RMS.sig = ''; rmRender(); }
+    else if (a === 'go') rmGo(v);
+    else if (a === 'who') { const w = byId[v]; closeRooms(); if (w) { openCard(w.id); if (w !== me) flyToWorker(w); } }
+  });
+  function rmKey(e) {
+    if (!RMS.open) return false;
+    const k = e.key, i = ROOM_LIST.findIndex(r => r[0] === RMS.sel);
+    if (k === 'Escape') { closeRooms(); return true; }
+    if (k === 'ArrowDown' || k === 'ArrowUp') { e.preventDefault && e.preventDefault(); RMS.sel = ROOM_LIST[(i + (k === 'ArrowDown' ? 1 : ROOM_LIST.length - 1)) % ROOM_LIST.length][0]; RMS.sig = ''; rmRender(); return true; }
+    if (k === 'Enter') { e.preventDefault && e.preventDefault(); rmGo(RMS.sel); return true; }
+    return true;   // while the list is open, other keys don't move you or the camera
+  }
+  // the compact list in the side panel: same rooms, one row each; click a row for the details
+  function rmSide() {
+    const el = $('rooms'); if (!el) return;
+    const cur = GRP(ZS.cur), sig = ROOM_LIST.map(r => r[0] + rmPeople(r[0]).length + (rmLive(r[0]) ? 1 : 0)).join('|') + cur;
+    if (sig === el._sig) return; el._sig = sig;
+    el.innerHTML = ROOM_LIST.map(r => { const n = rmPeople(r[0]).length, live = rmLive(r[0]);
+      return '<button data-z="' + r[0] + '" class="' + (GRP(r[0]) === cur ? 'on' : '') + '"><span class="rmt" style="--c:' + r[3] + '">' + r[1] + '</span><span class="rsn">' + esc(r[2]) + (live ? ' <i class="rlive">●</i>' : '') + '</span><span class="rsc">' + n + '</span></button>'; }).join('') +
+      '<button class="rsall" data-rmall="1">🚪 All rooms…</button>';
+  }
+  setInterval(() => { try { rmRender(); rmSide(); } catch (e) {} }, 1000);
+
+  $('rooms').addEventListener('click', e => { if (e.target.closest('[data-rmall]')) { openRooms(); return; } const b = e.target.closest('[data-z]'); if (b) openRooms(b.dataset.z); });
+  $('tbRooms').addEventListener('click', () => { if (RMS.open) closeRooms(); else openRooms(); });
+  rmSide();
   buildCut();
   ctl.theta = CAM.theta; ctl.phi = CAM.phi;
   setZone('office', true);
