@@ -5005,7 +5005,7 @@ function main(){
     }
   }
   function renderDock() {
-    $('dock').innerHTML = '<input id="hbIn" maxlength="160" autocomplete="off" placeholder="Say something…" aria-label="Chat message">' + '<button class="imgbtn" data-imgpick="dock" title="Send an image (or paste one with Ctrl+V)" aria-label="Send an image">🖼️</button>' + '<button data-dance="1" title="Dances" aria-label="Dances">💃</button><button data-instr="1" title="Instruments" aria-label="Instruments">🎸</button>' + REACTS.map(r => '<button data-rx="' + r[0] + '" title="' + r[2] + '" aria-label="' + r[2] + '">' + r[1] + '</button>').join('');
+    $('dock').innerHTML = '<input id="hbIn" maxlength="160" autocomplete="off" placeholder="Say something…" aria-label="Chat message">' + '<button class="imgbtn" data-imgpick="dock" title="Send an image (or paste one with Ctrl+V)" aria-label="Send an image">🖼️</button>' +  REACTS.map(r => '<button data-rx="' + r[0] + '" title="' + r[2] + '" aria-label="' + r[2] + '">' + r[1] + '</button>').join('');
   }
 
   // ================= first-time setup =================
