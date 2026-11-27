@@ -3630,6 +3630,7 @@ function main(){
     spkApplyCtx();
     try { if (MV.el && MV.el.tagName === 'VIDEO') sinkEl(MV.el, id); } catch (e) {}
     try { if (music.now && music.now.el && music.now.el.tagName === 'VIDEO') sinkEl(music.now.el, id); } catch (e) {}
+    try { if (typeof thAud !== 'undefined') sinkEl(thAud, id); if (typeof ssVid !== 'undefined') sinkEl(ssVid, id); } catch (e) {}
   }
   async function listSpks() {
     const sel = document.getElementById('spkDev'), note = document.getElementById('spkNote'); if (!sel) return;
@@ -12562,29 +12563,35 @@ function main(){
     if (key.indexOf('idle') === 0) thIdle(TH.by ? '⏳ Connecting to ' + thName(TH.by) + '’s presentation…' : '');
     TOWN.mat.map = map; TOWN.mat.needsUpdate = true;
   }
-  // The shared tab's sound goes through a Web Audio volume control (Chrome can ignore .volume on live streams).
-  // The video stays attached and muted so Chrome keeps decoding the stream; if Web Audio isn't ready yet, the video plays the sound itself.
-  const THA = { src: null, g: null, tid: '' };
-  function thAudioOff() { try { THA.src && THA.src.disconnect(); } catch (e) {} try { THA.g && THA.g.disconnect(); } catch (e) {} THA.src = null; THA.g = null; THA.tid = ''; }
+  // The shared tab's sound plays through its own hidden <audio> player (the same way voice chat plays), at the 🔊 slider's volume.
+  // (Sending a stream from another computer through Web Audio can come out silent in Chrome, so it isn't used here.)
+  // The picture's <video> stays muted so the sound never plays twice.
+  const thAud = document.createElement('audio'); thAud.autoplay = true; thAud.setAttribute('playsinline', ''); thAud.style.display = 'none'; document.body.appendChild(thAud);
+  try { sinkEl(thAud, spkId()); } catch (e) {}
+  const THA = { tid: '', blocked: false, noSnd: 0, told: '' };
+  function thAudPlay() {
+    if (!thAud.srcObject) return;
+    try { const p = thAud.play(); if (p && p.then) p.then(() => { THA.blocked = false; $('thHear').hidden = true; }).catch(() => { THA.blocked = true; if (!TH.local) $('thHear').hidden = false; }); } catch (e) {}
+  }
+  function thAudioOff() { try { thAud.pause(); } catch (e) {} try { thAud.srcObject = null; } catch (e) {} THA.tid = ''; THA.blocked = false; }
   function thAudioSync() {
     const s = thVid.srcObject, local = !!TH.local;
     const at = s && s.getAudioTracks ? (s.getAudioTracks()[0] || null) : null;
-    const want = at && at.readyState !== 'ended' && (!local || TH.selfAudio) ? at : null;   // presenting: only if Chrome stopped the tab playing it by itself
-    const c = audio.ctx, ready = !!(c && c.state === 'running' && typeof c.createMediaStreamSource === 'function');
+    const want = at && at.readyState !== 'ended' && (!local || TH.selfAudio) ? at : null;   // presenting: only when Chrome silenced the tab itself
     const need = want ? want.id : '';
-    if (THA.tid !== need || (need && !THA.g && ready)) {
-      thAudioOff();
-      if (want && ready) { try { THA.src = c.createMediaStreamSource(new MediaStream([want])); THA.g = c.createGain(); THA.src.connect(THA.g); THA.g.connect(c.destination); THA.tid = need; } catch (e) { thAudioOff(); THA.tid = need; } }
-      else THA.tid = need;
-    }
+    if (THA.tid !== need) { thAudioOff(); if (want) { try { thAud.srcObject = new MediaStream([want]); } catch (e) {} THA.tid = need; thAudPlay(); } }
     const v = Math.max(0, Math.min(1, TH.vol / 100));
-    if (THA.g) { try { THA.g.gain.value = audio.speaker ? v : 0; } catch (e) {} }
-    const m = !!THA.g || (local && !TH.selfAudio) || !audio.speaker;
-    if (thVid.muted !== m) thVid.muted = m;
-    if (Math.abs((thVid.volume || 0) - v) > 0.005) { try { thVid.volume = v; } catch (e) {} }
+    if (Math.abs((thAud.volume || 0) - v) > 0.005) { try { thAud.volume = v; } catch (e) {} }
+    if (thAud.muted !== !audio.speaker) thAud.muted = !audio.speaker;
+    if (!thVid.muted) thVid.muted = true;
+    if (want && thAud.paused && !THA.blocked) thAudPlay();
+    // tell a viewer once if the presentation simply has no sound
+    if (s && !local && TH.by && !at) { if (!THA.noSnd) THA.noSnd = Date.now(); else if (Date.now() - THA.noSnd > 4000 && THA.told !== TH.by + TH.gen) { THA.told = TH.by + TH.gen; toast('🔇 ' + thName(TH.by) + '’s presentation has no sound. To share sound, they need to pick a Chrome tab and turn on “Also share tab audio”.'); } }
+    else THA.noSnd = 0;
     const sl = document.getElementById('thVol');
-    if (sl) { const off = local && !TH.selfAudio; sl.disabled = off; sl.parentNode && (sl.parentNode.title = off ? 'Your shared tab plays its own sound: change the volume in that tab' : 'Volume of the shared screen'); }
+    if (sl) { const off = local && !TH.selfAudio; sl.disabled = off; if (sl.parentNode) sl.parentNode.title = off ? 'Your shared tab plays its own sound: change the volume in that tab' : 'Volume of the shared screen'; }
   }
+  window.addEventListener('pointerdown', () => { if (THA.tid && thAud.paused) { THA.blocked = false; thAudPlay(); } }, true);
   function thSetSrc(s, local) {
     if (thVid.srcObject !== s) { try { thVid.srcObject = s || null; } catch (e) {} }
     thAudioSync();
@@ -12904,7 +12911,7 @@ function main(){
     if (TH.by && seated && !TH.view && !TH.skipAt) thEnterView();
     else if (TH.by && here && !seated && !TH.view && TH.autoGen !== TH.gen && TH.by !== myNid()) { TH.autoGen = TH.gen; toast('🏛️ ' + thName(TH.by) + ' is presenting. Take a seat to watch (or press 🪑 Sit & watch).'); }
     if (TH.view && !here) thExitView();
-    if (thVid.srcObject || THA.g) thAudioSync();
+    if (thVid.srcObject || THA.tid) thAudioSync();
     thScreen(); hallTick(); thUI(false);
   }
   thBar.addEventListener('click', e => { const b = e.target.closest('[data-th]'); if (!b) return; const a = b.dataset.th; if (a === 'present') thPresent(); else if (a === 'sit') thSitWatch(); else if (a === 'watch') thEnterView(); else if (a === 'stop') thStopShare(); });
@@ -12921,7 +12928,7 @@ function main(){
   const thVolSet = e => { TH.vol = Math.max(0, Math.min(100, +e.target.value || 0)); $('thVolPct').textContent = TH.vol + '%'; try { actx(); } catch (er) {} thAudioSync(); try { localStorage.setItem('virtualOffice.thVol', String(TH.vol)); } catch (er) {} };
   $('thVol').addEventListener('input', thVolSet); $('thVol').addEventListener('change', thVolSet);
   $('thVol').addEventListener('keydown', e => e.stopPropagation());
-  $('thHear').addEventListener('click', () => { $('thHear').hidden = true; try { const p = thVid.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} });
+  $('thHear').addEventListener('click', () => { $('thHear').hidden = true; THA.blocked = false; try { actx(); } catch (e) {} try { const p = thVid.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} thAudPlay(); });
   window.addEventListener('keydown', e => { if (e.key === 'Escape' && TH.view) thUserExit(); });
   function thScreenClick() {
     if (TH.by) { thEnterView(); return; }
