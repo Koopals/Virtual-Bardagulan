@@ -338,6 +338,13 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .ctk b{font-size:13px}.ctk span{font-size:11px;font-weight:600;opacity:.8}
 .ctk:hover{background:#d3f2df}.ctk.on{background:#e0242d;border-color:#e0242d;color:#fff}.ctk.wait{background:#fff7d6;border-color:#f3cf5a;color:#7a5a00}
 .ctk[disabled]{opacity:.55;cursor:not-allowed}.ctk.join{background:#eef2ff;border-color:#a5b4fc;color:#3730a3}.ctk.join:hover{background:#e0e7ff}
+.tb#tbMus.mm{background:#fde8e8;border-color:#f5a3a3}
+.tb#tbMus .tbslash{display:none}.tb#tbMus.mm .tbslash{display:block}
+.mmute{width:100%;margin-top:8px;padding:7px 10px;font-weight:800;font-size:12.5px;border-radius:9px}
+.mmute.on{background:#e0242d;border-color:#e0242d;color:#fff}
+.mvolsec.muted .mvrow{opacity:.45}
+.mmnote{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:0 0 8px;padding:6px 9px;border-radius:9px;background:#fde8e8;color:#9a1c1c;font-size:12px;font-weight:700}
+.mmnote button{padding:3px 10px;font-size:11.5px;font-weight:800}
 .tkb{margin-left:auto;padding:3px 9px;font-size:11.5px;font-weight:800;border-radius:999px;background:#e8f8ee;border:1px solid #86d9a5;color:#166534;flex:none}
 .tkb:hover{background:#d3f2df}.tkb.join{background:#eef2ff;border-color:#a5b4fc;color:#3730a3}.tkb[disabled]{opacity:.5;cursor:not-allowed}.tkb.on{background:#e0242d;border-color:#e0242d;color:#fff}.tkb.wait{background:#fff7d6;border-color:#f3cf5a;color:#7a5a00}
 .person .pn{align-items:center}
@@ -779,6 +786,7 @@ img.imgm{display:block;max-width:220px;max-height:200px;width:auto;height:auto;b
   <button class="tb" id="tbRooms" title="Rooms" aria-haspopup="dialog">🚪</button>
   <button class="tb" data-dd="team" title="Team" aria-haspopup="true" aria-expanded="false">👥<span class="rdot" id="bTeam" hidden></span></button>
   <button class="tb" data-dd="tasks" title="Tasks" aria-haspopup="true" aria-expanded="false">✅<span class="rdot" id="bTasks" hidden></span></button>
+  <button class="tb" id="tbMus" title="Mute the music for you (N)" aria-pressed="false">🎶<span class="tbslash"></span></button>
   <button class="tb" data-dd="music" title="Music" aria-haspopup="true" aria-expanded="false">🎵<span class="rdot" id="bMusic" hidden></span></button>
 </nav>
 <aside id="side">
@@ -825,7 +833,7 @@ img.imgm{display:block;max-width:220px;max-height:200px;width:auto;height:auto;b
   <div class="float dd" id="ddMusic" hidden><div class="ddh">🎵 Music</div>
   <div class="pane" id="pMusic">
     <div class="np" id="np"></div>
-    <div class="msec mvolsec"><div class="lbl">🔊 Music volume <span id="mvolPct">85%</span></div><div class="mvrow"><input type="range" id="mvol" min="0" max="100" value="85" aria-label="Music volume"><button data-m="test" title="Test sound">🔔</button></div></div>
+    <div class="msec mvolsec" id="mvolsec"><div class="lbl">🔊 Music volume <span id="mvolPct">85%</span></div><div class="mvrow"><input type="range" id="mvol" min="0" max="100" value="85" aria-label="Music volume"><button data-m="test" title="Test sound">🔔</button></div><button id="mMute" class="mmute" title="Only you stop hearing the music (N)">🔇 Mute music for me</button></div>
     <div class="msec" id="picks">
       <div class="srctabs" id="srcTabs"><button data-src="yt" class="on">▶️ YouTube</button><button data-src="ytm">🎵 YT Music</button><button data-src="sp">🟢 Spotify</button><button data-src="my">⭐ My picks</button></div>
       <div id="picksBody"></div>
@@ -4254,8 +4262,9 @@ function main(){
     let s;
     if (!n) s = '<div class="npe">Nothing playing. Pick a station, or play a song from your computer.</div>';
     else {
+      const mm = typeof MMUTE !== 'undefined' && MMUTE.on;
       const by = byId[n.by] || me;
-      s = '<div class="npc"><div class="eq' + (audible() ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 Playing for the room · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
+      s = (mm ? '<div class="mmnote">🔇 Muted for you. Everyone else still hears it. <button data-m="unmute">Unmute</button></div>' : '') + '<div class="npc"><div class="eq' + (audible() && !mm ? ' on' : '') + '"><i></i><i></i><i></i><i></i></div><div style="min-width:0"><div class="npt">' + esc(n.title) + '</div><div class="nps">' + (n.kind === 'link' ? ({ playing: '🎬 Playing for the room · ', embed: '🎬 Playing for the room · ', loading: '⏳ Loading… · ', paused: '⏸ Paused · ', error: '<b>' + esc(n.err || 'Couldn’t play that link') + '</b> · ' }[n.yt] || '') : n.kind === 'yt' ? ({ playing: '🔊 Playing in the office · ', loading: '⏳ Loading YouTube… · ', paused: '⏸ Paused · ', blocked: '<b>YouTube didn’t load.</b> Check your internet connection · ', error: '<b>' + esc(n.err || 'YouTube error') + '</b> · ', search: '<b>Song names can’t play here.</b> Paste a song link instead · ' }[n.yt] || '') : (music.sound === 'blocked' ? '<b>Click the office to turn sound on</b> · ' : (n.kind === 'radio' && !music.src && !music.timer ? '⏳ Loading… · ' : '🔊 Playing in the office · '))) + esc(n.src) + ' · started by ' + esc(by === me ? 'you' : by.name) + '</div></div></div><div class="row2">' +
         (n.kind === 'link' || n.kind === 'yt' ? '<button data-m="th">' + (($('ytMini') && $('ytMini').classList.contains('theater')) ? '🗗 Close big screen' : '⛶ Big screen') + '</button><button data-m="save">⭐ Save</button>' : '') + (n.kind === 'link' && n.mode === 'video' && n.el && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') + (n.kind === 'link' ? '<a class="btn" href="' + esc(n.url) + '" target="_blank" rel="noopener">Open link</a>' : '') +
         (n.kind === 'yt' && (n.yt === 'playing' || n.yt === 'paused') ? '<button data-m="pp">' + (n.yt === 'playing' ? '⏸ Pause' : '▶ Play') + '</button>' : '') +
         (n.kind === 'yt' && !(n.yt === 'playing' || n.yt === 'paused' || n.yt === 'loading') ? '<a class="btn yt" href="' + esc(n.url) + '" target="_blank" rel="noopener">' + (n.yt === 'search' ? 'Search on ' : 'Open on ') + esc(n.src) + '</a>' : '') +
@@ -4271,6 +4280,7 @@ function main(){
     if (d.radio) { if (music.key === d.radio) stopMusic(); else playRadio(d.radio, 'me'); }
     else if (d.m === 'stop') stopMusic();
     else if (d.m === 'test') testSound();
+    else if (d.m === 'unmute') setMusicMute(false);
     else if (d.m === 'pp' && music.now && music.now.kind === 'link' && music.now.el && music.now.el.play) { try { if (music.now.yt === 'playing') music.now.el.pause(); else { const pr = music.now.el.play(); if (pr && pr.catch) pr.catch(() => {}); } } catch (e) {} }
     else if (d.m === 'pp' && yt.player && yt.ready) { try { if (music.now.yt === 'playing') yt.player.pauseVideo(); else yt.player.playVideo(); } catch (e) {} }
     else if (d.m === 'skip') skipMusic();
@@ -4399,6 +4409,7 @@ function main(){
   $('ytIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addYT(!music.now); } });
   $('mvol').addEventListener('input', e => { { const pc = document.getElementById('mvolPct'); if (pc) pc.textContent = (+e.target.value || 0) + '%'; } setTimeout(() => quietTick(true), 0); music.vol = (+e.target.value || 0) / 100; if (music.gain) music.gain.gain.value = music.vol * 1.6; if (yt.player && yt.ready) { try { yt.player.setVolume(Math.round(music.vol * 100)); } catch (_) {} } });
   $('ytMiniX').addEventListener('click', stopMusic);
+  $('mMute').addEventListener('click', () => toggleMusicMute());
   renderMusic();
 
   // ================= emotes =================
@@ -7377,6 +7388,7 @@ function main(){
     if (rmKey(e)) return;
     const k = e.key.toLowerCase(); keys[k] = true;
     if (k === 'm' && !e.repeat && !walking) toggleMic();
+    if (k === 'n' && !e.repeat && !walking && !e.ctrlKey && !e.metaKey) toggleMusicMute();
     if (!e.repeat && !walking && !e.ctrlKey && !e.metaKey) { if (k === 'q') rotateCam(-1); else if (k === 'e') rotateCam(1); else if (k === 't') cycleTilt(); else if (k === 'r') resetCam(); }
     if (k === 'h' && !e.repeat) setHud(!hudHidden);
     if (k === 'p' && !e.repeat) { if (document.getElementById('pantry').hidden) openPantry(); else closePantry(); }
@@ -11999,11 +12011,33 @@ function main(){
   // ---- watching: first-person view of the screen with the real player on top ----
 
   // ---- office music is muted inside the meeting room and the movie room ----
-  const QM = { on: null, t: 0 };
-  function musicQuiet() { const zz = zoneAt(me.x, me.z); return !!(MV.on || inRoom(me) || zz === 'movie' || zz === 'town'); }
+  const QM = { on: null, t: 0, room: null };
+  // 🔇 Mute music: your own choice, only on your computer (everyone else keeps hearing it), remembered next time
+  const MMUTE = { on: false, blank: null };
+  try { MMUTE.on = localStorage.getItem('virtualOffice.musicMute') === '1'; } catch (e) {}
+  function roomQuiet() { const zz = zoneAt(me.x, me.z); return !!(MV.on || inRoom(me) || zz === 'movie' || zz === 'town'); }
+  function musicQuiet() { return MMUTE.on || roomQuiet(); }
+  // embedded players (Spotify, SoundCloud, Vimeo…) can't be turned down from the page, so they're paused while muted and reloaded after
+  function mmEmbed() {
+    const n = music.now, f = n && n.kind === 'link' && n.el && n.el.tagName === 'IFRAME' ? n.el : null;
+    if (MMUTE.on && f && MMUTE.blank !== f) { MMUTE.blank = f; MMUTE.src = f.src; try { f.src = 'about:blank'; } catch (e) {} }
+    else if ((!MMUTE.on || !f || MMUTE.blank !== f) && MMUTE.blank) { const b = MMUTE.blank; MMUTE.blank = null; if (b.isConnected !== false && b === (music.now && music.now.el)) { try { b.src = MMUTE.src; } catch (e) {} } }
+  }
+  function setMusicMute(on, quiet) {
+    MMUTE.on = !!on; try { localStorage.setItem('virtualOffice.musicMute', MMUTE.on ? '1' : '0'); } catch (e) {}
+    mmEmbed(); quietTick(true); renderMusicMute();
+    if (!quiet) toast(MMUTE.on ? '🔇 Music muted for you. Everyone else still hears it, and you can hear conversations clearly. Press N or 🔇 to unmute.' : (roomQuiet() ? '🎵 Music unmuted (it’s still quiet in this room).' : '🎵 Music unmuted.'));
+  }
+  const toggleMusicMute = () => setMusicMute(!MMUTE.on);
+  function renderMusicMute() {
+    const b = document.getElementById('tbMus'); if (b) { b.classList.toggle('mm', MMUTE.on); b.title = MMUTE.on ? 'Music is muted for you (N): click to unmute' : 'Mute the music for you (N)'; b.setAttribute('aria-pressed', String(MMUTE.on)); }
+    const p = document.getElementById('mMute'); if (p) { p.classList.toggle('on', MMUTE.on); p.textContent = MMUTE.on ? '🔇 Muted for you · Unmute' : '🔇 Mute music for me'; }
+    const s = document.getElementById('mvolsec'); if (s) s.classList.toggle('muted', MMUTE.on);
+  }
   function quietTick(force) {
-    const q = musicQuiet(), v = q ? 0 : music.vol;
-    if (q !== QM.on) { const was = QM.on; QM.on = q; force = true; if (was !== null && music.now) toast(q ? '🔇 The office music is muted in here.' : '🔊 You can hear the office music again.'); }
+    const q = musicQuiet(), v = q ? 0 : music.vol, rq = roomQuiet();
+    if (q !== QM.on || rq !== QM.room) { const was = QM.on, wasR = QM.room; QM.on = q; QM.room = rq; force = true; if (was !== null && music.now && !MMUTE.on && rq !== wasR) toast(rq ? '🔇 The office music is muted in here.' : '🔊 You can hear the office music again.'); }
+    if (MMUTE.on || MMUTE.blank) mmEmbed();
     try { if (music.gain && Math.abs(music.gain.gain.value - v * 1.6) > 0.001) music.gain.gain.value = v * 1.6; } catch (e) {}
     try { if (music.now && music.now.el && music.now.el.tagName === 'VIDEO' && Math.abs(music.now.el.volume - Math.min(1, v)) > 0.01) music.now.el.volume = Math.min(1, v); } catch (e) {}
     QM.t -= 1;
@@ -13103,6 +13137,7 @@ function main(){
   }
   setInterval(() => { try { rmRender(); rmSide(); } catch (e) {} }, 1000);
 
+  $('tbMus').addEventListener('click', () => toggleMusicMute()); renderMusicMute(); setTimeout(() => { if (MMUTE.on) toast('🔇 Music is muted for you (you muted it last time). Press N or 🎶 to unmute.'); }, 4000);
   $('rooms').addEventListener('click', e => { if (e.target.closest('[data-rmall]')) { openRooms(); return; } const b = e.target.closest('[data-z]'); if (b) openRooms(b.dataset.z); });
   $('tbRooms').addEventListener('click', () => { if (RMS.open) closeRooms(); else openRooms(); });
   rmSide();
