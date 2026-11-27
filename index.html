@@ -345,6 +345,9 @@ body.habbo .hudtog:hover{background:rgba(255,255,255,.28)}
 .mvolsec.muted .mvrow{opacity:.45}
 .mmnote{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:0 0 8px;padding:6px 9px;border-radius:9px;background:#fde8e8;color:#9a1c1c;font-size:12px;font-weight:700}
 .mmnote button{padding:3px 10px;font-size:11.5px;font-weight:800}
+#hudActs{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+#hudActs button{display:flex;align-items:center;gap:6px;justify-content:flex-start;padding:6px 8px;font-size:12.5px;font-weight:700;text-align:left;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hudActs button.cur{background:#ec4899;border-color:#ec4899;color:#fff}
 .tkb{margin-left:auto;padding:3px 9px;font-size:11.5px;font-weight:800;border-radius:999px;background:#e8f8ee;border:1px solid #86d9a5;color:#166534;flex:none}
 .tkb:hover{background:#d3f2df}.tkb.join{background:#eef2ff;border-color:#a5b4fc;color:#3730a3}.tkb[disabled]{opacity:.5;cursor:not-allowed}.tkb.on{background:#e0242d;border-color:#e0242d;color:#fff}.tkb.wait{background:#fff7d6;border-color:#f3cf5a;color:#7a5a00}
 .person .pn{align-items:center}
@@ -717,18 +720,9 @@ img.imgm{display:block;max-width:220px;max-height:200px;width:auto;height:auto;b
   <p class="sub" id="hudSub">21 people on the floor</p>
   <p class="netline" id="netLine" hidden><span id="netTxt">Connecting…</span><button id="netInvite">🔗 Copy invite link</button><button id="netLock" hidden>🔒 Lock room</button><button id="netSrv" hidden>🔌 Connect to server</button></p>
   <div class="counts" id="counts"></div>
-  <div class="lbl">Rooms</div>
-  <div class="views" id="rooms">
-    <button data-z="office" class="on">🏢 Office</button>
-    <button data-z="game">🎲 Games</button>
-    <button data-z="pool">🏊 Pool</button>
-    <button data-z="court">🏀 Court</button>
-    <button data-z="sleep">😴 Sleep</button>
-    <button data-z="bar">🍻 Bar</button>
-    <button data-z="town">🏛️ Town hall</button>
-    <button data-z="gym">💪 Gym</button>
-    <button data-z="beach">🏖️ Beach</button>
-  </div>
+  <div class="lbl">Actions</div>
+  <div class="hudacts" id="hudActs"></div>
+  <div id="rooms" hidden></div>
   <div class="lbl">View</div>
   <div class="views" id="views">
     <button data-v="overview" class="on">Whole room</button>
@@ -4704,8 +4698,8 @@ function main(){
     const b = ev.target.closest('[data-dp]'); if (!b) return;
     const a = b.dataset.dp;
     if (a === 'close') document.getElementById('dpick').hidden = true;
-    else if (a === 'stop') { if (me.emote && me.emote.type === 'dance') setEmote(me, null); renderDancePicker(); }
-    else if (a === 'go') startDance(me, b.dataset.v);
+    else if (a === 'stop') { if (me.emote && me.emote.type === 'dance') setEmote(me, null); document.getElementById('dpick').hidden = true; }
+    else if (a === 'go') { startDance(me, b.dataset.v); document.getElementById('dpick').hidden = true; }   // picked: the list closes; press 💃 again to change
   });
   const mGtr = M(0xd08a3a, { roughness: 0.5 }), mGtrDark = M(0x5a3417, { roughness: 0.6 }), mMicProp = M(0x2b2f35, { metalness: 0.6, roughness: 0.3 });
   function guitarProp(w) {
@@ -4749,9 +4743,11 @@ function main(){
     if (card.dataset.id === w.id && !card.hidden && !cs.wsp && !cs.open && !cs.look) renderCard();
   }
   function renderEmoteBar() {
-    const el = $('emoBar'); if (!el) return;
-    el.innerHTML = Object.keys(EMOTES).map(k => { const on = !!(me.emote && me.emote.type === k); return '<button data-emo="' + k + '" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>'; }).join('') +
+    const el = $('emoBar'), ha = document.getElementById('hudActs'); if (!el && !ha) return;
+    const html = Object.keys(EMOTES).map(k => { const on = !!(me.emote && me.emote.type === k); return '<button data-emo="' + k + '" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '">' + EMOTES[k].emoji + ' ' + EMOTES[k].short + '</button>'; }).join('') +
       (function () { const sOn = typeof isSittingDown === 'function' && isSittingDown(); const on = typeof isResting === 'function' && isResting(); return '<button data-emo="sit" class="' + (sOn ? 'cur' : '') + '" aria-pressed="' + sOn + '" title="Sit down (6)">' + (sOn ? '🧍 Stand up' : '🪑 Sit') + '</button><button data-emo="lie" class="' + (on ? 'cur' : '') + '" aria-pressed="' + on + '" title="Lie down (5)">🛌 ' + (on ? 'Get up' : 'Lie down') + '</button>'; })();
+    if (el) el.innerHTML = html;
+    if (ha && ha._html !== html) { ha._html = html; ha.innerHTML = html; }
   }
   function floatFx(w, txt, cls) {
     const p = screenPos(w); if (!p) return;
@@ -7725,6 +7721,9 @@ function main(){
   renderAV(); renderMe(); renderTeam(); renderTasks(); renderCounts(); renderEmoteBar(); renderDock();
   $('dock').addEventListener('click', e => { if (e.target.closest('[data-instr]')) { toggleInstrPicker(); return; } if (e.target.closest('[data-dance]')) { ipick.hidden = true; toggleDancePicker(); return; } const b = e.target.closest('[data-rx]'); if (b) react(me, b.dataset.rx); });
   { const hbIn = $('hbIn'); mpAttach(hbIn); if (hbIn) hbIn.addEventListener('keydown', e => { e.stopPropagation(); if (mpKey(e, hbIn)) return; if (e.key === 'Enter') { const t = hbIn.value.trim(); if (t) { hbIn.value = ''; mpClose(); const re = replyTo; clearReply(); sendText(t, { re: re }); } } }); }
+  const emoClick = e => { const b = e.target.closest('[data-emo]'); if (!b) return; if (b.dataset.emo === 'lie') toggleLie(); else if (b.dataset.emo === 'sit') toggleSit(); else if (b.dataset.emo === 'dance') danceButton(); else if (INST[b.dataset.emo]) menuInstr(b.dataset.emo); else setEmote(me, b.dataset.emo); renderEmoteBar(); };
+  $('hudActs').addEventListener('click', emoClick); renderEmoteBar();
+  { const r = document.getElementById('rooms'); if (r) { r.hidden = true; r.innerHTML = ''; } }
   $('emoBar').addEventListener('click', e => { const b = e.target.closest('[data-emo]'); if (!b) return; if (b.dataset.emo === 'lie') toggleLie(); else if (b.dataset.emo === 'sit') toggleSit(); else if (b.dataset.emo === 'dance') danceButton(); else if (INST[b.dataset.emo]) menuInstr(b.dataset.emo); else setEmote(me, b.dataset.emo); });
   post(null, 'Welcome to the office chat · ' + fmtT(new Date()));
   post(null, '🎄 The office is decorated for Christmas! Play 🔔 Jingle Bells in the Music tab.');
@@ -13128,7 +13127,7 @@ function main(){
   }
   // the compact list in the side panel: same rooms, one row each; click a row for the details
   function rmSide() {
-    const el = $('rooms'); if (!el) return;
+    const el = $('rooms'); if (!el || el.hidden) return;   // the side list was replaced by Actions; rooms are in the 🚪 Rooms window
     const cur = GRP(ZS.cur), sig = ROOM_LIST.map(r => r[0] + rmPeople(r[0]).length + (rmLive(r[0]) ? 1 : 0)).join('|') + cur;
     if (sig === el._sig) return; el._sig = sig;
     el.innerHTML = ROOM_LIST.map(r => { const n = rmPeople(r[0]).length, live = rmLive(r[0]);
