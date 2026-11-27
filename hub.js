@@ -10,6 +10,11 @@ const newTable = () => ({ seats: [null, null], log: [] });
 const ARC_TABLES = ['pong', 'hockey', 'foos', 'darts', 'cycles'];
 const newArc = () => ({ seats: [null, null], st: '', watch: new Set() });   // game room arcade tables: seats, the last game state, who is watching
 const arcView = r => { const o = {}; ARC_TABLES.forEach(g => { const t = r.arc && r.arc[g]; if (t) o[g] = { seats: t.seats, st: t.seats[0] && t.seats[1] ? t.st : '' }; }); return o; };
+// 🏛️ town hall screen sharing: one presenter; viewers are joined into a tree (the presenter feeds 4, everyone else passes it on to 3)
+const TH_FAN0 = 4, TH_FAN = 3;
+const newHall = () => ({ hands: [], floor: null, quiet: false, next: null, nextT: 0 });   // town hall Q&A: raised hands in order, who has the floor, quiet mode, a pending hand-over
+const hallView = h => ({ hands: h.hands.slice(), floor: h.floor, quiet: h.quiet, next: h.next });
+const newTh = () => ({ by: null, title: '', t0: 0, par: new Map(), kids: new Map(), bad: new Map(), fails: new Map(), snap: new Set() });
 const newBill = () => ({ seats: [null, null], st: '', turn: 0, n: 0, shooter: null });   // the billiards table: seats, last settled position, whose turn
 // message id and the message being replied to (who wrote it, their name and a short quote)
 function chatExtra(m) {
@@ -48,7 +53,7 @@ function createHub(opts) {
 
   const roomOf = name => {
     let r = rooms.get(name);
-    if (!r) { r = { clients: new Map(), music: null, games: {}, bill: newBill(), arc: {} }; GAME_TABLES.forEach(g => { r.games[g] = newTable(); }); ARC_TABLES.forEach(g => { r.arc[g] = newArc(); }); rooms.set(name, r); }
+    if (!r) { r = { clients: new Map(), music: null, games: {}, bill: newBill(), arc: {}, th: newTh(), hall: newHall() }; GAME_TABLES.forEach(g => { r.games[g] = newTable(); }); ARC_TABLES.forEach(g => { r.arc[g] = newArc(); }); rooms.set(name, r); }
     return r;
   };
   const send = (c, obj) => { try { c.sock.send(JSON.stringify(obj)); } catch (e) {} };
@@ -59,6 +64,49 @@ function createHub(opts) {
       try { c.sock.send(s); } catch (e) {}
     }
   };
+  // ---- town hall tree ----
+  const thTo = (room, id, obj) => { const x = room.clients.get(id); if (x) send(x, Object.assign({ t: 'ev', from: '', k: 'th' }, obj)); };
+  const thUnder = (th, node, anc) => { let p = node, n = 0; while (p && n++ < 120) { if (p === anc) return true; if (p === th.by) return false; p = th.par.get(p); } return false; };
+  const thDepth = (th, id) => { let d = 0, p = id; while (p && p !== th.by && d < 120) { p = th.par.get(p); d++; } return p === th.by ? d : 999; };
+  function thDetach(room, id, tell) {
+    const th = room.th, p = th.par.get(id); if (p === undefined) return;
+    th.par.delete(id); const k = th.kids.get(p); if (k) k.delete(id);
+    if (tell) thTo(room, p, { act: 'unkid', id: id });
+  }
+  function thAttach(room, id) {
+    const th = room.th; if (!th.by || id === th.by || !room.clients.has(id)) return;
+    thDetach(room, id, true);
+    const bad = th.bad.get(id) || new Set();
+    let best = null, bs = 1e9;
+    for (const p of [th.by].concat(Array.from(th.par.keys()))) {
+      if (p === id || bad.has(p) || !room.clients.has(p) || th.snap.has(p)) continue;
+      const d = thDepth(th, p); if (d >= 999 || (p !== th.by && thUnder(th, p, id))) continue;
+      const n = (th.kids.get(p) || new Set()).size; if (n >= (p === th.by ? TH_FAN0 : TH_FAN)) continue;
+      const s = d * 10 + n; if (s < bs) { bs = s; best = p; }
+    }
+    if (!best) { thSnapOn(room, id); return; }
+    th.par.set(id, best); if (!th.kids.has(best)) th.kids.set(best, new Set()); th.kids.get(best).add(id);
+    thTo(room, best, { act: 'kid', id: id }); thTo(room, id, { act: 'parent', id: best });
+  }
+  function thOrphans(room, id) {   // someone left the tree: their children find new parents (and keep their own children)
+    const th = room.th, ks = Array.from(th.kids.get(id) || []); th.kids.delete(id);
+    ks.forEach(k => th.par.delete(k)); ks.forEach(k => thAttach(room, k));
+  }
+  function thSnapOn(room, id) {   // no working direct connection: a still picture through the server instead
+    const th = room.th; thDetach(room, id, true); thOrphans(room, id);
+    th.snap.add(id); thTo(room, id, { act: 'snap', on: 1 }); if (th.by) thTo(room, th.by, { act: 'snapn', n: th.snap.size });
+  }
+  function thRemove(room, id) {
+    const th = room.th; if (!th || !th.by) return;
+    thDetach(room, id, true); thOrphans(room, id);
+    if (th.snap.delete(id)) thTo(room, th.by, { act: 'snapn', n: th.snap.size });
+    th.bad.delete(id); th.fails.delete(id);
+  }
+  const hallSend = room => broadcast(room, { t: 'ev', from: '', k: 'hall', act: 'state', st: hallView(room.hall) });
+  function thStop(room) {
+    const th = room.th; if (!th || !th.by) return; const by = th.by; room.th = newTh(); broadcast(room, { t: 'ev', from: by, k: 'th', act: 'stop', by: by });
+    const hl = room.hall; if (hl && (hl.quiet || hl.next)) { hl.quiet = false; hl.next = null; hallSend(room); }
+  }
   // The passcode a room needs right now: one set by the server owner wins over one set inside the room.
   const needOf = name => { const p = passFor(name); return p ? hash(String(p)) : (locks.get(name) || ''); };
   const ipBlocked = ip => { const f = ipFails.get(ip); return !!(ip && f && f.n >= 10 && now() < f.until); };
@@ -127,6 +175,17 @@ function createHub(opts) {
         return;
       }
 
+      if (m.t === 'snap') {   // town hall fallback picture: from the presenter to the people who can't get the live stream
+        c.stok = Math.min(3, (c.stok == null ? 3 : c.stok) + (t - (c.slast || t)) / 600); c.slast = t;
+        if (c.stok < 1 || !c.room) return;
+        c.stok -= 1;
+        const room = rooms.get(c.room); if (!room || !room.th || room.th.by !== c.id || !room.th.snap.size) return;
+        const d = typeof m.d === 'string' && m.d.length <= 62000 && /^[A-Za-z0-9+/=]+$/.test(m.d) ? m.d : null; if (!d) return;
+        const out = JSON.stringify({ t: 'snap', from: c.id, d: d });
+        room.th.snap.forEach(id => { const x = room.clients.get(id); if (x) { try { x.sock.send(out); } catch (e) {} } });
+        return;
+      }
+
       c.tokens = Math.min(60, c.tokens + (t - c.last) / 50); c.last = t;   // about 20 messages a second, bursts of 60
       if (c.tokens < 1) return;
       c.tokens -= 1;
@@ -155,7 +214,7 @@ function createHub(opts) {
         c.state = cleanState(m.state);
         const peers = [...room.clients.values()].map(p => ({ id: p.id, state: p.state }));
         room.clients.set(c.id, c);
-        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, movie: room.movie || null, games: room.games, bill: room.bill || null, arc: arcView(room), token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
+        send(c, { t: 'welcome', id: c.id, room: name, peers: peers, music: room.music, movie: room.movie || null, games: room.games, bill: room.bill || null, arc: arcView(room), th: room.th && room.th.by ? { by: room.th.by, title: room.th.title } : null, hall: hallView(room.hall || (room.hall = newHall())), token: issueToken(c, name), locked: !!need, admin: !!passFor(name) });
         broadcast(room, { t: 'join', id: c.id, state: c.state }, c.id);
         return;
       }
@@ -194,6 +253,52 @@ function createHub(opts) {
           if (!(k in m)) continue;
           const v = m[k];
           ev[k] = (typeof v === 'number' && isFinite(v)) || typeof v === 'boolean' ? v : str(v, k === 'url' ? (m.k === 'arc' ? 6000 : 1000) : 120);
+        }
+        if (ev.k === 'hall') {   // 🏛️ town hall Q&A
+          const hl = room.hall || (room.hall = newHall()), th = room.th || (room.th = newTh());
+          const host = th.by ? th.by === c.id : true, id = typeof ev.id === 'string' ? ev.id : '';
+          if (ev.act === 'hand') { if (th.by === c.id || hl.hands.indexOf(c.id) > -1 || hl.floor === c.id || hl.hands.length >= 60) return; hl.hands.push(c.id); }
+          else if (ev.act === 'lower') { const who = id || c.id; if (who !== c.id && !host) return; const n = hl.hands.length; hl.hands = hl.hands.filter(x => x !== who); if (hl.hands.length === n) return; }
+          else if (ev.act === 'floor') { if (!host) return; const who = id && room.clients.has(id) ? id : null; if (who === hl.floor) return; hl.floor = who; if (who) hl.hands = hl.hands.filter(x => x !== who); }
+          else if (ev.act === 'yield') { if (hl.floor !== c.id) return; hl.floor = null; }
+          else if (ev.act === 'clear') { if (!host || !hl.hands.length) return; hl.hands = []; }
+          else if (ev.act === 'quiet') { if (!th.by || th.by !== c.id) return; const on = !!ev.on; if (on === hl.quiet) return; hl.quiet = on; }
+          else if (ev.act === 'pass') {
+            if (!th.by || th.by !== c.id || !id || id === c.id || !room.clients.has(id)) return;
+            hl.next = id; hl.nextT = t; send(room.clients.get(id), { t: 'ev', from: c.id, k: 'hall', act: 'invite', by: c.id });
+          }
+          else if (ev.act === 'decline') { if (hl.next !== c.id) return; hl.next = null; if (th.by) { const p = room.clients.get(th.by); if (p) send(p, { t: 'ev', from: c.id, k: 'hall', act: 'declined', id: c.id }); } }
+          else return;
+          hallSend(room);
+          return;
+        }
+        if (ev.k === 'th') {   // 🏛️ town hall screen sharing
+          const th = room.th || (room.th = newTh());
+          if (ev.act === 'start') {
+            const hl = room.hall || (room.hall = newHall()), handover = hl.next === c.id && t - hl.nextT < 90000;
+            if (th.by && th.by !== c.id && room.clients.has(th.by) && !handover) { send(c, { t: 'ev', from: '', k: 'th', act: 'busy', by: th.by }); return; }
+            room.th = newTh(); room.th.by = c.id; room.th.title = typeof ev.title === 'string' ? ev.title.slice(0, 80) : ''; room.th.t0 = t;
+            broadcast(room, { t: 'ev', from: c.id, k: 'th', act: 'start', by: c.id, title: room.th.title });
+            hl.next = null; hl.hands = hl.hands.filter(x => x !== c.id); if (hl.floor === c.id) hl.floor = null; hallSend(room);
+            return;
+          }
+          if (ev.act === 'stop') { if (th.by === c.id) thStop(room); return; }
+          if (!th.by || c.id === th.by) return;
+          if (ev.act === 'want') {
+            if (th.snap.has(c.id)) { thTo(room, c.id, { act: 'snap', on: 1 }); return; }
+            const p = th.par.get(c.id);
+            if (p && thDepth(th, c.id) < 999) { thTo(room, p, { act: 'kid', id: c.id }); thTo(room, c.id, { act: 'parent', id: p }); return; }
+            thAttach(room, c.id); return;
+          }
+          if (ev.act === 'leave') { thRemove(room, c.id); return; }
+          if (ev.act === 'fail') {
+            if (th.par.get(c.id) !== ev.id) return;
+            const b = th.bad.get(c.id) || new Set(); b.add(ev.id); th.bad.set(c.id, b);
+            const f = (th.fails.get(c.id) || 0) + 1; th.fails.set(c.id, f);
+            if (f >= 3) thSnapOn(room, c.id); else thAttach(room, c.id);
+            return;
+          }
+          return;
         }
         if (ev.k === 'arc') {   // game room arcade: Player 1 runs the game and sends it out; Player 2 sends their controls to Player 1
           const tb = room.arc && room.arc[ev.table]; if (!tb) return;
@@ -267,6 +372,8 @@ function createHub(opts) {
       if (!room) return;
       room.clients.delete(c.id);
       for (const g of GAME_TABLES) { const tb = room.games[g]; if (tb && tb.seats.indexOf(c.id) > -1) { tb.seats = tb.seats.map(x => x === c.id ? null : x); if (!tb.seats[0] && !tb.seats[1]) tb.log = []; } }
+      if (room.th && room.th.by) { if (room.th.by === c.id) thStop(room); else thRemove(room, c.id); }
+      { const hl = room.hall; if (hl && (hl.hands.indexOf(c.id) > -1 || hl.floor === c.id || hl.next === c.id)) { hl.hands = hl.hands.filter(x => x !== c.id); if (hl.floor === c.id) hl.floor = null; if (hl.next === c.id) hl.next = null; hallSend(room); } }
       if (room.arc) ARC_TABLES.forEach(g => { const tb = room.arc[g]; if (!tb) return; tb.watch.delete(c.id); if (tb.seats.indexOf(c.id) > -1) { tb.seats = tb.seats.map(x => x === c.id ? null : x); tb.st = ''; } });
       { const tb = room.bill; if (tb) { if (tb.shooter === c.id) tb.shooter = null; if (tb.seats.indexOf(c.id) > -1) { tb.seats = tb.seats.map(x => x === c.id ? null : x); if (!tb.seats[0] && !tb.seats[1]) { tb.st = ''; tb.turn = 0; tb.n = 0; } } } }
       broadcast(room, { t: 'leave', id: c.id });

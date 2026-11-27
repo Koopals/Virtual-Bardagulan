@@ -7,7 +7,7 @@
 //   ROOM_PASSWORDS    passcodes per room, as JSON, e.g. {"sjp":"blue-tiger"}  (wins over OFFICE_PASSWORD)
 //   ICE_SERVERS       STUN/TURN servers for voice, as JSON, e.g. [{"urls":"turn:turn.example.com:3478","username":"u","credential":"p"}]
 //   TURN_API_URL      or: a link that returns TURN servers (e.g. Metered Open Relay's credentials link); loaded hourly
-//   MAX_PER_ROOM      how many people fit in one room (default 40)
+//   MAX_PER_ROOM      how many people fit in one room (default 60, enough for a full town hall)
 //   YOUTUBE_API_KEY   optional: a YouTube Data API key, turns on song search in the Music menu
 //   (chat images need no setting: pasted images are kept in memory for a day)
 
@@ -19,7 +19,7 @@ const { WebSocketServer } = require('ws');
 const { createHub, roomName } = require('./hub');
 
 const PORT = process.env.PORT || 3000;
-const MAX_PER_ROOM = Number(process.env.MAX_PER_ROOM) || 40;
+const MAX_PER_ROOM = Number(process.env.MAX_PER_ROOM) || 60;   // the town hall seats 50
 
 function jsonEnv(key, fallback, check) {
   const raw = process.env[key];
